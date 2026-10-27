@@ -10,8 +10,8 @@ Final code commit `7835016`: [push run 40580454945](https://github.com/MariaAlej
 | Harness reliability fixes found by CI | fixed | false "app died" on one adb miss; launch racing `pm clear`; silent `measure_device` exit; CRLF in bundletool output; evidence wiped before pull; real ads SDK started in E2E runs (now mock from boot) |
 | GDScript import + compile all scripts | PASS | 0 errors | CI `godot-tests`, `check_scripts.log` |
 | Unit + property + content + integration (GUT) | PASS | 192 tests, 0 failed / pending / assertion-free; empty discovery fails the gate | CI `test-reports` (`junit.xml`, `summary.json`) |
-| 1,000 seeded generated boards + 300 random-vs-brute-force | PASS | in the 191 | `tests/property/test_generated_boards.gd` |
-| 24 packaged levels: valid, solutions replay, no deadlocks, full campaign unlocks each creature once | PASS | in the 191 | `tests/content/test_packaged_content.gd` |
+| 1,000 seeded generated boards + 300 random-vs-brute-force | PASS | in the 192 | `tests/property/test_generated_boards.gd` |
+| 24 packaged levels: valid, solutions replay, no deadlocks, full campaign unlocks each creature once | PASS | in the 192 | `tests/content/test_packaged_content.gd` |
 | Line coverage, puzzle/solver/progression (target 90%) | PASS | 94.8% (601/634 statements) | CI `test-reports/coverage/coverage.md`, method D-38 |
 | Line coverage, save/reward (target 80%) | PASS | 95.1% (270/284) | same |
 | Kotlin plugin core JUnit + Android unit tests + lint | PASS | 15 core tests, `lintRelease` clean | CI `android-ads-plugin`, `kotlin-reports` |
