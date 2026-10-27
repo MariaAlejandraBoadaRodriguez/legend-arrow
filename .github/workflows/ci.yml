@@ -197,7 +197,20 @@ jobs:
           key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
 
       - name: Install Xvfb, Mesa and ffmpeg
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null
+        # A mirror once hung this step for 25 min (PR run 40570864428): bound
+        # each attempt and retry instead of waiting for the job timeout.
+        timeout-minutes: 12
+        run: |
+          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          for attempt in 1 2 3; do
+            if timeout 240 sudo apt-get $APT update -qq && \
+               timeout 240 sudo apt-get $APT install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null; then
+              exit 0
+            fi
+            echo "apt attempt $attempt failed; retrying" >&2
+            sleep 10
+          done
+          exit 1
 
       - name: Run journeys
         run: |
