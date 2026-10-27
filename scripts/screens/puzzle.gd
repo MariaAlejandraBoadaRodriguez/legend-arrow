@@ -64,6 +64,7 @@ func _on_tap(id: String) -> void:
 	match r.result:
 		PuzzleSession.TapResult.REMOVED:
 			board.play_exit(id)
+			Game.audio.play_sfx("exit")
 			_message.text = ""
 			if session.is_complete():
 				_commit_completion()
@@ -72,6 +73,7 @@ func _on_tap(id: String) -> void:
 				Game.persist()
 		PuzzleSession.TapResult.BLOCKED:
 			board.play_blocked(id)
+			Game.audio.play_sfx("blocked")
 			_message.text = "BLOCKED_MESSAGE"
 			Game.events.log_event("blocked_tap", {"level": level_id})
 			if bool(Game.settings().haptics) and OS.has_feature("mobile"):
@@ -90,6 +92,7 @@ func _commit_completion() -> void:
 	if result.unlocked_creature != "":
 		Game.events.log_event("creature_unlock", {"creature": result.unlocked_creature})
 	set_meta("completion", result)
+	Game.audio.play_sfx("complete")
 	if not board.is_animating():
 		_go_next()
 
@@ -146,6 +149,7 @@ func _on_hint() -> void:
 	Game.events.log_event("hint_requested", {"kind": spent})
 	Game.persist()
 	board.show_hint(target)
+	Game.audio.play_sfx("hint")
 	_refresh_controls()
 
 

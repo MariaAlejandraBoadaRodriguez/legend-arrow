@@ -209,6 +209,74 @@ static func ribbon(line: PackedVector2Array, w_start: float, w_end: float) -> Pa
 	return left
 
 
+## Applies {part: [rotation, scale(, position)]} to named parts.
+func apply_pose(p: Dictionary) -> void:
+	for k in p:
+		var v: Array = p[k]
+		parts[k].rotation = v[0]
+		parts[k].scale = v[1]
+		if v.size() > 2:
+			parts[k].position = v[2]
+
+
+## Queues the same pose as parallel tweens on `t` (all parts move together).
+func tween_pose(t: Tween, p: Dictionary, seconds: float, trans := Tween.TRANS_SINE, ease_type := Tween.EASE_IN_OUT) -> void:
+	var first := true
+	for k in p:
+		var v: Array = p[k]
+		var step := t.tween_property(parts[k], "rotation", v[0], seconds) if first else t.parallel().tween_property(parts[k], "rotation", v[0], seconds)
+		step.set_trans(trans).set_ease(ease_type)
+		first = false
+		t.parallel().tween_property(parts[k], "scale", v[1], seconds).set_trans(trans).set_ease(ease_type)
+		if v.size() > 2:
+			t.parallel().tween_property(parts[k], "position", v[2], seconds).set_trans(trans).set_ease(ease_type)
+
+
+## Low pale rock the creature stands on.
+static func rock_base(parent: Node2D, half_width: float, fill := Color("#C9CDCF"), shade := Color("#AEB4B8")) -> void:
+	var w := half_width
+	shape(parent, PackedVector2Array([Vector2(-w * 0.92, 10), Vector2(-w * 0.68, -22), Vector2(-w * 0.24, -30), Vector2(w * 0.16, -24),
+		Vector2(w * 0.6, -30), Vector2(w * 0.96, 4), Vector2(w * 1.04, 40), Vector2(-w, 40)]), fill, shade, 2.0)
+	stroke(parent, PackedVector2Array([Vector2(-w * 0.48, 0), Vector2(-w * 0.24, 12), Vector2(w * 0.04, 4)]), shade, 2.0)
+
+
+## Feathered wing hanging from its pivot (pointing down/back when rotation is
+## 0). `length` is shoulder-to-tip; feathers fan along the trailing edge.
+static func feather_wing(parent: Node2D, length: float, width: float, fill: Color, quill: Color, feathers := 7) -> void:
+	var outline := PackedVector2Array([Vector2(0, 0), Vector2(width * 0.55, length * 0.25), Vector2(width * 0.45, length * 0.7), Vector2(width * 0.12, length)])
+	var edge := PackedVector2Array()
+	for i in feathers + 1:
+		var k := float(i) / feathers
+		var base := Vector2(lerpf(width * 0.12, -width * 0.5, k), lerpf(length, length * 0.18, k))
+		edge.append(base)
+		if i < feathers:
+			var nk := float(i + 1) / feathers
+			var nxt := Vector2(lerpf(width * 0.12, -width * 0.5, nk), lerpf(length, length * 0.18, nk))
+			edge.append((base + nxt) * 0.5 + Vector2(-width * 0.12, length * 0.04))
+	outline.append_array(edge)
+	shape(parent, outline, fill, Color("#25282B"), 2.5)
+	for i in range(1, feathers):
+		var k := float(i) / feathers
+		var tip := Vector2(lerpf(width * 0.12, -width * 0.5, k), lerpf(length, length * 0.18, k))
+		stroke(parent, PackedVector2Array([Vector2(width * 0.15, length * 0.2), tip]), quill, 2.0)
+
+
+## A few drifting specks (frost, embers, dust): bounded and cheap. Returns the
+## node so the caller can tween its modulate.
+static func specks(parent: Node2D, origin: Vector2, count: int, spread: Vector2, color: Color, radius := 4.0, seed_value := 1) -> Node2D:
+	var holder := Node2D.new()
+	holder.position = origin
+	parent.add_child(holder)
+	var rng := DeterministicRng.new(seed_value)
+	for i in count:
+		var p := Polygon2D.new()
+		p.polygon = ellipse(Vector2.ZERO, Vector2(radius, radius), 8)
+		p.color = color
+		p.position = Vector2(rng.range_int(0, int(spread.x)) - spread.x / 2.0, -rng.range_int(0, int(spread.y)))
+		holder.add_child(p)
+	return holder
+
+
 static func ellipse(center: Vector2, radii: Vector2, steps := 24) -> PackedVector2Array:
 	var out := PackedVector2Array()
 	for i in steps:

@@ -19,6 +19,7 @@ func _ready() -> void:
 	Game.set_host(host)
 	var result := Game.boot() if not Game.booted else Game.boot_result
 	route_after_boot(result)
+	Game.audio.play_music()
 
 
 ## Pending awakening (app killed mid-reveal) replays first; a restored backup

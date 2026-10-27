@@ -1,0 +1,35 @@
+{
+  "schema_version": 1.0,
+  "id": "antler_fox",
+  "realm": "mistwood",
+  "name_key": "CREATURE_ANTLER_FOX",
+  "lore_key": "CREATURE_ANTLER_FOX_LORE",
+  "art": "res://scenes/creatures/antler_fox.tscn",
+  "signature": "looks_back_and_tail_sweep",
+  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
+  "level_masks": [
+    [
+      "..........",
+      ".......#..",
+      "........#.",
+      "........##",
+      ".......##.",
+      "...#####..",
+      "#####..#..",
+      "....#..#..",
+      "....#..#.."
+    ],
+    [
+      "...........",
+      "........#..",
+      "...........",
+      ".........#.",
+      "........###",
+      ".....####..",
+      "##.######..",
+      "#####...#..",
+      "....##..#..",
+      "....#...#.."
+    ]
+  ]
+}

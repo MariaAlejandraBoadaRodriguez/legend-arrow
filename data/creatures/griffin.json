@@ -1,0 +1,39 @@
+{
+  "schema_version": 1.0,
+  "id": "griffin",
+  "realm": "cloud_peaks",
+  "name_key": "CREATURE_GRIFFIN",
+  "lore_key": "CREATURE_GRIFFIN_LORE",
+  "art": "res://scenes/creatures/griffin.tscn",
+  "signature": "rears_and_spreads_wings",
+  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
+  "level_masks": [
+    [
+      ".##.........",
+      ".#####......",
+      ".#######.##.",
+      "..#########.",
+      "...#######..",
+      "...#######..",
+      "..#######...",
+      ".#.#.####...",
+      "####....##..",
+      "...#....#...",
+      "...#....#..."
+    ],
+    [
+      ".##.........",
+      "#####.......",
+      ".#######.##.",
+      ".#######.###",
+      "..#########.",
+      "...#######..",
+      "..########..",
+      ".#########..",
+      "#.##....##..",
+      "#.##....##..",
+      "..##....##..",
+      "..##....#..."
+    ]
+  ]
+}

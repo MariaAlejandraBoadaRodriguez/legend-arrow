@@ -26,6 +26,7 @@ var progression: Progression
 var repository: SaveRepository
 var events := EventLog.new()
 var ads: AdService
+var audio: AudioDirector
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
@@ -38,6 +39,9 @@ var _stack: Array = []        # [[name, params], ...] for Back
 
 func _ready() -> void:
 	_ensure_buses()
+	audio = AudioDirector.new()
+	audio.name = "Audio"
+	add_child(audio)
 
 
 ## Loads content and the save. Returns the SaveRepository.load_save() result.
@@ -79,11 +83,11 @@ func set_ad_provider(provider: AdProvider) -> void:
 
 ## Full-screen ads: silence the game first, restore only if still allowed.
 func _on_ad_fullscreen_started() -> void:
-	AudioServer.set_bus_mute(0, true)
+	audio.set_muted("ad", true)
 
 
 func _on_ad_fullscreen_ended() -> void:
-	AudioServer.set_bus_mute(0, false)
+	audio.set_muted("ad", false)
 	apply_settings()
 
 
@@ -205,7 +209,12 @@ func unmount() -> void:
 
 func _notification(what: int) -> void:
 	match what:
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED:
+			if audio != null:
+				audio.set_muted("background", false)
 		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
+			if audio != null and what != NOTIFICATION_WM_CLOSE_REQUEST:
+				audio.set_muted("background", true)
 			if _current != null and _current.has_method("on_app_paused"):
 				_current.on_app_paused()
 			persist()
