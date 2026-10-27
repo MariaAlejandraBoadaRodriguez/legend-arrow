@@ -92,6 +92,14 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   unzip -q -o "$OUT_DIR/universal/u.apks" universal.apk -d "$OUT_DIR/universal"
   check "universal APK from bundle passes check_apk (release)" \
     'EXPECT_ADS_PLUGIN=0 "$ROOT/scripts/check_apk.sh" "$OUT_DIR/universal/universal.apk" > "$OUT_DIR/universal/apk_report.txt"'
+  # Download size per device configuration (spec §14: <= 120 MB per delivery).
+  bt build-apks --bundle="$AAB" --output="$OUT_DIR/universal/split.apks" \
+    --ks="$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" --ks-key-alias="$GODOT_ANDROID_KEYSTORE_RELEASE_USER" \
+    --ks-pass="pass:$GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD" >/dev/null
+  sizes="$(bt get-size total --apks="$OUT_DIR/universal/split.apks" --dimensions=ABI)"
+  echo "download size by ABI (bytes, MIN,MAX):"; echo "$sizes"
+  max_arm64="$(awk -F, '/arm64-v8a/ {print $3}' <<<"$sizes")"
+  check "arm64 phone download <= 120 MB (spec §14)" '[[ -n "$max_arm64" && "$max_arm64" -le 125829120 ]]'
   echo "REPORT COMPLETE"
 } | tee "$REPORT"
 # The block runs in a pipeline subshell: trust only a complete report.

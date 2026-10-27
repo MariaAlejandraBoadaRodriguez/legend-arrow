@@ -60,6 +60,7 @@ for j in "${JOURNEYS[@]}"; do
     wait "$rec" 2>/dev/null || true
     sleep 2
     adb pull /sdcard/legend_arrow_gameplay.mp4 "$OUT/legend_arrow_gameplay.mp4" >/dev/null 2>&1 || echo "android_e2e: no video recorded" >&2
+    [[ -s "$OUT/legend_arrow_gameplay.mp4" ]] && echo "video: legend_arrow_gameplay.mp4 $(stat -c %s "$OUT/legend_arrow_gameplay.mp4") bytes"
   fi
   adb shell am force-stop "$PKG"
   secs=$(( $(date +%s) - start ))

@@ -87,7 +87,7 @@ PRIVACY_SUBTITLE,Play without an account.,Juega sin cuenta.
 PRIVACY_OFFLINE,Your game stays playable offline.,Tu juego funciona sin conexión.
 PRIVACY_NO_ACCOUNT,No email or account required.,No se necesita correo ni cuenta.
 PRIVACY_ADS,Ads are optional and only give extra hints.,Los anuncios son opcionales y solo dan pistas extra.
-CREDITS_BODY,"Legend Arrow. Game, art and code made for this project. Typeface: Inter (SIL Open Font License). Engine: Godot (MIT).","Legend Arrow. Juego, arte y código hechos para este proyecto. Tipografía: Inter (SIL Open Font License). Motor: Godot (MIT)."
+CREDITS_BODY,"Legend Arrow. Game, art, sound and code made for this project. Typeface: Inter (SIL Open Font License). Engine: Godot (MIT).","Legend Arrow. Juego, arte, sonido y código hechos para este proyecto. Tipografía: Inter (SIL Open Font License). Motor: Godot (MIT)."
 REALM_MISTWOOD,Mistwood,Bosque de Niebla
 REALM_CLOUD_PEAKS,Cloud Peaks,Picos Nublados
 REALM_ANCIENT_HIGHLANDS,Ancient Highlands,Altiplanos Antiguos
