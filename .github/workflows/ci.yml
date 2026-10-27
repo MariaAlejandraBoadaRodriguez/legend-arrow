@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  godot-tests:
+    name: Godot import, script check and tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GODOT_HOME: ${{ github.workspace }}/.cache/godot
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cache Godot editor
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/godot
+          key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
+
+      - name: Install pinned Godot
+        run: scripts/install_godot.sh
+
+      - name: Verify (import, compile, unit/property tests, JUnit gate)
+        run: scripts/verify_all.sh
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "### Legend Arrow verification"
+            if [ -f build/reports/summary.json ]; then
+              echo '```json'; cat build/reports/summary.json; echo '```'
+            else
+              echo "No test summary produced (an earlier step failed)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test reports and logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-reports
+          path: build/reports/
+          if-no-files-found: error
