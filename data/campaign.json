@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "realms": [
+    {"id": "mistwood", "name_key": "REALM_MISTWOOD"},
+    {"id": "cloud_peaks", "name_key": "REALM_CLOUD_PEAKS"},
+    {"id": "ancient_highlands", "name_key": "REALM_ANCIENT_HIGHLANDS"}
+  ],
+  "creatures": [
+    {"id": "forest_drake", "realm": "mistwood", "name_key": "CREATURE_FOREST_DRAKE", "levels": ["forest_drake_1", "forest_drake_2"]}
+  ]
+}

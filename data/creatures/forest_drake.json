@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "id": "forest_drake",
+  "realm": "mistwood",
+  "name_key": "CREATURE_FOREST_DRAKE",
+  "lore_key": "CREATURE_FOREST_DRAKE_LORE",
+  "art": "res://scenes/creatures/forest_drake.tscn",
+  "signature": "wings_unfold_and_roar",
+  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
+  "level_masks": [
+    [
+      "#.....#",
+      "##...##",
+      ".##.##.",
+      "..###.#",
+      "..#####",
+      ".###...",
+      "##.....",
+      "#......"
+    ],
+    [
+      ".#.....#.",
+      ".##...##.",
+      "..##.###.",
+      "..#####..",
+      "...###.##",
+      "...#####.",
+      "..####...",
+      ".##.##...",
+      "##..#....",
+      "#...##..."
+    ]
+  ]
+}

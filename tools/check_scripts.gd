@@ -6,6 +6,9 @@ const ROOTS := ["res://scripts", "res://scenes", "res://tests", "res://tools"]
 
 
 func _init() -> void:
+	# Autoload singletons (e.g. Game) are registered after _init; scripts that
+	# reference them only compile once the main loop is running.
+	await process_frame
 	var files: Array[String] = []
 	for root in ROOTS:
 		_collect(root, files)

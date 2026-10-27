@@ -1,0 +1,88 @@
+keys,en,es
+APP_NAME,Legend Arrow,Legend Arrow
+APP_TAGLINE,Awaken legendary creatures,Flechas · Despierta criaturas legendarias
+HOME_PLAY,Play,Jugar
+HOME_BESTIARY,Bestiary,Bestiario
+HOME_SETTINGS,Settings,Ajustes
+LOADING,Loading…,Cargando…
+TUTORIAL_TITLE,How to play,Cómo jugar
+TUTORIAL_STEP_OF,Step %d of 3,Paso %d de 3
+TUTORIAL_STEP_1,Tap an arrow with a clear way out.,Toca una flecha con la salida despejada.
+TUTORIAL_STEP_2,Clear other arrows to open a path.,Despeja otras flechas para abrir camino.
+TUTORIAL_STEP_3,Release every arrow to awaken the creature.,Libera todas las flechas para despertar a la criatura.
+TUTORIAL_NEXT,Next,Siguiente
+TUTORIAL_SKIP,Skip,Omitir
+TUTORIAL_START,Start playing,Empezar a jugar
+TUTORIAL_WELL_DONE,Well done.,Bien hecho.
+BLOCKED_MESSAGE,Clear another arrow first.,Despeja otra flecha primero.
+LEVEL_SELECT_SUBTITLE,Choose a challenge.,Elige un desafío.
+PLAY_PUZZLE,Play puzzle %d,Jugar puzle %d
+PUZZLE_N_OF_2,Puzzle %d of 2,Puzle %d de 2
+DIFFICULTY_TUTORIAL,Gentle,Suave
+DIFFICULTY_EASY,Easy,Fácil
+DIFFICULTY_MEDIUM,Medium,Media
+DIFFICULTY_HARD,Hard,Difícil
+DIFFICULTY_EXPERT,Expert,Experto
+LOCKED,Locked,Bloqueada
+COMING_SOON,More creatures are on their way.,Más criaturas están en camino.
+ALL_AWAKENED,Every creature here is awake.,Todas las criaturas aquí están despiertas.
+UNDO,Undo,Deshacer
+HINT,Hint,Pista
+HINT_FREE,Hint · %d free,Pista · %d gratis
+HINT_AD_READY,Hint · %d earned,Pista · %d ganadas
+RESTART,Restart,Reiniciar
+PAUSE,Pause,Pausa
+PAUSED,Paused,En pausa
+PAUSED_SAVED,Your progress is saved.,Tu progreso está guardado.
+RESUME,Resume,Continuar
+RESTART_PUZZLE,Restart puzzle,Reiniciar puzle
+LEVEL_SELECTION,Level selection,Selección de nivel
+BACK,Back,Atrás
+PUZZLE_COMPLETE,Puzzle complete,Puzle completado
+TWO_PUZZLES,Two puzzles to awaken,Dos puzles para despertar
+N_OF_2_COMPLETE,%d of 2 complete,%d de 2 completados
+CONTINUE_TO_PUZZLE_2,Continue to puzzle 2,Continuar al puzle 2
+CREATURE_AWAKENED,Creature awakened,Criatura despertada
+CONTINUE,Continue,Continuar
+SKIP,Skip,Omitir
+OPEN_BESTIARY,Open bestiary,Abrir bestiario
+REPLAY_AWAKENING,Replay awakening,Repetir despertar
+BESTIARY_TITLE,Bestiary,Bestiario
+N_AWAKENED,%d of %d awakened,%d de %d despertadas
+CONTINUE_ADVENTURE,Continue adventure,Continuar aventura
+NEW_BADGE,New,Nueva
+HINT_SHEET_TITLE,Need a hint?,¿Necesitas una pista?
+HINT_SHEET_USED,Your 3 free hints for this puzzle have been used.,Ya usaste tus 3 pistas gratis de este puzle.
+HINT_SHEET_FREE_PATH,Undo and restart are always free.,Deshacer y reiniciar siempre son gratis.
+KEEP_PLAYING,Keep playing,Seguir jugando
+SAVE_RESTORED_TITLE,Progress restored,Progreso restaurado
+SAVE_RESTORED_BODY,We restored your last saved progress.,Restauramos tu último progreso guardado.
+SETTINGS_TITLE,Settings,Ajustes
+SETTINGS_AUDIO,Audio,Audio
+SETTINGS_MUSIC,Music,Música
+SETTINGS_SFX,Sound effects,Efectos de sonido
+SETTINGS_CREATURE,Creature audio,Sonido de criaturas
+SETTINGS_ACCESSIBILITY,Accessibility,Accesibilidad
+SETTINGS_REDUCE_MOTION,Reduce motion,Reducir movimiento
+SETTINGS_REDUCE_MOTION_DESC,Minimize animations and screen movement,Minimiza animaciones y movimiento de pantalla
+SETTINGS_HAPTICS,Haptics,Vibración
+SETTINGS_HAPTICS_DESC,Vibration feedback for interactions,Vibración al interactuar
+SETTINGS_LANGUAGE,Language,Idioma
+LANGUAGE_SYSTEM,Device language,Idioma del dispositivo
+LANGUAGE_EN,English,English
+LANGUAGE_ES,Español,Español
+SETTINGS_REPLAY_TUTORIAL,Replay tutorial,Repetir tutorial
+SETTINGS_PRIVACY_OPTIONS,Privacy options,Opciones de privacidad
+SETTINGS_PRIVACY_POLICY,Privacy policy,Política de privacidad
+SETTINGS_CREDITS,Credits,Créditos
+PRIVACY_TITLE,Privacy,Privacidad
+PRIVACY_SUBTITLE,Play without an account.,Juega sin cuenta.
+PRIVACY_OFFLINE,Your game stays playable offline.,Tu juego funciona sin conexión.
+PRIVACY_NO_ACCOUNT,No email or account required.,No se necesita correo ni cuenta.
+PRIVACY_ADS,Ads are optional and only give extra hints.,Los anuncios son opcionales y solo dan pistas extra.
+CREDITS_BODY,"Legend Arrow. Game, art and code made for this project. Typeface: Inter (SIL Open Font License). Engine: Godot (MIT).","Legend Arrow. Juego, arte y código hechos para este proyecto. Tipografía: Inter (SIL Open Font License). Motor: Godot (MIT)."
+REALM_MISTWOOD,Mistwood,Bosque de Niebla
+REALM_CLOUD_PEAKS,Cloud Peaks,Picos Nublados
+REALM_ANCIENT_HIGHLANDS,Ancient Highlands,Altiplanos Antiguos
+CREATURE_FOREST_DRAKE,Forest Drake,Draco del Bosque
+CREATURE_FOREST_DRAKE_LORE,A quiet sentinel of the old Mistwood.,Un centinela silencioso del viejo Bosque de Niebla.

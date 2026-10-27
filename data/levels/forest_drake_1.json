@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "forest_drake_1",
+  "creature_id": "forest_drake",
+  "difficulty": "tutorial",
+  "width": 7,
+  "height": 8,
+  "seed": 29,
+  "arrows": [
+    {"id": "a01", "cells": [[2, 2], [1, 2], [1, 1], [0, 1]]},
+    {"id": "a02", "cells": [[4, 3], [4, 2], [5, 2], [5, 1]]},
+    {"id": "a03", "cells": [[5, 4], [6, 4], [6, 3]]},
+    {"id": "a04", "cells": [[3, 3], [2, 3], [2, 4]]},
+    {"id": "a05", "cells": [[0, 7], [0, 6], [1, 6], [1, 5]]}
+  ],
+  "solution": ["a01","a02","a05","a03","a04"]
+}
