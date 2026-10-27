@@ -19,7 +19,7 @@ Priority on conflicts: `CLAUDE.md` > brief > spec > READ_FIRST > mockup pixels.
 | D-13 | Undo is disabled once a level is complete; restart is allowed (replay). Rewards are owned by progression, not the session. | Spec §4: undo cannot undo a completed reward; replay grants no duplicate reward. |
 | D-14 | Saved in-progress state stores only the ordered removed-arrow IDs and is **replayed through the rules** on load; an illegal history is rejected and the level restarts. | Tampered/stale saves can never produce an impossible board. |
 | D-15 | The test gate fails on: GUT nonzero exit, any script/parse error in logs, zero tests, pending/skipped tests, assertion-free tests, or a test file that reports no tests. | Spec §20 / CLAUDE.md honesty rules. Each gate was demonstrated failing (see PROGRESS). |
-| D-16 | CI runs on pushes to `main` and `claude/**`, PRs and manual dispatch; actions pinned by commit SHA; `permissions: contents: read`. | Brief §5. `claude/**` lets each development branch prove green before merge. |
+| D-16 | CI runs on pushes to `master` (the repo default branch), `main` and `claude/**`, PRs and manual dispatch; actions pinned by commit SHA; `permissions: contents: read`. | Brief §5. `claude/**` lets each development branch prove green before merge. |
 | D-17 | JDK: spec says JDK 17 for Godot Android export. Container has JDK 21; CI will install Temurin 17 via `actions/setup-java` for the export job (M2). | Follow Godot's documented requirement. |
 | D-18 | Physical-device performance checks are **BLOCKED** (owner has no Android phone); `scripts/measure_device.sh` will be shipped (M6). | CLAUDE.md. |
 
