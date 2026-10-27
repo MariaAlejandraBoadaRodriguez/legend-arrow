@@ -110,6 +110,20 @@ func _init() -> void:
 	Dialog.open(home, "SAVE_RESTORED_TITLE", "SAVE_RESTORED_BODY", [["CONTINUE", func(): pass, true]])
 	await _settle()
 	await shot("14_save_restored")
+	game.reset_to("home")
+	# Late-game board and a finished collection: reached through the real
+	# progression rules (every level completed in campaign order).
+	game.go("puzzle", {"level_id": "phoenix_2"})
+	await _settle()
+	await shot("15_puzzle_late_game")
+	for level_id in game.campaign.level_ids():
+		game.progression.complete_level(level_id)
+	for cid in game.campaign.creature_ids():
+		game.progression.mark_awakening_seen(cid)
+	game.reset_to("home")
+	game.go("bestiary")
+	await _settle()
+	await shot("16_bestiary_complete")
 	print("capture_screens: wrote %s" % out_dir)
 	quit()
 
