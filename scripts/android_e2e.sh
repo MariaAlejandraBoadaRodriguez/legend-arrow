@@ -78,15 +78,19 @@ for j in "${JOURNEYS[@]}"; do
   esac
 done
 
-# Cold-start smoke without a trigger: the app must come up and stay up.
+# First-launch smoke without a trigger, on cleared data: the real product
+# path, including the real UMP + Google Mobile Ads start-up with Google's
+# test IDs (no live ads, nothing is clicked). The app must come up and stay up.
+adb shell pm clear "$PKG" >/dev/null
 adb logcat -c
 adb shell am start -W -n "$ACTIVITY" | tr -d '\r' | grep -E "Status|TotalTime|WaitTime" | sed 's/^/cold start: /' || true
-sleep 8
-if adb shell pidof "$PKG" >/dev/null 2>&1 && ! adb logcat -d | grep -q "FATAL EXCEPTION"; then
+sleep 30
+if ! app_dead && ! adb logcat -d | grep -qiE "FATAL EXCEPTION|Fatal signal"; then
   echo "LEGEND_E2E PASS cold_start_smoke"
   results+=("cold_start_smoke|LEGEND_E2E PASS cold_start_smoke|8")
 else
   echo "LEGEND_E2E FAIL cold_start_smoke"
+  adb logcat -d | grep -iE "fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|godot|Ads|UserMessaging" | tail -80 || true
   results+=("cold_start_smoke|LEGEND_E2E FAIL cold_start_smoke: not running|8")
   fail=1
 fi

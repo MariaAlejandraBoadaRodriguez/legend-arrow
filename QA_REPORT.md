@@ -42,7 +42,8 @@ Final CI run: see `docs/PROGRESS.md` (updated with each push). Runs cited here: 
 | Consent refused/error/offline never blocks play; one request per launch | PASS | unit + integration tests |
 | Child/unknown treatment, interstitials disabled | PASS | unit tests + Kotlin `AdSettings` tests + manifest checks |
 | Release refuses test or missing IDs | PASS | `test_release_build_rejects_test_ids`, `test_release_config_validation`, `export_release.sh` guard |
-| Live ads / real UMP form against Google | **NOT RUN** | by design CI never contacts ad services; manual check with Google test IDs on a test device before release (`docs/RELEASE.md` step 4) |
+| Real UMP + Google Mobile Ads start-up on a first launch (test IDs) | see final run | emulator `cold_start_smoke`: cleared data, real debug build, app must stay up 30 s with no crash |
+| Live ads / real UMP form shown and completed | **NOT RUN** | never shown or clicked in CI; manual check with Google test IDs on a test device before release (`docs/RELEASE.md` step 4) |
 
 ## Visual review
 | Check | Result | Detail |
