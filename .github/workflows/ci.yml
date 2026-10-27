@@ -144,6 +144,22 @@ jobs:
       - name: Export and inspect APK
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
 
+      - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_release.sh --rehearsal
+
+      - name: Upload release AAB rehearsal (NOT for Play upload)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: legend-arrow-release-aab-rehearsal
+          path: |
+            build/android/legend-arrow-release.aab
+            build/android/legend-arrow-release.aab.sha256
+            build/android/aab_report.txt
+            build/android/universal/apk_report.txt
+            build/android/export_release.log
+          if-no-files-found: error
+
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -226,7 +242,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android
+          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
 
       - name: Upload E2E evidence
         if: always()

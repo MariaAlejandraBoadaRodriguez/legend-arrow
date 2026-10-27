@@ -59,6 +59,8 @@ export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$KEYSTORE"
 export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
 export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
 
+[[ "${SKIP_DEBUG_EXPORT:-0}" == "1" ]] && exit 0   # setup only (used by export_release.sh)
+
 # 4. Export (Gradle build: bundles the LegendAds plugin AAR).
 AAR="$ROOT/addons/legend_ads/bin/legend_ads-release.aar"
 [[ -f "$AAR" ]] || { echo "!! $AAR missing: run scripts/build_ads_plugin.sh first" >&2; exit 1; }

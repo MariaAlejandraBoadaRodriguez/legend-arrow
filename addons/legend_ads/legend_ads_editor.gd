@@ -43,7 +43,12 @@ class LegendAdsExport extends EditorExportPlugin:
 	func _get_android_manifest_application_element_contents(_platform: EditorExportPlatform, debug: bool) -> String:
 		var config := AdConfig.load_for_build(debug)
 		if not debug and not config.release_errors().is_empty():
-			push_error("LegendAds: release export without valid ads_release.json: %s" % str(config.release_errors()))
+			# CI rehearsal AABs (never uploaded) keep Google's test app id so the
+			# SDK starts; the release build still refuses every ad request.
+			if OS.get_environment("LEGEND_RELEASE_REHEARSAL") == "1":
+				print("LegendAds: release REHEARSAL export, no ads_release.json: ads stay disabled")
+			else:
+				push_error("LegendAds: release export without valid ads_release.json: %s" % str(config.release_errors()))
 		return '<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="%s"/>' % config.app_id
 
 	## Mixed audience with child/unknown treatment: strip the advertising-ID

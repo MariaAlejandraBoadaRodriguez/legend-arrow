@@ -24,6 +24,7 @@ var mock: MockAdProvider
 var _failed := ""
 var _log: Array[String] = []
 var _shots := 0
+var _frame_ms := {"puzzle": [], "awakening": []}  # per-frame times by screen (spec §14 budgets)
 
 
 ## The journey to run, or "" (release builds, or no trigger file).
@@ -63,6 +64,11 @@ func _run() -> void:
 	else:
 		await frames(10)
 		await Callable(self, journey).call()
+	for screen_name in _frame_ms:
+		var stats := frame_stats(screen_name)
+		if stats.n > 0:
+			_log.append("frametime %s p50=%.1f ms p95=%.1f ms n=%d" % [screen_name, stats.p50, stats.p95, stats.n])
+			_say("FRAMETIME %s p50=%.1f p95=%.1f n=%d" % [screen_name, stats.p50, stats.p95, stats.n])
 	var verdict := "PASS" if _failed == "" else "FAIL"
 	var f := FileAccess.open(OUT_DIR.path_join("result_%s.txt" % journey), FileAccess.WRITE)
 	f.store_string("%s %s\n%s\n" % [verdict, journey, "\n".join(_log)])
@@ -269,6 +275,22 @@ func settings_b() -> void:
 
 
 # --- helpers ------------------------------------------------------------------
+
+func _process(delta: float) -> void:
+	var screen_name := Game.current_screen_name()
+	if _frame_ms.has(screen_name):
+		_frame_ms[screen_name].append(delta * 1000.0)
+
+
+func frame_stats(screen_name: String) -> Dictionary:
+	var xs: Array = _frame_ms[screen_name].duplicate()
+	if xs.size() > 10:
+		xs = xs.slice(5)  # drop the screen's first frames (scene build)
+	xs.sort()
+	if xs.is_empty():
+		return {"n": 0, "p50": 0.0, "p95": 0.0}
+	return {"n": xs.size(), "p50": xs[int(xs.size() * 0.5)], "p95": xs[mini(xs.size() - 1, int(xs.size() * 0.95))]}
+
 
 func _say(msg: String) -> void:
 	print("LEGEND_E2E %s" % msg)
