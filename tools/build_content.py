@@ -41,7 +41,7 @@ PLAN = [
 ]
 MAX_GROW = 4
 # Thin bodies get their silhouette thickened (see make_mask.gd).
-DILATE = {"cloud_serpent": 1, "stone_wyrm": 1}
+DILATE = {"cloud_serpent": 1, "stone_wyrm": 1, "phoenix": 1}
 
 
 def run(args, render=False):
