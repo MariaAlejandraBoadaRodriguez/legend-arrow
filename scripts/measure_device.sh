@@ -51,7 +51,14 @@ app_dead() {
 }
 
 # 2. Load: fresh install journey (tutorial, 2 puzzles, awakening) while sampling.
+# pm clear force-stops asynchronously: settle before launching (see android_e2e.sh).
 adb shell pm clear "$PKG" >/dev/null
+adb shell am force-stop "$PKG"
+for _ in $(seq 1 15); do
+  adb shell "run-as $PKG sh -c 'mkdir -p files && test -w files'" >/dev/null 2>&1 && break
+  sleep 1
+done
+sleep 2
 adb shell "run-as $PKG sh -c 'mkdir -p files && echo fresh_install > files/e2e_journey.txt'"
 adb logcat -c
 adb shell am start -n "$ACTIVITY" >/dev/null
@@ -103,6 +110,6 @@ adb shell am force-stop "$PKG"
 cat "$REPORT"
 if [[ "$verdict" != *"PASS"* ]]; then
   echo "measure_device: load journey did not pass: $verdict" >&2
-  grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|SCRIPT ERROR|godot" "$OUT/logcat.txt" | tail -80 >&2 || true
+  grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|Killing|SCRIPT ERROR|godot" "$OUT/logcat.txt" | tail -80 >&2 || true
   exit 1
 fi

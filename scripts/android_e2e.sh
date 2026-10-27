@@ -22,7 +22,6 @@ adb wait-for-device
 adb shell getprop ro.build.version.release | sed 's/^/android: /'
 adb shell wm size | sed 's/^/display: /'
 adb install -r -g "$APK" >/dev/null
-adb shell pm clear "$PKG" >/dev/null
 ACTIVITY="$(adb shell cmd package resolve-activity --brief "$PKG" | tr -d '\r' | tail -1)"
 echo "launch activity: $ACTIVITY"
 [[ "$ACTIVITY" == "$PKG/"* ]] || { echo "android_e2e: launcher activity not found" >&2; exit 1; }
@@ -42,8 +41,22 @@ app_dead() {
   (( misses == 3 ))
 }
 
+# `pm clear` force-stops the package asynchronously; a launch issued right
+# after it can be killed (CI runs 40578441238, 40576384695: first launch after
+# a clear died with no app output). Wait until the clear has settled.
+clear_data() {
+  adb shell pm clear "$PKG" >/dev/null
+  adb shell am force-stop "$PKG"
+  for _ in $(seq 1 15); do
+    adb shell "run-as $PKG sh -c 'mkdir -p files && test -w files'" >/dev/null 2>&1 && break
+    sleep 1
+  done
+  sleep 2
+}
+
 results=()
 fail=0
+clear_data
 for j in "${JOURNEYS[@]}"; do
   start=$(date +%s)
   # Trigger file in the app's private files dir (debuggable build: run-as).
@@ -78,10 +91,13 @@ for j in "${JOURNEYS[@]}"; do
   esac
 done
 
+# In-app evidence (result files + viewport PNGs).
+adb exec-out run-as "$PKG" tar -c -C files e2e 2>/dev/null | tar -x -C "$OUT/app" || echo "android_e2e: could not pull in-app evidence" >&2
+
 # First-launch smoke without a trigger, on cleared data: the real product
 # path, including the real UMP + Google Mobile Ads start-up with Google's
 # test IDs (no live ads, nothing is clicked). The app must come up and stay up.
-adb shell pm clear "$PKG" >/dev/null
+clear_data
 adb logcat -c
 adb shell am start -W -n "$ACTIVITY" | tr -d '\r' | grep -E "Status|TotalTime|WaitTime" | sed 's/^/cold start: /' || true
 sleep 30
@@ -98,8 +114,6 @@ adb exec-out screencap -p > "$OUT/screencap/cold_start.png" || true
 adb logcat -d > "$OUT/logcat/cold_start.txt" || true
 adb shell am force-stop "$PKG"
 
-# In-app evidence (result files + viewport PNGs).
-adb exec-out run-as "$PKG" tar -c -C files e2e 2>/dev/null | tar -x -C "$OUT/app" || echo "android_e2e: could not pull in-app evidence" >&2
 
 # JUnit for the report gate / artifacts.
 {
