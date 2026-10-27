@@ -25,6 +25,7 @@ var campaign: Campaign
 var progression: Progression
 var repository: SaveRepository
 var events := EventLog.new()
+var ads: AdService
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
@@ -51,8 +52,39 @@ func boot(save_path: String = "user://save.json") -> Dictionary:
 	if boot_result.recovered:
 		events.log_event("save_recovery", {"source": int(boot_result.source)})
 	apply_settings()
+	set_ad_provider(_default_ad_provider())
 	booted = true
 	return boot_result
+
+
+## Android uses the Kotlin plugin when present; an Android build without it
+## gets no ads at all. Desktop/editor runs use the mock so the flow is testable.
+func _default_ad_provider() -> AdProvider:
+	if Engine.has_singleton(AndroidAdProvider.SINGLETON):
+		return AndroidAdProvider.new()
+	if OS.has_feature("android"):
+		return AdProvider.new()
+	return MockAdProvider.new()
+
+
+## Rebuilds the ad layer around a provider (boot, tests). Consent is requested
+## in the background; nothing waits for it.
+func set_ad_provider(provider: AdProvider) -> void:
+	ads = AdService.new(provider, AdConfig.load_for_build(OS.is_debug_build()), progression, events)
+	ads.persist = persist
+	ads.fullscreen_started.connect(_on_ad_fullscreen_started)
+	ads.fullscreen_ended.connect(_on_ad_fullscreen_ended)
+	ads.start()
+
+
+## Full-screen ads: silence the game first, restore only if still allowed.
+func _on_ad_fullscreen_started() -> void:
+	AudioServer.set_bus_mute(0, true)
+
+
+func _on_ad_fullscreen_ended() -> void:
+	AudioServer.set_bus_mute(0, false)
+	apply_settings()
 
 
 func persist() -> void:

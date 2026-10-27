@@ -55,6 +55,13 @@ HINT_SHEET_TITLE,Need a hint?,¿Necesitas una pista?
 HINT_SHEET_USED,Your 3 free hints for this puzzle have been used.,Ya usaste tus 3 pistas gratis de este puzle.
 HINT_SHEET_FREE_PATH,Undo and restart are always free.,Deshacer y reiniciar siempre son gratis.
 KEEP_PLAYING,Keep playing,Seguir jugando
+HINT_SHEET_AD,Watch a short ad to highlight one free arrow.,Mira un anuncio corto para resaltar una flecha libre.
+WATCH_AD_HINT,Watch ad · Get 1 hint,Ver anuncio · 1 pista
+LOADING_AD,Loading ad…,Cargando anuncio…
+NO_AD_TITLE,No ad available,No hay anuncios disponibles
+NO_AD_BODY,You can keep playing.,Puedes seguir jugando.
+RETURN_TO_PUZZLE,Return to puzzle,Volver al puzle
+TRY_AGAIN,Try again,Intentar de nuevo
 SAVE_RESTORED_TITLE,Progress restored,Progreso restaurado
 SAVE_RESTORED_BODY,We restored your last saved progress.,Restauramos tu último progreso guardado.
 SETTINGS_TITLE,Settings,Ajustes

@@ -38,7 +38,7 @@ func build() -> void:
 
 	col.add_child(Ui.spacer(Palette.SPACE))
 	col.add_child(_row_link("SETTINGS_REPLAY_TUTORIAL", func(): Game.go("tutorial"), "ReplayTutorial"))
-	col.add_child(_row_link("SETTINGS_PRIVACY_OPTIONS", func(): Game.go("privacy"), "PrivacyOptions"))
+	col.add_child(_row_link("SETTINGS_PRIVACY_OPTIONS", _privacy_options, "PrivacyOptions"))
 	col.add_child(_row_link("SETTINGS_PRIVACY_POLICY", func(): Game.go("privacy"), "PrivacyPolicy"))
 	col.add_child(_row_link("SETTINGS_CREDITS", func(): Dialog.open(self, "SETTINGS_CREDITS", "CREDITS_BODY", [["CONTINUE", func(): pass, true]], "CreditsDialog"), "Credits"))
 
@@ -95,6 +95,13 @@ func _row_link(key: String, cb: Callable, node_name: String) -> Button:
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	return b
+
+
+## Opens Google's consent form when the SDK says one is required in this
+## region; otherwise our own privacy page.
+func _privacy_options() -> void:
+	if not Game.ads.consent.show_privacy_options():
+		Game.go("privacy")
 
 
 func _on_language(index: int) -> void:

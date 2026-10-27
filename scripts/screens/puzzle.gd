@@ -50,6 +50,10 @@ func build() -> void:
 	row.add_child(Ui.button("RESTART", _on_restart, false, "RestartButton"))
 	content.add_child(row)
 	Game.events.log_event("level_start", {"level": level_id})
+	# Bound methods are disconnected automatically when this screen is freed,
+	# so ad callbacks can never touch a dead screen.
+	Game.ads.rewarded_result.connect(_on_ad_result)
+	Game.ads.hint_granted.connect(_on_ad_hint_granted)
 	_refresh_controls()
 
 
@@ -81,6 +85,7 @@ func _commit_completion() -> void:
 	board.input_enabled = false
 	var result := Game.progression.complete_level(level_id)
 	Game.persist()
+	Game.ads.on_level_completed(str(level.difficulty) == "tutorial")
 	Game.events.log_event("level_complete", {"level": level_id, "first": result.first_completion})
 	if result.unlocked_creature != "":
 		Game.events.log_event("creature_unlock", {"creature": result.unlocked_creature})
@@ -145,8 +150,75 @@ func _on_hint() -> void:
 
 
 func open_hint_sheet() -> Dialog:
-	return Dialog.open(self, "HINT_SHEET_TITLE", "%s\n%s" % [tr("HINT_SHEET_USED"), tr("HINT_SHEET_FREE_PATH")],
-		[["KEEP_PLAYING", func(): pass, true, "KeepPlaying"]], "HintSheet")
+	_close_dialogs()
+	var body := tr("HINT_SHEET_USED")
+	var buttons: Array = []
+	if Game.ads.rewarded_available():
+		body += "\n" + tr("HINT_SHEET_AD")
+		buttons.append(["WATCH_AD_HINT", _watch_ad, true, "WatchAdButton"])
+	body += "\n" + tr("HINT_SHEET_FREE_PATH")
+	buttons.append(["KEEP_PLAYING", func(): pass, buttons.is_empty(), "KeepPlaying"])
+	return Dialog.open(self, "HINT_SHEET_TITLE", body, buttons, "HintSheet")
+
+
+## The player explicitly chose to watch an ad for one hint.
+func _watch_ad() -> void:
+	match Game.ads.watch_for_hint():
+		"started":
+			if Game.ads.reward_state == AdService.RewardState.LOADING:
+				Dialog.open(self, "LOADING_AD", "", [["KEEP_PLAYING", Game.ads.cancel_pending_show, false, "CancelAd"]], "AdLoading")
+		"cooldown":
+			open_no_ad_sheet()
+		"unavailable":
+			open_no_ad_sheet()
+
+
+## "No ad available. You can keep playing." Retry is secondary and only
+## enabled once the short cooldown has passed (no automatic retry loop).
+func open_no_ad_sheet() -> Dialog:
+	_close_dialogs()
+	var d := Dialog.open(self, "NO_AD_TITLE", "NO_AD_BODY", [
+		["RETURN_TO_PUZZLE", func(): pass, true, "ReturnToPuzzle"],
+		["TRY_AGAIN", _watch_ad, false, "TryAgain"],
+	], "NoAdSheet")
+	var retry := d.find_child("TryAgain", true, false) as Button
+	var wait := Game.ads.retry_wait()
+	if not Game.ads.rewarded_available():
+		retry.disabled = true
+	elif wait > 0.0:
+		retry.disabled = true
+		get_tree().create_timer(wait).timeout.connect(_enable_retry.bind(retry.get_instance_id()))
+	return d
+
+
+func _enable_retry(button_id: int) -> void:
+	var b := instance_from_id(button_id) as Button
+	if b != null and b.is_inside_tree():
+		b.disabled = false
+
+
+func _on_ad_result(result: String) -> void:
+	var loading := find_child("AdLoading", false, false)
+	if loading != null:
+		(loading as Dialog).close()
+	if result in ["no_fill", "offline", "failed"]:
+		open_no_ad_sheet()
+
+
+## Reward arrived (possibly late). Use it right away if this board still
+## needs a hint; otherwise it stays saved for the next board.
+func _on_ad_hint_granted(_pid: String) -> void:
+	if _completing or session == null or session.is_complete():
+		_refresh_controls()
+		return
+	_on_hint()
+
+
+func _close_dialogs() -> void:
+	var d := Dialog.top(self)
+	while d != null:
+		d.close()
+		d = Dialog.top(self)
 
 
 func open_pause() -> Dialog:

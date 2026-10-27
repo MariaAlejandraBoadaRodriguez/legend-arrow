@@ -20,7 +20,7 @@ func build() -> void:
 	content.add_child(status)
 	var next := _next_level_of(cid)
 	if next != "":
-		content.add_child(Ui.button("CONTINUE_TO_PUZZLE_2", func(): Game.go("puzzle", {"level_id": next}, true), true, "ContinueButton"))
+		content.add_child(Ui.button("CONTINUE_TO_PUZZLE_2", _continue_to.bind(next), true, "ContinueButton"))
 	content.add_child(Ui.button("LEVEL_SELECTION", Game.leave, next == "", "LevelSelectButton"))
 
 
@@ -29,3 +29,10 @@ func _next_level_of(cid: String) -> String:
 		if Game.progression.is_level_unlocked(l) and not Game.progression.is_level_completed(l):
 			return l
 	return ""
+
+
+## Between levels is the only place an interstitial may appear; the next
+## puzzle opens immediately either way (progress never waits for an ad).
+func _continue_to(level_id: String) -> void:
+	Game.ads.maybe_show_interstitial(InterstitialPolicy.CONTEXT_BETWEEN_LEVELS)
+	Game.go("puzzle", {"level_id": level_id}, true)
