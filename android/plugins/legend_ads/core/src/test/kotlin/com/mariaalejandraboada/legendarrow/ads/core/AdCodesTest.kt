@@ -24,7 +24,7 @@ class AdCodesTest {
 
     @Test fun consentJsonCarriesOnlyThreeFields() {
         val o = JSONObject(ConsentJson.build(AdCodes.CONSENT_REQUIRED, false, true))
-        assertEquals(setOf("status", "can_request_ads", "privacy_options_required"), o.keySet())
+        assertEquals(setOf("status", "can_request_ads", "privacy_options_required"), o.keys().asSequence().toSet())
         assertEquals("required", o.getString("status"))
         assertFalse(o.getBoolean("can_request_ads"))
         assertTrue(o.getBoolean("privacy_options_required"))
