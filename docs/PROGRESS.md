@@ -1,37 +1,40 @@
 # Progress
 
-_Last updated: 2026-10-27 (session 1)_
+_Last updated: 2026-10-27 (session 2)_
 
 ## Where things are
-- Branch `claude/new-session-8a6cy7` pushed; `main` created from it at `8950f0d` (the repo previously had only `master` = initial upload; see DECISIONS D-26).
-- Follow-up (16 KB page-size check + this file) is in PR [#1](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/1) into `main`; CI green on `b5200bc` ([run 40444897238](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40444897238)). Merge is the owner's call.
+- `main` holds M0–M2 (PR #1 merged). M3 is on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
 
 ## Done
-- **M0** — roadmap, decisions, Godot 4.7.2 skeleton, vendored GUT 9.7.1, pinned installer (SHA-256), `scripts/verify_all.sh` + JUnit gate, SHA-pinned CI. Gate negative checks demonstrated: empty discovery, failing test, assertion-free test, broken script → all exit 1.
-- **M1** — pure model (`scripts/core/`): swept-body rules, graph solver, validator, deterministic generator, session (undo/restart/hint/save replay). 1,000 seeded boards + 300 random boards vs brute force.
-- **M2** — vertical slice: progression + atomic saves (backup, quarantine, migration, kill-at-each-step), Forest Drake levels 1–2 + 3 tutorial boards, 10 screens + dialogs, EN/ES, Inter font, WCAG-checked tokens, reduced motion, Forest Drake layered rig with ~5 s awakening, Android export preset/scripts, CI APK job.
+- **M0** — roadmap, decisions, Godot 4.7.2 skeleton, vendored GUT 9.7.1, `verify_all.sh` + JUnit gate, SHA-pinned CI.
+- **M1** — pure puzzle model, swept-body rules, graph solver, validator, generator; 1,000 seeded + 300 random-vs-brute-force boards.
+- **M2** — vertical slice: tutorial, Forest Drake 2 levels + awakening, bestiary, settings, EN/ES, atomic saves, debug APK.
+- **M3** — ads and consent:
+  - GDScript: `AdService` rewarded state machine (grant only from earned callback, once per presentation id, persisted; duplicates/late/unknown harmless; retry cooldown; audio muted during full-screen), `ConsentService` (one UMP request per launch, refusal never blocks play, privacy-options entry), `AdConfig` (test IDs in debug/CI; release rejects test/missing IDs), `InterstitialPolicy` + `RemoteConfig` (only reduce pressure), mock provider, Android provider adapter; hint sheet Watch ad / Loading / No ad available + rate-limited Try again.
+  - Kotlin plugin `android/plugins/legend_ads` (UMP 3.2.0 + GMA 24.4.0; child/unknown → child-directed, under-age, G), export plugin `addons/legend_ads` (AAR, deps, test app id, strips AD_ID + Privacy Sandbox permissions), Gradle-build APK export.
+  - `verify_all.sh` now fails on objects leaked at exit.
+  - Docs: `docs/ADS_AND_PRIVACY.md`, DECISIONS D-27…D-32.
 
 ## Verification
 | Check | Result | Evidence |
 |---|---|---|
-| CI `Godot import, script check and tests` on `main` @ `8950f0d` | **PASS** — 127 tests discovered, 127 passed, 2,693 assertions, 0 failed/pending/assertion-free | [run 40444356036](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40444356036), artifact `test-reports` |
-| Same on branch push | **PASS** | [run 40444348583](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40444348583) |
-| CI `Export Android debug APK` @ `8950f0d` | **PASS** — package `com.mariaalejandraboada.legendarrow`, label, minSdk 24, targetSdk 36, arm64-v8a + x86_64, only VIBRATE permission, signature verified; SHA-256 `0de538d3…e248` | artifact `legend-arrow-debug-apk` in run 40444356036 |
-| 16 KB page size | **PASS** in CI on PR #1 @ `b5200bc` — all 4 64-bit libs PT_LOAD p_align 16384, libs compressed (was NOT RUN in run 40444356036: zipalign flag detection missed) | [run 40444897238](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40444897238), `scripts/check_page_size.py` |
-| CI tests + APK on PR #1 @ `b5200bc` | **PASS** — both jobs green; APK SHA-256 `4277d7ad…d4fa` | run 40444897238 |
-| Local `scripts/verify_all.sh` | **PASS** — 127 tests | `build/reports/summary.json` |
+| CI Godot import/compile/tests @ `eaf5c35` | **PASS** — 166 tests, 0 failed/pending/assertion-free | [run 40449617522](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40449617522) |
+| CI Kotlin plugin: core JUnit, Android unit tests, lint, AAR @ `eaf5c35` | **PASS** — 15 core tests, `lintRelease` clean, AAR built | run 40449617522, artifacts `kotlin-reports`, `legend-ads-aar` |
+| CI Gradle APK export + `check_apk.sh` @ `eaf5c35` | **PASS** — package/label, minSdk 24, targetSdk 36, LegendAds registered + packaged, Google test app id, no AD_ID / ACCESS_ADSERVICES_*, no notification/location/camera/mic/contacts, arm64-v8a + x86_64, 16 KB (ELF + zip offsets), signature; SHA-256 `d40fd283…5bdc` | run 40449617522, artifact `legend-arrow-debug-apk` |
+| Local `scripts/verify_all.sh` | **PASS** — 166 tests | `build/reports/summary.json` |
+| Local Kotlin core (`-PcoreOnly`) | **PASS** — 15 tests | `build/kt.log` |
+| Live ads on a device/emulator (consent form, real SDK callbacks) | **NOT RUN** — needs an emulator (M5); CI never requests ads | — |
 | APK install/launch on emulator | **NOT RUN** — M5 CI emulator job | — |
 | Physical-device performance | **BLOCKED** — no Android phone (D-18) | — |
-| Screenshots phone/tablet EN/ES | captured (visual evidence only) | `docs/screenshots/m2/` |
 
 ## Next
-1. Owner: review and merge PR #1 into `main` (optionally make `main` the default branch).
-2. **M3**: `AdService`/`ConsentService` interfaces + mock provider, reward state machine (idle→loading→ready→showing→rewarded/dismissed/failed) + tests; Gradle-based Android export with a Kotlin plugin (UMP + Google Mobile Ads, child/unknown restricted, official test IDs); hint sheet "Watch ad" and "No ad available" states.
-3. Polish from screenshots: cap button width on tablets; creature art pass (M4).
+1. Owner: review/merge PR #2 into `main`.
+2. **M4** — full content: 24 validated levels (silhouette masks per creature), 12 creatures with layered art + distinct awakenings, roster in `campaign.json` across 3 realms, audio buses with original sounds; extend content tests to require exactly 12 creatures / 24 levels.
+3. Polish noted earlier: cap button width on tablets; creature art pass.
 
 Next command: `scripts/verify_all.sh`
 
 ## Blockers
-- **Network policy (cloud environment):** `dl.google.com` denied → no official Android SDK/emulator inside this container (CI unaffected). Allow it under the environment's Network access settings to run an emulator here.
+- **Network policy (cloud environment):** `dl.google.com` (Google Maven, Android SDK, emulator images) is denied and Maven Central rate-limits → Android builds only in CI. Allowing `dl.google.com` in the environment's Network access settings would enable local Android builds/emulator.
 - Physical-device checks: BLOCKED by design (D-18).
-- Optional owner action: make `main` the default branch on GitHub (currently `master`).
+- Release ads: real AdMob IDs, UMP message, `ads_release.json` — owner prerequisites (see `docs/ADS_AND_PRIVACY.md`).
