@@ -103,6 +103,6 @@ adb shell am force-stop "$PKG"
 cat "$REPORT"
 if [[ "$verdict" != *"PASS"* ]]; then
   echo "measure_device: load journey did not pass: $verdict" >&2
-  grep -E "LEGEND_E2E|FATAL|AndroidRuntime|lowmemorykiller|ANR in|SCRIPT ERROR" "$OUT/logcat.txt" | tail -40 >&2 || true
+  grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|SCRIPT ERROR|godot" "$OUT/logcat.txt" | tail -80 >&2 || true
   exit 1
 fi

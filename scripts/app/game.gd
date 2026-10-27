@@ -30,6 +30,7 @@ var audio: AudioDirector
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
+var force_mock_ads := false   # set by Main for on-device E2E runs (before boot)
 
 var _host: Control            # where screens are mounted (set by main scene)
 var _current: Control
@@ -64,6 +65,8 @@ func boot(save_path: String = "user://save.json") -> Dictionary:
 ## Android uses the Kotlin plugin when present; an Android build without it
 ## gets no ads at all. Desktop/editor runs use the mock so the flow is testable.
 func _default_ad_provider() -> AdProvider:
+	if force_mock_ads:
+		return MockAdProvider.new()
 	if Engine.has_singleton(AndroidAdProvider.SINGLETON):
 		return AndroidAdProvider.new()
 	if OS.has_feature("android"):

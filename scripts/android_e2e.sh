@@ -69,7 +69,12 @@ for j in "${JOURNEYS[@]}"; do
   results+=("$j|$verdict|$secs")
   case "$verdict" in
     *" PASS "*) ;;
-    *) fail=1; grep -E "LEGEND_E2E|FATAL|AndroidRuntime|SCRIPT ERROR|USER ERROR" "$OUT/logcat/$j.txt" | head -30 || true ;;
+    *) fail=1
+       # Case-insensitive: native crashes log as "F libc : Fatal signal …".
+       echo "---- $j: crash / kill / app lines from logcat ----"
+       grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|SCRIPT ERROR|USER ERROR|godot" \
+         "$OUT/logcat/$j.txt" | grep -v "GodotPluginRegistry: Registering" | tail -80 || true
+       echo "---- end $j ----" ;;
   esac
 done
 

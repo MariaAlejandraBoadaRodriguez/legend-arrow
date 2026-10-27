@@ -46,12 +46,6 @@ func _init(p_journey: String) -> void:
 	name = "DeviceE2E"
 
 
-## Called by Main before routing so no live ad SDK is ever touched.
-func install_mock_ads() -> void:
-	mock = MockAdProvider.new()
-	Game.set_ad_provider(mock)
-
-
 func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(OUT_DIR)
 	_run.call_deferred()
