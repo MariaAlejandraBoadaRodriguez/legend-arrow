@@ -115,4 +115,4 @@ Milestones M0–M6 come from `CLAUDE.md`; phases 1–10 from the brief (§3). Ev
 - **M3** (Phase 5 interfaces, 7 ads/consent). ✅ CI green — see PROGRESS.
 - **M4** (Phase 6 full content). ✅ CI green — see PROGRESS.
 - **M5** (Phases 8, 9 E2E/emulator). ✅ CI green — see PROGRESS.
-- **M6** (Phases 9 release, 10).
+- **M6** (Phases 9 release, 10). ✅ CI green — owner prerequisites listed in RELEASE_CHECKLIST.md.

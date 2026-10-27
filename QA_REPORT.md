@@ -24,13 +24,13 @@ Final CI run: see `docs/PROGRESS.md` (updated with each push). Runs cited here: 
 | Debug APK | PASS | package, label, minSdk 24, targetSdk 36, LegendAds registered, Google **test** app id, no AD_ID/ACCESS_ADSERVICES/notification/location/camera/mic/contacts permissions, arm64-v8a + x86_64, 16 KB ELF + zip alignment, signature; `legend-arrow-debug.apk.sha256` |
 | Release AAB (rehearsal: throwaway key, ads disabled) | PASS | bundletool 1.18.1 `validate`; versionCode 1 / 0.1.0; targetSdk 36; not debuggable; no AD_ID; arm64-v8a + armeabi-v7a + x86_64; no tests/tools/docs packaged; universal APK passes `check_apk.sh`; `legend-arrow-release.aab.sha256` |
 | Download size per device (bundletool `get-size`) | PASS | arm64-v8a 30.7 MB, armeabi-v7a 32.1 MB, x86_64 32.1 MB (budget 120 MB) |
-| Gameplay + awakening video | see final run | `legend_arrow_gameplay.mp4` recorded by `screenrecord` during `fresh_install` (artifact `e2e-android-api34`) |
+| Gameplay + awakening video | PASS | `docs/media/legend_arrow_gameplay.mp4` (25 s): Home → tutorial → Forest Drake's 2 puzzles → awakening → creature detail, rendered frame-by-frame by Godot Movie Maker while `fresh_install` passes (`scripts/record_video.sh`; CI artifact `e2e-desktop-phone`). An emulator `screenrecord` attempt produced a 92 KB file whose content could not be verified, so it was dropped |
 
 ## Performance and memory
 | Check | Result | Detail |
 |---|---|---|
 | Physical low-tier phone (spec §14 budgets) | **BLOCKED** | Owner has no Android phone (D-18). Run `scripts/measure_device.sh <debug apk>` on a 3 GB phone |
-| Emulator measurement (not device evidence) | measured | API 34 x86_64 emulator, SwiftShader **software** GPU at 1080×2400: cold start TotalTime 1147–1634 ms (5 runs); peak PSS 209 MB during the tutorial → 2 puzzles → awakening journey; frame time puzzle p50 98 ms / p95 141 ms, awakening p50 69 ms / p95 129 ms |
+| Emulator measurement (not device evidence) | measured | API 34 x86_64 emulator, SwiftShader **software** GPU at 1080×2400, two runs: cold start TotalTime 1147–1664 ms; peak PSS 209–212 MB during the tutorial → 2 puzzles → awakening journey; frame time puzzle p95 110–141 ms, awakening p95 86–129 ms |
 | 20 screen transitions, no node leak | PASS | `test_twenty_transitions_do_not_leak_nodes`; leak gate in `verify_all.sh` |
 
 **Risk to note:** on the software-rendered emulator the game runs at ~10 fps. That says little about real GPUs, but it means the spec's frame budgets (puzzle p95 ≤ 16.7 ms) are **unverified** until a physical-device run. If a low-tier phone misses them, the first levers are the awakening SubViewport size and polygon counts of the larger rigs.

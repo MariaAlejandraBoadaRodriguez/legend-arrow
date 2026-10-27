@@ -34,13 +34,6 @@ for j in "${JOURNEYS[@]}"; do
   # Trigger file in the app's private files dir (debuggable build: run-as).
   adb shell "run-as $PKG sh -c 'mkdir -p files && echo $j > files/e2e_journey.txt'"
   adb logcat -c
-  rec=0
-  if [[ "$j" == "fresh_install" ]]; then  # gameplay + awakening video
-    adb shell rm -f /sdcard/legend_arrow_gameplay.mp4
-    adb shell screenrecord --time-limit 180 --size 540x1200 --bit-rate 3000000 /sdcard/legend_arrow_gameplay.mp4 &
-    rec=$!
-    sleep 1
-  fi
   adb shell am start -W -n "$ACTIVITY" >/dev/null
   verdict=""
   while (( $(date +%s) - start < TIMEOUT_S )); do
@@ -55,13 +48,6 @@ for j in "${JOURNEYS[@]}"; do
   [[ -n "$verdict" ]] || verdict="LEGEND_E2E FAIL $j: no verdict within ${TIMEOUT_S}s"
   adb exec-out screencap -p > "$OUT/screencap/$j.png" || true
   adb logcat -d > "$OUT/logcat/$j.txt" || true
-  if (( rec )); then
-    adb shell pkill -INT screenrecord || true
-    wait "$rec" 2>/dev/null || true
-    sleep 2
-    adb pull /sdcard/legend_arrow_gameplay.mp4 "$OUT/legend_arrow_gameplay.mp4" >/dev/null 2>&1 || echo "android_e2e: no video recorded" >&2
-    [[ -s "$OUT/legend_arrow_gameplay.mp4" ]] && echo "video: legend_arrow_gameplay.mp4 $(stat -c %s "$OUT/legend_arrow_gameplay.mp4") bytes"
-  fi
   adb shell am force-stop "$PKG"
   secs=$(( $(date +%s) - start ))
   echo "$verdict (${secs}s)"

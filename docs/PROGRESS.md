@@ -1,9 +1,9 @@
 # Progress
 
-_Last updated: 2026-10-27 (session 3)_
+_Last updated: 2026-10-27 (session 3, M6)_
 
 ## Where things are
-- `main` holds M0–M2 (PR #1 merged). M3, M4 and M5 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
+- `main` holds M0–M2 (PR #1 merged). M3–M6 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
 
 ## Done
 - **M0** — roadmap, decisions, Godot 4.7.2 skeleton, vendored GUT 9.7.1, `verify_all.sh` + JUnit gate, SHA-pinned CI.
@@ -25,6 +25,12 @@ _Last updated: 2026-10-27 (session 3)_
   - `scripts/android_e2e.sh` on a CI **Android 14 emulator** (Pixel 6, 1080×2400): `am start` / `am force-stop`, logcat, in-app PNGs, system `screencap`, JUnit; `scripts/desktop_e2e.sh` at phone 720×1280 and tablet 1200×1920.
   - `tools/coverage.py` line coverage enforced in CI (D-38); `docs/REQUIREMENTS_MATRIX.md`.
   - Fixed during M5: tap coordinates ignored the canvas stretch transform (would miss on any scaled screen); desktop runner leaked orphan processes.
+- **M6** — release preparation:
+  - Release AAB pipeline `scripts/export_release.sh` (real release needs owner upload key + `ads_release.json`; CI `--rehearsal` with a throwaway key and ads disabled), bundletool 1.18.1 validation, manifest/ABI/16 KB checks, per-device download size, SHA-256.
+  - `scripts/measure_device.sh` (cold start, PSS, in-game frame-time p50/p95, gfxinfo, thermal) — exercised on the CI emulator.
+  - Gameplay + awakening video `docs/media/legend_arrow_gameplay.mp4` (`scripts/record_video.sh`, Godot Movie Maker; CI artifact).
+  - Docs: `RELEASE_CHECKLIST.md`, `QA_REPORT.md`, `docs/RELEASE.md`, `docs/OPERATIONS.md`, `docs/PRIVACY_POLICY.md` (draft), `docs/DATA_SAFETY.md`, `docs/ART_AND_ANIMATION.md`, README architecture diagram.
+  - Fixed: bundletool CRLF output broke the size check (reproduced from CI output).
 
 ## Verification
 | Check | Result | Evidence |
@@ -37,6 +43,8 @@ _Last updated: 2026-10-27 (session 3)_
 | CI @ `c76f958`: desktop E2E phone + tablet | **PASS** — 8/8 journeys each | run 40558523080, artifacts `e2e-desktop-phone`, `e2e-desktop-tablet` |
 | CI @ `c76f958`: line coverage | **PASS** — puzzle/solver/progression 94.8% (≥90), save/reward 95.1% (≥80) | run 40558523080, artifact `test-reports/coverage/` |
 | CI @ `c76f958`: Godot tests, Kotlin, APK | **PASS** — 191 tests | run 40558523080 |
+| CI @ `fa321c7` (M6): all 6 jobs incl. release AAB rehearsal + emulator E2E + measure_device | **PASS** — AAB: validate, versionCode 1 / 0.1.0, targetSdk 36, not debuggable, no AD_ID, arm64 + armv7 + x86_64, universal APK checks; download arm64 30.7 MB / armv7 32.1 MB (≤ 120 MB) | [run 40565420265](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40565420265), artifact `legend-arrow-release-aab-rehearsal` |
+| Emulator performance (not device evidence) | measured — cold start 1.2–1.7 s; peak PSS ~212 MB; software-GPU frame p95 110 ms puzzle / 86 ms awakening | run 40565420265, `e2e-android-api34/measure-emulator` |
 | Local `scripts/verify_all.sh` (M4) | **PASS** — 188 tests, 4,341 asserts, 0 failed/pending/assertion-free | `build/verify.log`, `build/reports/junit.xml` |
 | Creature art final quality | **NOT RUN** — stylised procedural placeholder art; human art pass recommended before store listing (D-33) | — |
 | Local Kotlin core (`-PcoreOnly`) | **PASS** — 15 tests | `build/kt.log` |
@@ -45,10 +53,10 @@ _Last updated: 2026-10-27 (session 3)_
 
 ## Next
 1. Owner: review/merge PR #2 into `main`.
-2. **M6** — release prep: AAB, checksums, privacy policy draft, Data Safety inventory, `RELEASE_CHECKLIST.md`, `QA_REPORT.md`, `scripts/measure_device.sh`.
-3. Polish noted earlier: creature art pass (human).
+2. All milestones M0–M6 delivered. Remaining work needs the owner (see `RELEASE_CHECKLIST.md` → Owner actions): upload key + Play App Signing, AdMob IDs + UMP message → `ads_release.json`, hosted privacy policy, Play Console forms, `scripts/measure_device.sh` on a real phone.
+3. Recommended: human creature-art pass; physical-device performance run (software-GPU emulator ran ~10 fps, so the 60 fps budget is unverified).
 
-Next command: `scripts/verify_all.sh`, then M6.
+Next command: `scripts/verify_all.sh` (any change), `scripts/measure_device.sh <apk>` on a phone (owner).
 
 ## Blockers
 - **Network policy (cloud environment):** `dl.google.com` (Google Maven, Android SDK, emulator images) is denied and Maven Central rate-limits → Android builds only in CI. Allowing `dl.google.com` in the environment's Network access settings would enable local Android builds/emulator.

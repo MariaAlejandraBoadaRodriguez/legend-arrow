@@ -196,14 +196,18 @@ jobs:
           path: .cache/godot
           key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
 
-      - name: Install Xvfb and Mesa
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri >/dev/null
+      - name: Install Xvfb, Mesa and ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null
 
       - name: Run journeys
         run: |
           GODOT="$(scripts/install_godot.sh)"
           "$GODOT" --headless --path . --import >/dev/null 2>&1 || true
           GODOT="$GODOT" E2E_RES=${{ matrix.res }} scripts/desktop_e2e.sh build/e2e-desktop-${{ matrix.form }}
+
+      - name: Record gameplay + awakening video (Movie Maker)
+        if: matrix.form == 'phone'
+        run: GODOT="$(scripts/install_godot.sh)" scripts/record_video.sh build/e2e-desktop-${{ matrix.form }}/legend_arrow_gameplay.mp4
 
       - name: Upload screenshots and logs
         if: always()
