@@ -3,7 +3,7 @@
 _Last updated: 2026-10-27 (session 3)_
 
 ## Where things are
-- `main` holds M0–M2 (PR #1 merged). M3 is on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
+- `main` holds M0–M2 (PR #1 merged). M3 + M4 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
 
 ## Done
 - **M0** — roadmap, decisions, Godot 4.7.2 skeleton, vendored GUT 9.7.1, `verify_all.sh` + JUnit gate, SHA-pinned CI.
@@ -27,6 +27,7 @@ _Last updated: 2026-10-27 (session 3)_
 | CI Godot import/compile/tests @ `eaf5c35` | **PASS** — 166 tests, 0 failed/pending/assertion-free | [run 40449617522](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40449617522) |
 | CI Kotlin plugin: core JUnit, Android unit tests, lint, AAR @ `eaf5c35` | **PASS** — 15 core tests, `lintRelease` clean, AAR built | run 40449617522, artifacts `kotlin-reports`, `legend-ads-aar` |
 | CI Gradle APK export + `check_apk.sh` @ `eaf5c35` | **PASS** — package/label, minSdk 24, targetSdk 36, LegendAds registered + packaged, Google test app id, no AD_ID / ACCESS_ADSERVICES_*, no notification/location/camera/mic/contacts, arm64-v8a + x86_64, 16 KB (ELF + zip offsets), signature; SHA-256 `d40fd283…5bdc` | run 40449617522, artifact `legend-arrow-debug-apk` |
+| CI @ `25a9af4` (M4): Godot tests, Kotlin plugin, APK export + checks | **PASS** — 188 tests, 0 failed/pending/assertion-free; Kotlin + APK jobs green | [run 40554751564](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40554751564) |
 | Local `scripts/verify_all.sh` (M4) | **PASS** — 188 tests, 4,341 asserts, 0 failed/pending/assertion-free | `build/verify.log`, `build/reports/junit.xml` |
 | Creature art final quality | **NOT RUN** — stylised procedural placeholder art; human art pass recommended before store listing (D-33) | — |
 | Local Kotlin core (`-PcoreOnly`) | **PASS** — 15 tests | `build/kt.log` |
