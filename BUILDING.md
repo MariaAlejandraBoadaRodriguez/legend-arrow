@@ -7,7 +7,9 @@
 | GUT test runner | **9.7.1** (`aeb5d4f3f7f0a6c9b5e178876d6c99b791fda605`) | vendored in `addons/gut/` (`VENDORED_VERSION.txt`) |
 | Python | 3.x (stdlib only) | JUnit gate `scripts/check_junit.py` |
 | GitHub Actions | checkout v7.0.1, cache v6.1.0, upload-artifact v7.0.2 | commit SHAs in `.github/workflows/ci.yml` |
-| Android (from M2) | JDK 17, SDK 36, minSdk 26 | added with the export job |
+| Godot export templates | 4.7.2-stable (Android only extracted) | `scripts/export_android.sh` |
+| Android | JDK 17 (Temurin in CI), SDK from runner, debug keystore generated | `.github/workflows/ci.yml` job `android-debug-apk` |
+| Typeface | Inter 4.1 (OFL) | `assets/fonts/` |
 
 ## Run all checks (Linux / CI)
 ```bash
@@ -26,5 +28,24 @@ Open the project in Godot 4.7.2 → Project Settings → Plugins → enable **Gu
 $GODOT --headless --path . -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gselect=test_puzzle_board
 ```
 
-## Android export
-Added in M2 (debug APK in CI). Release signing keys and real AdMob IDs are owner-supplied and never committed.
+## Android debug APK
+```bash
+ANDROID_HOME=/path/to/sdk JAVA_HOME=/path/to/jdk17 scripts/export_android.sh
+```
+Downloads the 4.7.2 export templates once (Android files only), writes Godot editor settings for the SDK/JDK, creates a throwaway debug keystore in `build/`, exports `build/android/legend-arrow-debug.apk`, then runs `scripts/check_apk.sh` (package id, label, SDK levels, permissions, arm64-v8a + x86_64 libs, 16 KB alignment, signature) and writes the SHA-256.
+Resolved by the template: **minSdk 24, targetSdk 36** (DECISIONS D-20). Release signing keys and real AdMob IDs are owner-supplied and never committed.
+
+To install on the Android Studio emulator: drag the APK onto the emulator window, or `adb install -r build/android/legend-arrow-debug.apk`.
+
+## Screenshots and creature renders (needs a display; Xvfb on Linux)
+```bash
+xvfb-run -a $GODOT --path . --rendering-driver opengl3 --audio-driver Dummy -s res://tools/capture_screens.gd -- phone en
+xvfb-run -a $GODOT --path . --rendering-driver opengl3 --audio-driver Dummy -s res://tools/render_creature.gd -- forest_drake
+```
+Output: `build/shots/`. Curated sheets are committed under `docs/screenshots/`.
+
+## Level authoring
+```bash
+$GODOT --headless --path . -s res://tools/generate_level.gd -- --creature forest_drake --slot 2 --arrows 8 --difficulty tutorial --max-len 5 --min-depth 3
+```
+Searches seeds 1..400 for the best silhouette coverage, validates, writes `data/levels/<creature>_<slot>.json` (deterministic).
