@@ -96,10 +96,10 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   bt build-apks --bundle="$AAB" --output="$OUT_DIR/universal/split.apks" \
     --ks="$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" --ks-key-alias="$GODOT_ANDROID_KEYSTORE_RELEASE_USER" \
     --ks-pass="pass:$GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD" >/dev/null
-  sizes="$(bt get-size total --apks="$OUT_DIR/universal/split.apks" --dimensions=ABI)"
+  sizes="$(bt get-size total --apks="$OUT_DIR/universal/split.apks" --dimensions=ABI | tr -d '\r')"  # CRLF output
   echo "download size by ABI (bytes, MIN,MAX):"; echo "$sizes"
   max_arm64="$(awk -F, '/arm64-v8a/ {print $3}' <<<"$sizes")"
-  check "arm64 phone download <= 120 MB (spec §14)" '[[ -n "$max_arm64" && "$max_arm64" -le 125829120 ]]'
+  check "arm64 phone download <= 120 MB (spec §14)" '[[ "$max_arm64" =~ ^[0-9]+$ ]] && (( max_arm64 <= 125829120 ))'
   echo "REPORT COMPLETE"
 } | tee "$REPORT"
 # The block runs in a pipeline subshell: trust only a complete report.
