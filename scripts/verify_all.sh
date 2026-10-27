@@ -41,6 +41,11 @@ gut_status=$?
 set -e
 tail -n 40 "$REPORTS/gut.log"
 fail_on_errors "$REPORTS/gut.log" "tests"
+# Reference cycles between RefCounted objects never free; catch them here.
+if grep -nE "ObjectDB instances were leaked at exit|resources still in use at exit" "$REPORTS/gut.log"; then
+  echo "!! tests: objects or resources leaked at exit (reference cycle?)" >&2
+  exit 1
+fi
 [[ $gut_status -eq 0 ]] || { echo "!! GUT exited with $gut_status" >&2; exit 1; }
 
 echo "== [4/4] Gate JUnit report"

@@ -6,6 +6,7 @@ extends Screen
 ## replaying can never grant it twice.
 
 const SKIP_AFTER := 1.0
+const SIGNATURE_AT := 2.0
 
 var creature_id := ""
 var replay := false
@@ -54,7 +55,15 @@ func build() -> void:
 func _begin() -> void:
 	stage.rig.awaken()
 	landscape.play()
+	# The motif accompanies the signature move (starts ~2 s in).
+	get_tree().create_timer(SIGNATURE_AT).timeout.connect(_play_motif)
 	set_process(true)
+
+
+func _play_motif() -> void:
+	if is_inside_tree() and not has_meta("motif"):
+		set_meta("motif", true)
+		Game.audio.play_creature(creature_id)
 
 
 func _process(delta: float) -> void:
@@ -71,6 +80,7 @@ func skip() -> void:
 		return
 	landscape.finish()
 	stage.rig.skip()
+	_play_motif()
 
 
 func _on_finished() -> void:
@@ -105,5 +115,6 @@ func handle_back() -> bool:
 
 
 func on_leave() -> void:
+	Game.audio.stop_creature()
 	if stage != null and stage.rig != null:
 		stage.rig.stop()

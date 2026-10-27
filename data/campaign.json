@@ -6,6 +6,17 @@
     {"id": "ancient_highlands", "name_key": "REALM_ANCIENT_HIGHLANDS"}
   ],
   "creatures": [
-    {"id": "forest_drake", "realm": "mistwood", "name_key": "CREATURE_FOREST_DRAKE", "levels": ["forest_drake_1", "forest_drake_2"]}
+    {"id": "forest_drake", "realm": "mistwood", "name_key": "CREATURE_FOREST_DRAKE", "levels": ["forest_drake_1", "forest_drake_2"]},
+    {"id": "moon_owl", "realm": "mistwood", "name_key": "CREATURE_MOON_OWL", "levels": ["moon_owl_1", "moon_owl_2"]},
+    {"id": "antler_fox", "realm": "mistwood", "name_key": "CREATURE_ANTLER_FOX", "levels": ["antler_fox_1", "antler_fox_2"]},
+    {"id": "basilisk", "realm": "mistwood", "name_key": "CREATURE_BASILISK", "levels": ["basilisk_1", "basilisk_2"]},
+    {"id": "wyvern", "realm": "cloud_peaks", "name_key": "CREATURE_WYVERN", "levels": ["wyvern_1", "wyvern_2"]},
+    {"id": "arctic_drake", "realm": "cloud_peaks", "name_key": "CREATURE_ARCTIC_DRAKE", "levels": ["arctic_drake_1", "arctic_drake_2"]},
+    {"id": "griffin", "realm": "cloud_peaks", "name_key": "CREATURE_GRIFFIN", "levels": ["griffin_1", "griffin_2"]},
+    {"id": "cloud_serpent", "realm": "cloud_peaks", "name_key": "CREATURE_CLOUD_SERPENT", "levels": ["cloud_serpent_1", "cloud_serpent_2"]},
+    {"id": "stone_wyrm", "realm": "ancient_highlands", "name_key": "CREATURE_STONE_WYRM", "levels": ["stone_wyrm_1", "stone_wyrm_2"]},
+    {"id": "unicorn", "realm": "ancient_highlands", "name_key": "CREATURE_UNICORN", "levels": ["unicorn_1", "unicorn_2"]},
+    {"id": "phoenix", "realm": "ancient_highlands", "name_key": "CREATURE_PHOENIX", "levels": ["phoenix_1", "phoenix_2"]},
+    {"id": "ancient_dragon", "realm": "ancient_highlands", "name_key": "CREATURE_ANCIENT_DRAGON", "levels": ["ancient_dragon_1", "ancient_dragon_2"]}
   ]
 }

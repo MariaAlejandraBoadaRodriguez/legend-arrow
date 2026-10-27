@@ -25,9 +25,12 @@ var campaign: Campaign
 var progression: Progression
 var repository: SaveRepository
 var events := EventLog.new()
+var ads: AdService
+var audio: AudioDirector
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
+var force_mock_ads := false   # set by Main for on-device E2E runs (before boot)
 
 var _host: Control            # where screens are mounted (set by main scene)
 var _current: Control
@@ -37,6 +40,9 @@ var _stack: Array = []        # [[name, params], ...] for Back
 
 func _ready() -> void:
 	_ensure_buses()
+	audio = AudioDirector.new()
+	audio.name = "Audio"
+	add_child(audio)
 
 
 ## Loads content and the save. Returns the SaveRepository.load_save() result.
@@ -51,8 +57,41 @@ func boot(save_path: String = "user://save.json") -> Dictionary:
 	if boot_result.recovered:
 		events.log_event("save_recovery", {"source": int(boot_result.source)})
 	apply_settings()
+	set_ad_provider(_default_ad_provider())
 	booted = true
 	return boot_result
+
+
+## Android uses the Kotlin plugin when present; an Android build without it
+## gets no ads at all. Desktop/editor runs use the mock so the flow is testable.
+func _default_ad_provider() -> AdProvider:
+	if force_mock_ads:
+		return MockAdProvider.new()
+	if Engine.has_singleton(AndroidAdProvider.SINGLETON):
+		return AndroidAdProvider.new()
+	if OS.has_feature("android"):
+		return AdProvider.new()
+	return MockAdProvider.new()
+
+
+## Rebuilds the ad layer around a provider (boot, tests). Consent is requested
+## in the background; nothing waits for it.
+func set_ad_provider(provider: AdProvider) -> void:
+	ads = AdService.new(provider, AdConfig.load_for_build(OS.is_debug_build()), progression, events)
+	ads.persist = persist
+	ads.fullscreen_started.connect(_on_ad_fullscreen_started)
+	ads.fullscreen_ended.connect(_on_ad_fullscreen_ended)
+	ads.start()
+
+
+## Full-screen ads: silence the game first, restore only if still allowed.
+func _on_ad_fullscreen_started() -> void:
+	audio.set_muted("ad", true)
+
+
+func _on_ad_fullscreen_ended() -> void:
+	audio.set_muted("ad", false)
+	apply_settings()
 
 
 func persist() -> void:
@@ -173,7 +212,12 @@ func unmount() -> void:
 
 func _notification(what: int) -> void:
 	match what:
+		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED:
+			if audio != null:
+				audio.set_muted("background", false)
 		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
+			if audio != null and what != NOTIFICATION_WM_CLOSE_REQUEST:
+				audio.set_muted("background", true)
 			if _current != null and _current.has_method("on_app_paused"):
 				_current.on_app_paused()
 			persist()

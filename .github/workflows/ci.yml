@@ -35,6 +35,9 @@ jobs:
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
 
+      - name: Line coverage (instrumented re-run, fails below brief targets)
+        run: GODOT="$(scripts/install_godot.sh)" python3 tools/coverage.py build/reports/coverage
+
       - name: Job summary
         if: always()
         run: |
@@ -45,6 +48,7 @@ jobs:
             else
               echo "No test summary produced (an earlier step failed)."
             fi
+            if [ -f build/reports/coverage/coverage.md ]; then cat build/reports/coverage/coverage.md; fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload test reports and logs
@@ -55,9 +59,50 @@ jobs:
           path: build/reports/
           if-no-files-found: error
 
+  android-ads-plugin:
+    name: Kotlin ads plugin (unit tests, lint, AAR)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-plugin-${{ hashFiles('android/plugins/legend_ads/**/*.kts', 'android/plugins/legend_ads/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Build and test plugin
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/build_ads_plugin.sh
+
+      - name: Upload AAR
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: legend-ads-aar
+          path: addons/legend_ads/bin/legend_ads-release.aar
+          if-no-files-found: error
+
+      - name: Upload Kotlin reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: kotlin-reports
+          path: |
+            build/reports/kotlin/
+            android/plugins/legend_ads/plugin/build/reports/
+            android/plugins/legend_ads/plugin/build/test-results/
+          if-no-files-found: warn
+
   android-debug-apk:
     name: Export Android debug APK
-    needs: godot-tests
+    needs: [godot-tests, android-ads-plugin]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -82,8 +127,38 @@ jobs:
           path: ~/.local/share/godot/export_templates
           key: godot-templates-android-${{ hashFiles('scripts/export_android.sh') }}
 
+      - name: Get ads plugin AAR
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: legend-ads-aar
+          path: addons/legend_ads/bin
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-export-${{ hashFiles('export_presets.cfg', 'addons/legend_ads/legend_ads_editor.gd') }}
+
       - name: Export and inspect APK
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
+
+      - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_release.sh --rehearsal
+
+      - name: Upload release AAB rehearsal (NOT for Play upload)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: legend-arrow-release-aab-rehearsal
+          path: |
+            build/android/legend-arrow-release.aab
+            build/android/legend-arrow-release.aab.sha256
+            build/android/aab_report.txt
+            build/android/universal/apk_report.txt
+            build/android/export_release.log
+          if-no-files-found: error
 
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()
@@ -95,4 +170,101 @@ jobs:
             build/android/legend-arrow-debug.apk.sha256
             build/android/apk_report.txt
             build/android/export.log
+          if-no-files-found: error
+
+  desktop-e2e:
+    name: Desktop E2E journeys (${{ matrix.form }})
+    needs: [godot-tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - form: phone
+            res: 720x1280
+          - form: tablet
+            res: 1200x1920
+    env:
+      GODOT_HOME: ${{ github.workspace }}/.cache/godot
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cache Godot editor
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/godot
+          key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
+
+      - name: Install Xvfb, Mesa and ffmpeg
+        # A mirror once hung this step for 25 min (PR run 40570864428): bound
+        # each attempt and retry instead of waiting for the job timeout.
+        timeout-minutes: 12
+        run: |
+          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          for attempt in 1 2 3; do
+            if timeout 240 sudo apt-get $APT update -qq && \
+               timeout 240 sudo apt-get $APT install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null; then
+              exit 0
+            fi
+            echo "apt attempt $attempt failed; retrying" >&2
+            sleep 10
+          done
+          exit 1
+
+      - name: Run journeys
+        run: |
+          GODOT="$(scripts/install_godot.sh)"
+          "$GODOT" --headless --path . --import >/dev/null 2>&1 || true
+          GODOT="$GODOT" E2E_RES=${{ matrix.res }} scripts/desktop_e2e.sh build/e2e-desktop-${{ matrix.form }}
+
+      - name: Record gameplay + awakening video (Movie Maker)
+        if: matrix.form == 'phone'
+        run: GODOT="$(scripts/install_godot.sh)" scripts/record_video.sh build/e2e-desktop-${{ matrix.form }}/legend_arrow_gameplay.mp4
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-desktop-${{ matrix.form }}
+          path: build/e2e-desktop-${{ matrix.form }}/
+          if-no-files-found: error
+
+  android-emulator-e2e:
+    name: Android emulator E2E (API 34)
+    needs: [android-debug-apk]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Get debug APK
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: legend-arrow-debug-apk
+          path: build/android
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run E2E on emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
+
+      - name: Upload E2E evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-android-api34
+          path: build/e2e-android/
           if-no-files-found: error

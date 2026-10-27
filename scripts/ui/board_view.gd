@@ -7,7 +7,8 @@ extends Control
 ## Input rules (spec §13): single-finger tap only; a press that moves more than
 ## DRAG_THRESHOLD, lasts longer than LONG_PRESS, is cancelled, or overlaps a
 ## second finger never taps. Hits resolve to the nearest arrow path within
-## HIT_RADIUS cells, measured in board coordinates.
+## HIT_RADIUS cells, measured in board coordinates (after zoom and pan).
+## Two fingers pinch-zoom (1x-MAX_ZOOM) and pan; the mouse wheel zooms.
 
 signal arrow_tapped(id: String)
 signal exit_finished(id: String)
@@ -19,6 +20,7 @@ const MAX_CELL := 120.0
 const LINE_WIDTH := 0.13         # in cells
 const HEAD_LEN := 0.42
 const HEAD_HALF_W := 0.27
+const MAX_ZOOM := 3.0
 
 var session: PuzzleSession
 var reduce_motion := false
@@ -26,6 +28,9 @@ var reduce_motion := false
 var clock: Callable = func() -> float: return Time.get_ticks_msec() / 1000.0
 var input_enabled := true
 
+var zoom := 1.0
+var pan := Vector2.ZERO
+var _fit_cell := 64.0
 var _cell := 64.0
 var _origin := Vector2.ZERO
 var _leaving := {}        # id -> {t: float, cells, dir}
@@ -42,7 +47,7 @@ var _press_index := -1
 func _init() -> void:
 	focus_mode = Control.FOCUS_ALL
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	clip_contents = false
+	clip_contents = true  # a zoomed board never draws over the controls
 
 
 func bind(p_session: PuzzleSession) -> void:
@@ -52,6 +57,8 @@ func bind(p_session: PuzzleSession) -> void:
 	_arrival.clear()
 	_hint_id = ""
 	_focus_id = ""
+	zoom = 1.0
+	pan = Vector2.ZERO
 	_layout()
 	queue_redraw()
 
@@ -73,9 +80,46 @@ func _layout() -> void:
 	# Leave one cell of room around the grid for arrowheads and exits.
 	var cw := size.x / float(b.width + 1)
 	var ch := size.y / float(b.height + 1)
-	_cell = minf(minf(cw, ch), MAX_CELL)
+	_fit_cell = minf(minf(cw, ch), MAX_CELL)
+	_cell = _fit_cell * zoom
 	var grid := Vector2(b.width, b.height) * _cell
-	_origin = (size - grid) / 2.0
+	pan = _clamp_pan(pan, grid)
+	_origin = (size - grid) / 2.0 + pan
+
+
+## Keeps a zoomed board covering the view: it may move until an edge (plus
+## one cell of margin) reaches the view's edge, never further.
+func _clamp_pan(p: Vector2, grid: Vector2) -> Vector2:
+	var slack := ((grid + Vector2(_cell, _cell) * 2.0) - size) / 2.0
+	slack = slack.max(Vector2.ZERO)
+	return p.clamp(-slack, slack)
+
+
+## Zooms by `factor` keeping the board point under `focus` (local) fixed.
+func zoom_at(factor: float, focus: Vector2) -> void:
+	if session == null:
+		return
+	var anchor := to_board(focus)
+	zoom = clampf(zoom * factor, 1.0, MAX_ZOOM)
+	if is_equal_approx(zoom, 1.0):
+		pan = Vector2.ZERO
+		_layout()
+	else:
+		_layout()
+		pan += focus - cell_center_f(anchor)
+		_layout()
+	queue_redraw()
+
+
+func pan_by(delta: Vector2) -> void:
+	pan += delta
+	_layout()
+	queue_redraw()
+
+
+## Centre of a (possibly fractional) board position in local coordinates.
+func cell_center_f(p: Vector2) -> Vector2:
+	return _origin + (p + Vector2(0.5, 0.5)) * _cell
 
 
 func _notification(what: int) -> void:
@@ -130,8 +174,16 @@ func _gui_input(event: InputEvent) -> void:
 		_on_touch(event)
 		accept_event()
 	elif event is InputEventScreenDrag:
-		if _touches.has(event.index) and event.position.distance_to(_touches[event.index].pos) > DRAG_THRESHOLD:
-			_touches[event.index].dragged = true
+		_on_drag(event)
+		accept_event()
+	elif event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		zoom_at(1.1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.1, event.position)
+		accept_event()
+	elif event is InputEventMagnifyGesture and _touches.is_empty():
+		zoom_at(event.factor, event.position)
+		accept_event()
+	elif event is InputEventPanGesture and _touches.is_empty():
+		pan_by(-event.delta * _cell * 0.5)
 		accept_event()
 	elif event.is_action_pressed("ui_accept"):
 		if _focus_id != "":
@@ -145,6 +197,27 @@ func _gui_input(event: InputEvent) -> void:
 				return
 
 
+## One finger: only marks the press as a drag (no tap). Two fingers: pinch
+## zoom around their midpoint and pan by the midpoint's movement.
+func _on_drag(e: InputEventScreenDrag) -> void:
+	if not _touches.has(e.index):
+		return
+	var t: Dictionary = _touches[e.index]
+	if e.position.distance_to(t.pos) > DRAG_THRESHOLD:
+		t.dragged = true
+	var others := _touches.keys().filter(func(i): return i != e.index)
+	if others.size() == 1:
+		var o: Dictionary = _touches[others[0]]
+		var before_d: float = (t.cur as Vector2).distance_to(o.cur)
+		var after_d: float = e.position.distance_to(o.cur)
+		var mid_before: Vector2 = ((t.cur as Vector2) + o.cur) * 0.5
+		var mid_after: Vector2 = (e.position + o.cur) * 0.5
+		if before_d > 1.0:
+			zoom_at(after_d / before_d, mid_after)
+		pan_by(mid_after - mid_before)
+	t.cur = e.position
+
+
 func _on_touch(e: InputEventScreenTouch) -> void:
 	if e.canceled:
 		_touches.clear()
@@ -153,7 +226,7 @@ func _on_touch(e: InputEventScreenTouch) -> void:
 	if e.pressed:
 		if not _touches.is_empty():
 			_multi = true
-		_touches[e.index] = {"pos": e.position, "time": clock.call(), "dragged": false}
+		_touches[e.index] = {"pos": e.position, "cur": e.position, "time": clock.call(), "dragged": false}
 		return
 	if not _touches.has(e.index):
 		return

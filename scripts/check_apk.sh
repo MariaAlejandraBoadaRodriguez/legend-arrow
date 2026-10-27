@@ -26,6 +26,20 @@ check "app label is Legend Arrow" '[[ "$label" == "Legend Arrow" ]]'
 check "minSdk <= $MIN_SDK_MAX" '[[ -n "$minsdk" && "$minsdk" -le $MIN_SDK_MAX ]]'
 check "versionCode >= 1" '[[ -n "$vcode" && "$vcode" -ge 1 ]]'
 check "no location/camera/microphone/contacts permissions" '! grep -qE "LOCATION|CAMERA|RECORD_AUDIO|CONTACTS" <<<"$badging"'
+check "no advertising-ID or Privacy Sandbox ad permissions (child/unknown audience)" '! grep -qE "permission.AD_ID|ACCESS_ADSERVICES" <<<"$badging"'
+check "no notification permission" '! grep -q "POST_NOTIFICATIONS" <<<"$badging"'
+if [[ "${EXPECT_ADS_PLUGIN:-1}" == "1" ]]; then
+  if [[ "$(basename "$AAPT")" == "aapt2" ]]; then
+    manifest="$("$AAPT" dump xmltree --file AndroidManifest.xml "$APK" 2>/dev/null || true)"
+  else
+    manifest="$("$AAPT" dump xmltree "$APK" AndroidManifest.xml 2>/dev/null || true)"
+  fi
+  check "manifest could be dumped" '[[ -n "$manifest" ]]'
+  check "INTERNET permission declared (ads only)" 'grep -q "android.permission.INTERNET" <<<"$badging"'
+  check "LegendAds plugin registered in manifest" 'grep -q "org.godotengine.plugin.v2.LegendAds" <<<"$manifest"'
+  check "LegendAdsPlugin class packaged" 'unzip -p "$APK" "classes*.dex" | grep -aq "LegendAdsPlugin"'
+  check "debug build uses Google test app id" 'grep -q "ca-app-pub-3940256099942544~3347511713" <<<"$manifest"'
+fi
 
 libs="$(unzip -l "$APK" | awk '{print $4}' | grep '^lib/' || true)"
 echo "$libs"

@@ -32,7 +32,7 @@ window/handheld/orientation=1
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/legend_ads/plugin.cfg")
 
 [gui]
 

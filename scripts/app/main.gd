@@ -17,8 +17,20 @@ func _ready() -> void:
 	get_tree().set_auto_accept_quit(false)
 	get_tree().set_quit_on_go_back(false)
 	Game.set_host(host)
+	# Decide E2E mode before boot so the real ads SDK is never started in a
+	# test run (brief §5: CI never contacts ad services).
+	var e2e_journey := DeviceE2E.requested_journey()
+	var e2e: DeviceE2E = null
+	if e2e_journey != "":
+		e2e = DeviceE2E.new(e2e_journey)
+		Game.force_mock_ads = true
 	var result := Game.boot() if not Game.booted else Game.boot_result
+	if e2e != null:
+		e2e.mock = Game.ads.provider as MockAdProvider
 	route_after_boot(result)
+	if e2e != null:
+		add_child(e2e)
+	Game.audio.play_music()
 
 
 ## Pending awakening (app killed mid-reveal) replays first; a restored backup

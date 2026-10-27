@@ -28,11 +28,20 @@ Open the project in Godot 4.7.2 → Project Settings → Plugins → enable **Gu
 $GODOT --headless --path . -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutconfig.json -gselect=test_puzzle_board
 ```
 
+## Ads plugin (Kotlin)
+```bash
+scripts/build_ads_plugin.sh          # core tests + Android unit tests + lint + AAR -> addons/legend_ads/bin/
+scripts/build_ads_plugin.sh --core   # SDK-free core tests only (works without Google Maven)
+```
+Gradle 8.11.1 wrapper, AGP 8.6.1, Kotlin 2.1.21, JDK 17, compile/target SDK 36, min SDK 24 (matching Godot 4.7.2's Android template). Deps: `play-services-ads:24.4.0`, `user-messaging-platform:3.2.0`, `org.godotengine:godot:4.7.2.stable` (compileOnly).
+
 ## Android debug APK
 ```bash
+scripts/build_ads_plugin.sh
 ANDROID_HOME=/path/to/sdk JAVA_HOME=/path/to/jdk17 scripts/export_android.sh
 ```
-Downloads the 4.7.2 export templates once (Android files only), writes Godot editor settings for the SDK/JDK, creates a throwaway debug keystore in `build/`, exports `build/android/legend-arrow-debug.apk`, then runs `scripts/check_apk.sh` (package id, label, SDK levels, permissions, arm64-v8a + x86_64 libs, 16 KB page size via `scripts/check_page_size.py`, signature) and writes the SHA-256.
+Gradle build export (`--install-android-build-template`), bundling the LegendAds AAR.
+Downloads the 4.7.2 export templates once (Android files only), writes Godot editor settings for the SDK/JDK, creates a throwaway debug keystore in `build/`, exports `build/android/legend-arrow-debug.apk`, then runs `scripts/check_apk.sh` (package id, label, SDK levels, permissions incl. no advertising-ID/Privacy Sandbox, plugin registered and packaged, test app id in debug, arm64-v8a + x86_64 libs, 16 KB page size via `scripts/check_page_size.py`, signature) and writes the SHA-256.
 Resolved by the template: **minSdk 24, targetSdk 36** (DECISIONS D-20). Release signing keys and real AdMob IDs are owner-supplied and never committed.
 
 To install on the Android Studio emulator: drag the APK onto the emulator window, or `adb install -r build/android/legend-arrow-debug.apk`.

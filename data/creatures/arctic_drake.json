@@ -1,0 +1,39 @@
+{
+  "schema_version": 1.0,
+  "id": "arctic_drake",
+  "realm": "cloud_peaks",
+  "name_key": "CREATURE_ARCTIC_DRAKE",
+  "lore_key": "CREATURE_ARCTIC_DRAKE_LORE",
+  "art": "res://scenes/creatures/arctic_drake.tscn",
+  "signature": "exhales_frost",
+  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
+  "level_masks": [
+    [
+      "............",
+      "....#.......",
+      "....####.###",
+      "...#####.###",
+      "...#####.#..",
+      "....######..",
+      ".....####...",
+      "....#####...",
+      "..##.##.#...",
+      ".##.........",
+      "............"
+    ],
+    [
+      "............",
+      "............",
+      "....###..#..",
+      "...#####.###",
+      "...#####.#..",
+      "...#######..",
+      "....######..",
+      "....#####...",
+      "...####.#...",
+      ".###.##.#...",
+      "............",
+      "............"
+    ]
+  ]
+}
