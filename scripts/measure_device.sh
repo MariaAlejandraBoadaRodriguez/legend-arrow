@@ -44,21 +44,25 @@ adb shell pm clear "$PKG" >/dev/null
 adb shell "run-as $PKG sh -c 'mkdir -p files && echo fresh_install > files/e2e_journey.txt'"
 adb logcat -c
 adb shell am start -n "$ACTIVITY" >/dev/null
-peak_pss=0; samples=0; temps=""
+peak_pss=0; samples=0; died=""
 start=$(date +%s)
-while (( $(date +%s) - start < 240 )); do
-  pss="$(adb shell dumpsys meminfo "$PKG" 2>/dev/null | tr -d '\r' | awk '/TOTAL PSS:/ {print $3; exit} /^ *TOTAL / {print $2; exit}')"
-  [[ "$pss" =~ ^[0-9]+$ ]] && (( pss > peak_pss )) && peak_pss=$pss
+LOAD_TIMEOUT_S="${LOAD_TIMEOUT_S:-360}"
+while (( $(date +%s) - start < LOAD_TIMEOUT_S )); do
+  pss="$(adb shell dumpsys meminfo "$PKG" 2>/dev/null | tr -d '\r' | awk '/TOTAL PSS:/ {print $3; exit} /^ *TOTAL / {print $2; exit}' || true)"
+  if [[ "$pss" =~ ^[0-9]+$ ]] && (( pss > peak_pss )); then peak_pss=$pss; fi
   samples=$((samples + 1))
-  if adb logcat -d | grep -qE "LEGEND_E2E (PASS|FAIL) fresh_install"; then break; fi
+  if adb logcat -d 2>/dev/null | grep -qE "LEGEND_E2E (PASS|FAIL) fresh_install"; then break; fi
+  if (( $(date +%s) - start > 20 )) && ! adb shell pidof "$PKG" >/dev/null 2>&1; then died="app process died"; break; fi
   sleep 2
 done
-verdict="$(adb logcat -d | grep -oE "LEGEND_E2E (PASS|FAIL) fresh_install.*" | head -1 | tr -d '\r')"
-frametimes="$(adb logcat -d | grep -oE "FRAMETIME [a-z]+ p50=[0-9.]+ p95=[0-9.]+ n=[0-9]+" | tr -d '\r' | sed 's/^FRAMETIME //' | paste -sd ';' -)"
+# Never exit silently: every probe below tolerates "no match".
+verdict="$(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) fresh_install.*" | head -1 | tr -d '\r' || true)"
+[[ -n "$verdict" ]] || verdict="no verdict (${died:-timeout after ${LOAD_TIMEOUT_S}s}); see logcat.txt"
+frametimes="$(adb logcat -d 2>/dev/null | grep -oE "FRAMETIME [a-z]+ p50=[0-9.]+ p95=[0-9.]+ n=[0-9]+" | tr -d '\r' | sed 's/^FRAMETIME //' | paste -sd ';' - || true)"
 gfx="$(adb shell dumpsys gfxinfo "$PKG" 2>/dev/null | tr -d '\r' | grep -E "Total frames rendered|Janky frames|50th percentile|90th percentile|99th percentile" || true)"
 thermal="$(adb shell dumpsys thermalservice 2>/dev/null | tr -d '\r' | grep -E "Thermal Status|mValue" | head -5 || true)"
 adb shell dumpsys meminfo "$PKG" > "$OUT/meminfo_end.txt" 2>/dev/null || true
-adb logcat -d > "$OUT/logcat.txt"
+adb logcat -d > "$OUT/logcat.txt" 2>/dev/null || true
 adb shell am force-stop "$PKG"
 
 {
@@ -86,4 +90,8 @@ adb shell am force-stop "$PKG"
   echo "download <= 120 MB. am start TotalTime is time to first frame, a lower bound for 'usable Home'."
 } > "$REPORT"
 cat "$REPORT"
-[[ "$verdict" == *"PASS"* ]] || { echo "measure_device: load journey did not pass" >&2; exit 1; }
+if [[ "$verdict" != *"PASS"* ]]; then
+  echo "measure_device: load journey did not pass: $verdict" >&2
+  grep -E "LEGEND_E2E|FATAL|AndroidRuntime|lowmemorykiller|ANR in|SCRIPT ERROR" "$OUT/logcat.txt" | tail -40 >&2 || true
+  exit 1
+fi
