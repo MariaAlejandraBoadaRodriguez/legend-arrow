@@ -1,0 +1,22 @@
+# Godot
+.godot/
+.import/
+export_credentials.cfg
+*.translation
+# Android / build output
+android/build/
+build/
+*.apk
+*.aab
+*.idx
+*.pck
+# Secrets — never commit
+*.keystore
+*.jks
+keystore.properties
+local.properties
+.env
+# Local saves / OS
+user_data/
+.DS_Store
+Thumbs.db
