@@ -2,13 +2,14 @@
 
 Statuses: **PASS** = executed with assertions, evidence cited · **FAIL** · **BLOCKED** = cannot run without something outside this repo · **NOT RUN**. A workflow file is not evidence; every PASS below points at an executed run or log.
 
-Final CI run: see `docs/PROGRESS.md` (updated with each push). Runs cited here: [40558523080](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40558523080) (M5), [40561120231](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40561120231) (M6 AAB + device script), [40563199020](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40563199020) (download size).
+Final code commit `7835016`: [push run 40580454945](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40580454945) and [PR run 40580462900](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40580462900), all jobs green. Runs cited here: [40558523080](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40558523080) (M5), [40561120231](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40561120231) (M6 AAB + device script), [40563199020](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/40563199020) (download size).
 
 ## Automated tests
 | Area | Result | Count / detail | Evidence |
 |---|---|---|---|
+| Harness reliability fixes found by CI | fixed | false "app died" on one adb miss; launch racing `pm clear`; silent `measure_device` exit; CRLF in bundletool output; evidence wiped before pull; real ads SDK started in E2E runs (now mock from boot) |
 | GDScript import + compile all scripts | PASS | 0 errors | CI `godot-tests`, `check_scripts.log` |
-| Unit + property + content + integration (GUT) | PASS | 191 tests, 0 failed / pending / assertion-free; empty discovery fails the gate | CI `test-reports` (`junit.xml`, `summary.json`) |
+| Unit + property + content + integration (GUT) | PASS | 192 tests, 0 failed / pending / assertion-free; empty discovery fails the gate | CI `test-reports` (`junit.xml`, `summary.json`) |
 | 1,000 seeded generated boards + 300 random-vs-brute-force | PASS | in the 191 | `tests/property/test_generated_boards.gd` |
 | 24 packaged levels: valid, solutions replay, no deadlocks, full campaign unlocks each creature once | PASS | in the 191 | `tests/content/test_packaged_content.gd` |
 | Line coverage, puzzle/solver/progression (target 90%) | PASS | 94.8% (601/634 statements) | CI `test-reports/coverage/coverage.md`, method D-38 |
@@ -42,7 +43,7 @@ Final CI run: see `docs/PROGRESS.md` (updated with each push). Runs cited here: 
 | Consent refused/error/offline never blocks play; one request per launch | PASS | unit + integration tests |
 | Child/unknown treatment, interstitials disabled | PASS | unit tests + Kotlin `AdSettings` tests + manifest checks |
 | Release refuses test or missing IDs | PASS | `test_release_build_rejects_test_ids`, `test_release_config_validation`, `export_release.sh` guard |
-| Real UMP + Google Mobile Ads start-up on a first launch (test IDs) | see final run | emulator `cold_start_smoke`: cleared data, real debug build, app must stay up 30 s with no crash |
+| Real UMP + Google Mobile Ads start-up on a first launch (test IDs) | PASS | emulator `cold_start_smoke`: cleared data, real debug build, app must stay up 30 s with no crash |
 | Live ads / real UMP form shown and completed | **NOT RUN** | never shown or clicked in CI; manual check with Google test IDs on a test device before release (`docs/RELEASE.md` step 4) |
 
 ## Visual review
