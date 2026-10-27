@@ -1,10 +1,29 @@
 {
-  "schema_version": 1,
+  "schema_version": 1.0,
   "id": "phoenix",
   "realm": "ancient_highlands",
   "name_key": "CREATURE_PHOENIX",
   "lore_key": "CREATURE_PHOENIX_LORE",
   "art": "res://scenes/creatures/phoenix.tscn",
   "signature": "opens_wings_sheds_embers",
-  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers)."
+  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
+  "level_masks": [
+    [
+      "............",
+      "............",
+      "............",
+      "..........##",
+      "..........#.",
+      "..........#.",
+      ".......####.",
+      "......#####.",
+      ".....#####..",
+      "...######...",
+      ".####.###...",
+      "##....##....",
+      "............",
+      "............"
+    ],
+    []
+  ]
 }
