@@ -32,7 +32,7 @@ $GODOT --headless --path . -s res://addons/gut/gut_cmdln.gd -gconfig=res://.gutc
 ```bash
 ANDROID_HOME=/path/to/sdk JAVA_HOME=/path/to/jdk17 scripts/export_android.sh
 ```
-Downloads the 4.7.2 export templates once (Android files only), writes Godot editor settings for the SDK/JDK, creates a throwaway debug keystore in `build/`, exports `build/android/legend-arrow-debug.apk`, then runs `scripts/check_apk.sh` (package id, label, SDK levels, permissions, arm64-v8a + x86_64 libs, 16 KB alignment, signature) and writes the SHA-256.
+Downloads the 4.7.2 export templates once (Android files only), writes Godot editor settings for the SDK/JDK, creates a throwaway debug keystore in `build/`, exports `build/android/legend-arrow-debug.apk`, then runs `scripts/check_apk.sh` (package id, label, SDK levels, permissions, arm64-v8a + x86_64 libs, 16 KB page size via `scripts/check_page_size.py`, signature) and writes the SHA-256.
 Resolved by the template: **minSdk 24, targetSdk 36** (DECISIONS D-20). Release signing keys and real AdMob IDs are owner-supplied and never committed.
 
 To install on the Android Studio emulator: drag the APK onto the emulator window, or `adb install -r build/android/legend-arrow-debug.apk`.

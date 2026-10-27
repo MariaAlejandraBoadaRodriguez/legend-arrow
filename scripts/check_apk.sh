@@ -32,11 +32,7 @@ echo "$libs"
 check "arm64-v8a engine library present" 'grep -q "^lib/arm64-v8a/.*\.so$" <<<"$libs"'
 check "x86_64 library present (emulator)" 'grep -q "^lib/x86_64/.*\.so$" <<<"$libs"'
 check "no 32-bit-only ABI without 64-bit" '! grep -q "^lib/armeabi-v7a/" <<<"$libs" || grep -q "^lib/arm64-v8a/" <<<"$libs"'
-if "$BT/zipalign" 2>&1 | grep -q -- "-P <pagesize_kb>"; then
-  check "zip aligned for 16 KB pages (zipalign -c -P 16)" '"$BT/zipalign" -c -P 16 4 "$APK" >/dev/null 2>&1'
-else
-  echo "NOT RUN  16 KB page alignment: this zipalign predates -P (needs build-tools >= 35)"
-fi
+check "16 KB page size: ELF segments and zip offsets" 'python3 "$(dirname "$0")/check_page_size.py" "$APK"'
 check "APK signature verifies" '"$BT/apksigner" verify "$APK" >/dev/null 2>&1'
 echo "targetSdk note: spec asks for >= 36; template value is $target (see DECISIONS D-20)."
 exit $fail
