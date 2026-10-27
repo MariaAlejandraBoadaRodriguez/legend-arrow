@@ -113,6 +113,6 @@ Milestones M0–M6 come from `CLAUDE.md`; phases 1–10 from the brief (§3). Ev
 - **M1** (Phase 4, 8): pure model, solver, validator, generator, property tests. ✅ see PROGRESS.
 - **M2** (Phases 3, 6-slice, 7-export): vertical slice + debug APK. ✅ locally (CI run pending GitHub write access) — see PROGRESS.
 - **M3** (Phase 5 interfaces, 7 ads/consent). ✅ CI green — see PROGRESS.
-- **M4** (Phase 6 full content).
+- **M4** (Phase 6 full content). ✅ locally — see PROGRESS.
 - **M5** (Phases 8, 9 E2E/emulator).
 - **M6** (Phases 9 release, 10).
