@@ -46,7 +46,19 @@ class LegendAdsExport extends EditorExportPlugin:
 			push_error("LegendAds: release export without valid ads_release.json: %s" % str(config.release_errors()))
 		return '<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="%s"/>' % config.app_id
 
-	## Mixed audience with child/unknown treatment: do not let the SDK add the
-	## advertising-ID permission (Families policy; spec §15, §17).
+	## Mixed audience with child/unknown treatment: strip the advertising-ID
+	## and Privacy Sandbox (ad id, attribution, topics) permissions the ads SDK
+	## merges in (Families policy; spec §15, §17). WorkManager's WAKE_LOCK and
+	## FOREGROUND_SERVICE stay; they carry no identifiers.
+	const REMOVED_PERMISSIONS := [
+		"com.google.android.gms.permission.AD_ID",
+		"android.permission.ACCESS_ADSERVICES_AD_ID",
+		"android.permission.ACCESS_ADSERVICES_ATTRIBUTION",
+		"android.permission.ACCESS_ADSERVICES_TOPICS",
+	]
+
 	func _get_android_manifest_element_contents(_platform: EditorExportPlatform, _debug: bool) -> String:
-		return '<uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>'
+		var lines: PackedStringArray = []
+		for p in REMOVED_PERMISSIONS:
+			lines.append('<uses-permission android:name="%s" tools:node="remove"/>' % p)
+		return "\n".join(lines)
