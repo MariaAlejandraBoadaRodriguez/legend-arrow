@@ -18,7 +18,14 @@ func _ready() -> void:
 	get_tree().set_quit_on_go_back(false)
 	Game.set_host(host)
 	var result := Game.boot() if not Game.booted else Game.boot_result
+	var e2e_journey := DeviceE2E.requested_journey()
+	var e2e: DeviceE2E = null
+	if e2e_journey != "":
+		e2e = DeviceE2E.new(e2e_journey)
+		e2e.install_mock_ads()
 	route_after_boot(result)
+	if e2e != null:
+		add_child(e2e)
 	Game.audio.play_music()
 
 
