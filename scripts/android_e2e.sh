@@ -27,6 +27,21 @@ ACTIVITY="$(adb shell cmd package resolve-activity --brief "$PKG" | tr -d '\r' |
 echo "launch activity: $ACTIVITY"
 [[ "$ACTIVITY" == "$PKG/"* ]] || { echo "android_e2e: launcher activity not found" >&2; exit 1; }
 
+# A single `pidof` miss is not death: adb on CI emulators drops calls
+# ("device offline", "protocol fault"). Require 3 consecutive misses over a
+# working adb link before killing the journey (CI run 40561130695 force-stopped
+# a healthy, slowly starting app on one miss).
+app_dead() {
+  local misses=0
+  for _ in 1 2 3; do
+    adb shell echo ok 2>/dev/null | grep -q ok || return 1   # adb itself unhealthy: unknown, not dead
+    if adb shell pidof "$PKG" >/dev/null 2>&1; then return 1; fi
+    misses=$((misses + 1))
+    sleep 2
+  done
+  (( misses == 3 ))
+}
+
 results=()
 fail=0
 for j in "${JOURNEYS[@]}"; do
@@ -39,7 +54,7 @@ for j in "${JOURNEYS[@]}"; do
   while (( $(date +%s) - start < TIMEOUT_S )); do
     verdict="$(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) $j.*" | head -1 | tr -d '\r' || true)"
     [[ -n "$verdict" ]] && break
-    if ! adb shell pidof "$PKG" >/dev/null 2>&1 && (( $(date +%s) - start > 20 )); then
+    if (( $(date +%s) - start > 60 )) && app_dead; then
       verdict="LEGEND_E2E FAIL $j: app process died"
       break
     fi

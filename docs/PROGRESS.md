@@ -31,6 +31,7 @@ _Last updated: 2026-10-27 (session 3, M6)_
   - Gameplay + awakening video `docs/media/legend_arrow_gameplay.mp4` (`scripts/record_video.sh`, Godot Movie Maker; CI artifact).
   - Docs: `RELEASE_CHECKLIST.md`, `QA_REPORT.md`, `docs/RELEASE.md`, `docs/OPERATIONS.md`, `docs/PRIVACY_POLICY.md` (draft), `docs/DATA_SAFETY.md`, `docs/ART_AND_ANIMATION.md`, README architecture diagram.
   - Fixed: bundletool CRLF output broke the size check (reproduced from CI output).
+  - Fixed: emulator harness declared a slowly starting app dead on one transient `adb pidof` miss and force-stopped it (PR run 40561130695: no crash in logcat, later journeys cascaded); death now needs 3 consecutive misses over a working adb link after a 60 s grace. `measure_device.sh` no longer exits silently (PR run 40565431363) and always keeps its report + logcat.
 
 ## Verification
 | Check | Result | Evidence |

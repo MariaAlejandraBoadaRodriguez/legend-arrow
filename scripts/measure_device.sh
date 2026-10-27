@@ -39,6 +39,17 @@ for i in $(seq 1 "$RUNS"); do
 done
 adb shell am force-stop "$PKG"
 
+# Death = 3 consecutive pidof misses over a working adb link (adb on CI
+# emulators drops single calls).
+app_dead() {
+  for _ in 1 2 3; do
+    adb shell echo ok 2>/dev/null | grep -q ok || return 1
+    if adb shell pidof "$PKG" >/dev/null 2>&1; then return 1; fi
+    sleep 2
+  done
+  return 0
+}
+
 # 2. Load: fresh install journey (tutorial, 2 puzzles, awakening) while sampling.
 adb shell pm clear "$PKG" >/dev/null
 adb shell "run-as $PKG sh -c 'mkdir -p files && echo fresh_install > files/e2e_journey.txt'"
@@ -52,7 +63,7 @@ while (( $(date +%s) - start < LOAD_TIMEOUT_S )); do
   if [[ "$pss" =~ ^[0-9]+$ ]] && (( pss > peak_pss )); then peak_pss=$pss; fi
   samples=$((samples + 1))
   if adb logcat -d 2>/dev/null | grep -qE "LEGEND_E2E (PASS|FAIL) fresh_install"; then break; fi
-  if (( $(date +%s) - start > 20 )) && ! adb shell pidof "$PKG" >/dev/null 2>&1; then died="app process died"; break; fi
+  if (( $(date +%s) - start > 60 )) && app_dead; then died="app process died"; break; fi
   sleep 2
 done
 # Never exit silently: every probe below tolerates "no match".
