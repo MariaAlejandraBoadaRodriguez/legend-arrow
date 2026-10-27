@@ -22,3 +22,9 @@ user_data/
 Thumbs.db
 # Owner-supplied real AdMob IDs (never commit)
 ads_release.json
+
+# Built LegendAds AAR (scripts/build_ads_plugin.sh)
+addons/legend_ads/bin/
+android/plugins/legend_ads/**/build/
+android/plugins/legend_ads/.gradle/
+android/.build_version

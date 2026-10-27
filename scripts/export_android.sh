@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Exports the Android debug APK and inspects it.
+# Exports the Android debug APK (Gradle build with the LegendAds plugin) and
+# inspects it. Run scripts/build_ads_plugin.sh first.
 #   scripts/export_android.sh            -> build/android/legend-arrow-debug.apk (+ .sha256, apk_report.txt)
 # Needs: ANDROID_HOME (SDK with build-tools), Java 17 (JAVA_HOME), network for
 # the first template download. The debug keystore is generated locally if
@@ -58,11 +59,13 @@ export GODOT_ANDROID_KEYSTORE_DEBUG_PATH="$KEYSTORE"
 export GODOT_ANDROID_KEYSTORE_DEBUG_USER="androiddebugkey"
 export GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD="android"
 
-# 4. Export.
+# 4. Export (Gradle build: bundles the LegendAds plugin AAR).
+AAR="$ROOT/addons/legend_ads/bin/legend_ads-release.aar"
+[[ -f "$AAR" ]] || { echo "!! $AAR missing: run scripts/build_ads_plugin.sh first" >&2; exit 1; }
 mkdir -p "$OUT_DIR"
 rm -f "$APK"
 "$GODOT" --headless --path "$ROOT" --import >/dev/null 2>&1 || true
-"$GODOT" --headless --path "$ROOT" --export-debug "Android" "$APK" 2>&1 | tee "$OUT_DIR/export.log"
+"$GODOT" --headless --path "$ROOT" --install-android-build-template --export-debug "Android" "$APK" 2>&1 | tee "$OUT_DIR/export.log"
 [[ -s "$APK" ]] || { echo "!! export produced no APK" >&2; exit 1; }
 if grep -E "^ERROR|SCRIPT ERROR" "$OUT_DIR/export.log"; then
   echo "!! export logged errors" >&2; exit 1

@@ -1,0 +1,52 @@
+@tool
+extends EditorPlugin
+## Adds the LegendAds AAR, its Maven dependencies and manifest entries to
+## Android Gradle exports. The AAR is built from android/plugins/legend_ads
+## (scripts/build_ads_plugin.sh) into addons/legend_ads/bin/ and is not
+## committed.
+
+var _export: LegendAdsExport
+
+
+func _enter_tree() -> void:
+	_export = LegendAdsExport.new()
+	add_export_plugin(_export)
+
+
+func _exit_tree() -> void:
+	remove_export_plugin(_export)
+	_export = null
+
+
+class LegendAdsExport extends EditorExportPlugin:
+	const AAR := "legend_ads/bin/legend_ads-release.aar"
+	const DEPENDENCIES := [
+		"com.google.android.gms:play-services-ads:24.4.0",
+		"com.google.android.ump:user-messaging-platform:3.2.0",
+	]
+
+	func _get_name() -> String:
+		return "LegendAds"
+
+	func _supports_platform(platform: EditorExportPlatform) -> bool:
+		return platform is EditorExportPlatformAndroid
+
+	func _get_android_libraries(_platform: EditorExportPlatform, _debug: bool) -> PackedStringArray:
+		return PackedStringArray([AAR])
+
+	func _get_android_dependencies(_platform: EditorExportPlatform, _debug: bool) -> PackedStringArray:
+		return PackedStringArray(DEPENDENCIES)
+
+	## The ads SDK needs the app id in the manifest. Debug exports always use
+	## Google's test app id; release exports use the owner's ads_release.json
+	## and fail loudly if it is missing or invalid.
+	func _get_android_manifest_application_element_contents(_platform: EditorExportPlatform, debug: bool) -> String:
+		var config := AdConfig.load_for_build(debug)
+		if not debug and not config.release_errors().is_empty():
+			push_error("LegendAds: release export without valid ads_release.json: %s" % str(config.release_errors()))
+		return '<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="%s"/>' % config.app_id
+
+	## Mixed audience with child/unknown treatment: do not let the SDK add the
+	## advertising-ID permission (Families policy; spec §15, §17).
+	func _get_android_manifest_element_contents(_platform: EditorExportPlatform, _debug: bool) -> String:
+		return '<uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>'
