@@ -20,7 +20,8 @@ S = 512 * SS      # working canvas
 
 
 def _canvas(bg=IVORY):
-    im = Image.new("RGB", (S, S), bg)
+    """bg=None gives a transparent canvas (adaptive icon foreground)."""
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0)) if bg is None else Image.new("RGB", (S, S), bg)
     return im, ImageDraw.Draw(im)
 
 
@@ -84,10 +85,11 @@ B_MASK = [
 ]
 
 
-def concept_b():
+def concept_b(size=512, bg=IVORY):
     """A wyvern drawn as a board of short arrows, as in the game; one
-    slate-blue arrow has just slid out past the snout."""
-    im, d = _canvas()
+    slate-blue arrow has just slid out past the snout. Chosen app icon
+    (tools/make_icons.py)."""
+    im, d = _canvas(bg)
     n = len(B_MASK)
     cell = S * 0.80 / n
     off = S * 0.08
@@ -111,7 +113,7 @@ def concept_b():
     y = off + 2.5 * cell
     _poly_stroke(d, [(off + 11.4 * cell, y), (off + 13.0 * cell, y)], w * 1.3, SLATE)
     _head(d, (off + 14.0 * cell, y), (1, 0), cell * 0.95, SLATE)
-    return im.resize((512, 512), Image.LANCZOS)
+    return im.resize((size, size), Image.LANCZOS)
 
 
 def _quad(p0, p1, p2, steps=80):

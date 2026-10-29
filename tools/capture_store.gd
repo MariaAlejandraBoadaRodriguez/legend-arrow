@@ -1,22 +1,26 @@
 extends SceneTree
 ## Renders Google Play store graphics from the real game to build/store/.
-## Run through tools/make_store_graphics.sh, which also builds the icon and
-## checks every size. Needs a renderer (Xvfb with a screen large enough):
+## Run through tools/make_store_graphics.sh, which adds the caption bands,
+## builds the icon and checks every file. Needs a renderer (Xvfb with a
+## screen large enough for the window):
 ##   godot --path . --rendering-driver opengl3 --audio-driver Dummy \
-##     -s res://tools/capture_store.gd -- screens|feature
-## screens: the running app at 1080x1920 (720x1280 UI at 1.5x).
+##     --resolution WxH -s res://tools/capture_store.gd -- phone|tablet|feature OUT
+## phone/tablet: the running app at the window size (one responsive layout;
+## canvas_items stretch), saved to OUT/<shot>.png.
 ## feature: the awakening backdrop and a creature rig at 1024x500, 1:1 pixels.
 
 const SAVE := "user://store_capture_save.json"
-const OUT := "res://build/store"
 
 var game: Node
+var out := "res://build/store"
 
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
-	var mode: String = args[0] if args.size() > 0 else "screens"
-	DirAccess.make_dir_recursive_absolute(OUT)
+	var mode: String = args[0] if args.size() > 0 else "phone"
+	if args.size() > 1:
+		out = args[1]
+	DirAccess.make_dir_recursive_absolute(out)
 	await process_frame
 	game = root.get_node("Game")
 	for suffix in ["", ".tmp", ".bak"]:
@@ -26,16 +30,20 @@ func _init() -> void:
 	if mode == "feature":
 		await _feature()
 	else:
-		await _screens()
-	print("capture_store: wrote %s (%s)" % [OUT, mode])
+		await _screens(mode == "phone")
+	print("capture_store: wrote %s (%s)" % [out, mode])
 	quit()
 
 
-func _screens() -> void:
-	DisplayServer.window_set_size(Vector2i(1080, 1920))
+func _screens(phone: bool) -> void:
 	await _settle()
 	root.add_child(load("res://scenes/main.tscn").instantiate())
+	if phone:
+		game.go("tutorial")
+		await _settle(0.6)
+		await shot("tutorial")
 	# A first creature already awakened, reached through the real rules.
+	game.progression.data.tutorial_done = true
 	game.progression.complete_level("forest_drake_1")
 	game.reset_to("home")
 	await _settle(0.5)
@@ -61,7 +69,9 @@ func _screens() -> void:
 	await shot("awakening")
 	await _settle(4.0)
 	game.current_screen()._on_continue()
-	await _settle(0.5)
+	await _settle(1.0)
+	if phone:
+		await shot("creature")
 
 	for level_id in game.campaign.level_ids():
 		game.progression.complete_level(level_id)
@@ -75,7 +85,6 @@ func _screens() -> void:
 
 func _feature() -> void:
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	DisplayServer.window_set_size(Vector2i(1024, 500))
 	await _settle()
 	var ui := Control.new()
 	ui.theme = UiTheme.get_theme()
@@ -120,4 +129,4 @@ func _settle(seconds := 0.25) -> void:
 
 func shot(shot_name: String) -> void:
 	await RenderingServer.frame_post_draw
-	root.get_texture().get_image().save_png("%s/%s.png" % [OUT, shot_name])
+	root.get_texture().get_image().save_png("%s/%s.png" % [out, shot_name])

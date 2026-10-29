@@ -2,7 +2,7 @@
 
 What CI produces automatically on every push and PR:
 - **Debug APK** (`legend-arrow-debug-apk`): debug-signed, uses Google test ad IDs, installs on any emulator or phone for testing.
-- **Release AAB rehearsals**: the real release pipeline (release export, bundletool validation, manifest/ABI/16 KB checks, versionCode 1, SHA-256), with ads and without ads, signed with a **throwaway key**. They prove the release build works. **Never upload them to Play**: their key is not your upload key.
+- **Release AAB rehearsals**: the real release pipeline (release export, bundletool validation, manifest/ABI/16 KB checks, expected versionCode, SHA-256), with ads and without ads, signed with a **throwaway key**. They prove the release build works. **Never upload them to Play**: their key is not your upload key.
 
 The store build comes from the manual **Release AAB** workflow (`.github/workflows/release.yml`), signed with **your upload key** from GitHub Actions secrets. The keystore and its password are never in the repository; `scripts/check_no_secrets.sh` fails CI if one is ever committed.
 
@@ -68,12 +68,12 @@ GitHub stores secrets encrypted, masks them in logs, and never shows them again.
 
 1. GitHub → **Actions → Release AAB → Run workflow** (branch `main`).
    - **ads**: `without-ads` until AdMob is set up. The ads SDK, the Google libraries and the AdMob manifest entry are left out entirely, and hints stay free-only. Use `with-ads` once `ADS_RELEASE_JSON` exists.
-   - **version_code**: `1` for the first upload. The run fails if the bundle has a different versionCode.
+   - **version_code**: the `version/code` in `export_presets.cfg` (currently `2`, versionName 0.1.1). The run fails if the bundle has a different versionCode.
 2. If you set required reviewers, approve the run.
-3. When it's green, download the artifact `legend-arrow-release-aab-vc1-…`. It contains:
+3. When it's green, download the artifact `legend-arrow-release-aab-vc2-…`. It contains:
    - `legend-arrow-release.aab`: upload this one;
    - `.sha256`: the checksum;
-   - `aab_report.txt`: package `com.mariaalejandraboada.legendarrow`, versionCode 1, targetSdk, ABIs, sizes and the signing certificate SHA-256. Compare that SHA-256 with your note from step 1.5.
+   - `aab_report.txt`: package `com.mariaalejandraboada.legendarrow`, the versionCode, targetSdk, ABIs, sizes and the signing certificate SHA-256. Compare that SHA-256 with your note from step 1.5.
 4. Play Console → your app → **Test and release → Internal testing → Create new release**. Accept **Play App Signing** (Google holds the app signing key; your key is the *upload* key), upload the AAB and roll out to your testers.
 
 ### Local alternative (Linux/macOS/WSL)
@@ -81,7 +81,7 @@ GitHub stores secrets encrypted, masks them in logs, and never shows them again.
 export GODOT_ANDROID_KEYSTORE_RELEASE_PATH=/secure/legend-arrow-upload.jks
 export GODOT_ANDROID_KEYSTORE_RELEASE_USER=upload
 read -rs GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD; export GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD
-EXPECT_VERSION_CODE=1 scripts/export_release.sh --no-ads     # or, with ads_release.json: scripts/build_ads_plugin.sh && scripts/export_release.sh
+EXPECT_VERSION_CODE=2 scripts/export_release.sh --no-ads     # or, with ads_release.json: scripts/build_ads_plugin.sh && scripts/export_release.sh
 ```
 
 ## Each later release
