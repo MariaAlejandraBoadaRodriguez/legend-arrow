@@ -100,13 +100,18 @@ static func top_bar(title: String, subtitle: String, on_back: Callable, action: 
 	return row
 
 
-## Simple segmented progress dots: `done` of `total`.
+## Simple segmented progress dots: `done` of `total`. Bars shrink so the row
+## never needs more than DOTS_MAX_WIDTH (a phone's content width).
+const DOTS_MAX_WIDTH := 560
+
+
 static func progress_dots(done: int, total: int) -> HBoxContainer:
 	var row := hbox(10)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var bar_w := mini(56, (DOTS_MAX_WIDTH - 10 * maxi(total - 1, 0)) / maxi(total, 1))
 	for i in total:
 		var bar := ColorRect.new()
-		bar.custom_minimum_size = Vector2(56, 8)
+		bar.custom_minimum_size = Vector2(bar_w, 8)
 		bar.color = Palette.ACCENT if i < done else Palette.GRID
 		row.add_child(bar)
 	return row
