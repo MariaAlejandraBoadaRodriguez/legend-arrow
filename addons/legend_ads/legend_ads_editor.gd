@@ -28,7 +28,12 @@ class LegendAdsExport extends EditorExportPlugin:
 	func _get_name() -> String:
 		return "LegendAds"
 
+	## LEGEND_ADS_DISABLED=1 (export_release.sh --no-ads) leaves the plugin,
+	## the Google SDKs and the AdMob manifest entry out of the build entirely;
+	## the game then runs with no ad provider (hints stay free-only).
 	func _supports_platform(platform: EditorExportPlatform) -> bool:
+		if OS.get_environment("LEGEND_ADS_DISABLED") == "1":
+			return false
 		return platform is EditorExportPlatformAndroid
 
 	func _get_android_libraries(_platform: EditorExportPlatform, _debug: bool) -> PackedStringArray:

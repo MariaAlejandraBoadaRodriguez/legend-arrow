@@ -4,8 +4,14 @@
 #   Real release (owner): ads_release.json present + upload key in env:
 #     GODOT_ANDROID_KEYSTORE_RELEASE_PATH / _USER / _PASSWORD
 #     scripts/export_release.sh
+#   Signed release without ads (no AdMob account yet): upload key in env,
+#   ads plugin and Google SDKs left out of the build, no ads_release.json:
+#     scripts/export_release.sh --no-ads
 #   CI rehearsal (never uploaded): throwaway key, test ads config, ads disabled:
-#     scripts/export_release.sh --rehearsal
+#     scripts/export_release.sh --rehearsal [--no-ads]
+#
+# EXPECT_VERSION_CODE (optional) makes the run fail unless the bundle carries
+# exactly that versionCode.
 #
 # Output: build/android/legend-arrow-release.aab (+ .sha256, aab_report.txt,
 # universal APK built from the bundle for the same checks as the debug APK).
@@ -15,7 +21,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 REHEARSAL=0
-[[ "${1:-}" == "--rehearsal" ]] && REHEARSAL=1
+NO_ADS=0
+for arg in "$@"; do
+  case "$arg" in
+    --rehearsal) REHEARSAL=1 ;;
+    --no-ads) NO_ADS=1 ;;
+    *) echo "usage: export_release.sh [--rehearsal] [--no-ads]" >&2; exit 2 ;;
+  esac
+done
+if (( NO_ADS )); then export LEGEND_ADS_DISABLED=1; fi
 GODOT="${GODOT:-$("$ROOT/scripts/install_godot.sh")}"
 OUT_DIR="$ROOT/build/android"
 AAB="$OUT_DIR/legend-arrow-release.aab"
@@ -29,7 +43,7 @@ mkdir -p "$OUT_DIR"
 SKIP_DEBUG_EXPORT=1 "$ROOT/scripts/export_android.sh" >/dev/null
 
 if (( REHEARSAL )); then
-  export LEGEND_RELEASE_REHEARSAL=1
+  (( NO_ADS )) || export LEGEND_RELEASE_REHEARSAL=1
   [[ ! -f "$ROOT/ads_release.json" ]] || { echo "!! rehearsal must not use ads_release.json" >&2; exit 1; }
   KEY="$ROOT/build/rehearsal-upload.keystore"   # throwaway, regenerated per run
   rm -f "$KEY"
@@ -43,7 +57,10 @@ else
   : "${GODOT_ANDROID_KEYSTORE_RELEASE_PATH:?set the upload keystore (see docs/RELEASE.md)}"
   : "${GODOT_ANDROID_KEYSTORE_RELEASE_USER:?}"
   : "${GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD:?}"
-  [[ -f "$ROOT/ads_release.json" ]] || { echo "!! ads_release.json missing (docs/ADS_AND_PRIVACY.md)" >&2; exit 1; }
+  [[ -f "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" ]] || { echo "!! keystore file not found" >&2; exit 1; }
+  if (( ! NO_ADS )); then
+    [[ -f "$ROOT/ads_release.json" ]] || { echo "!! ads_release.json missing (docs/ADS_AND_PRIVACY.md); use --no-ads for a build without ads" >&2; exit 1; }
+  fi
 fi
 
 rm -f "$AAB"
@@ -67,7 +84,8 @@ REPORT="$OUT_DIR/aab_report.txt"
 fail=0
 check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; }
 {
-  echo "mode: $([[ $REHEARSAL == 1 ]] && echo 'REHEARSAL (throwaway key, ads disabled, NOT for upload)' || echo 'release')"
+  mode="$([[ $REHEARSAL == 1 ]] && echo 'REHEARSAL (throwaway key, NOT for upload)' || echo 'RELEASE (upload key)')"
+  echo "mode: $mode; ads: $([[ $NO_ADS == 1 ]] && echo 'not included (--no-ads)' || echo 'included')"
   check "bundletool validate" 'bt validate --bundle="$AAB" >/dev/null'
   manifest="$(bt dump manifest --bundle="$AAB")"
   pkg="$(grep -o 'package="[^"]*"' <<<"$manifest" | head -1 | cut -d'"' -f2)"
@@ -76,6 +94,15 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   target="$(grep -o 'android:targetSdkVersion="[^"]*"' <<<"$manifest" | head -1 | cut -d'"' -f2)"
   echo "package=$pkg versionCode=$vcode versionName=$vname targetSdk=$target"
   check "package id" '[[ "$pkg" == "com.mariaalejandraboada.legendarrow" ]]'
+  if [[ -n "${EXPECT_VERSION_CODE:-}" ]]; then
+    check "versionCode is $EXPECT_VERSION_CODE" '[[ "$vcode" == "$EXPECT_VERSION_CODE" ]]'
+  fi
+  if (( NO_ADS )); then
+    check "no AdMob app id in manifest (ads not included)" '! grep -q "com.google.android.gms.ads.APPLICATION_ID" <<<"$manifest"'
+    check "no Google Mobile Ads / LegendAds code packaged" '! unzip -p "$AAB" "base/dex/*.dex" 2>/dev/null | grep -aqE "com/google/android/gms/ads/MobileAds|LegendAdsPlugin"'
+  elif (( ! REHEARSAL )); then
+    check "release AdMob app id is not a Google test id" '! grep -q "ca-app-pub-3940256099942544" <<<"$manifest"'
+  fi
   check "targetSdk >= 35 (Play requirement)" '[[ -n "$target" && "$target" -ge 35 ]]'
   check "release build is not debuggable" '! grep -q "android:debuggable=\"true\"" <<<"$manifest"'
   check "no AD_ID / Privacy Sandbox ad permissions" '! grep -qE "permission.AD_ID|ACCESS_ADSERVICES" <<<"$manifest"'
@@ -100,6 +127,9 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   echo "download size by ABI (bytes, MIN,MAX):"; echo "$sizes"
   max_arm64="$(awk -F, '/arm64-v8a/ {print $3}' <<<"$sizes")"
   check "arm64 phone download <= 120 MB (spec §14)" '[[ "$max_arm64" =~ ^[0-9]+$ ]] && (( max_arm64 <= 125829120 ))'
+  # Public certificate fingerprint of the signing key: compare it with the
+  # upload key certificate shown in Play Console (App integrity).
+  echo "signing certificate:"; "$JAVA_HOME/bin/keytool" -printcert -jarfile "$AAB" 2>/dev/null | grep -E "Owner:|SHA256:" | sed 's/^/  /' || true
   echo "REPORT COMPLETE"
 } | tee "$REPORT"
 # The block runs in a pipeline subshell: trust only a complete report.
