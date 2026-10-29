@@ -62,6 +62,27 @@ jobs:
           path: build/reports/
           if-no-files-found: error
 
+  store-assets:
+    name: Play Store assets (names, sizes, format, limits)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check docs/store/play_console
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0
+          "$RUNNER_TEMP/venv/bin/python" tools/store_assets.py check | tee store_assets_check.txt
+          cp store_assets_check.txt docs/store/play_console/
+
+      - name: Upload play-store-assets
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: play-store-assets
+          path: docs/store/play_console/
+          if-no-files-found: error
+
   android-ads-plugin:
     name: Kotlin ads plugin (unit tests, lint, AAR)
     runs-on: ubuntu-24.04
@@ -148,7 +169,7 @@ jobs:
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
 
       - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=1 scripts/export_release.sh --rehearsal
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal
 
       - name: Upload release AAB rehearsal (NOT for Play upload)
         if: always()
@@ -164,7 +185,7 @@ jobs:
           if-no-files-found: error
 
       - name: Release AAB rehearsal without ads (path used by release.yml "without-ads")
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=1 scripts/export_release.sh --rehearsal --no-ads
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal --no-ads
 
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()

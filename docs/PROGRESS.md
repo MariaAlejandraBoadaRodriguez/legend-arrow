@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-10-29 (session 4, signed release workflow)_
+_Last updated: 2026-10-29 (session 4, signed release workflow, store assets)_
 
 ## Where things are
 - `main` holds M0–M2 (PR #1 merged). M3–M6 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
@@ -34,6 +34,7 @@ _Last updated: 2026-10-29 (session 4, signed release workflow)_
   - Fixed: emulator harness declared a slowly starting app dead on one transient `adb pidof` miss and force-stopped it (PR run 40561130695: no crash in logcat, later journeys cascaded); death now needs 3 consecutive misses over a working adb link after a 60 s grace. `measure_device.sh` no longer exits silently (PR run 40565431363) and always keeps its report + logcat.
 
 - **Signed release (session 4)** — manual `.github/workflows/release.yml` builds the store AAB (`com.mariaalejandraboada.legendarrow`, versionCode 1) signed with the owner's upload key from GitHub secrets (decoded to runner temp, verified with keytool, deleted); `--no-ads` release mode leaves the ads plugin and Google SDKs out so the first upload needs no AdMob account; `scripts/check_no_secrets.sh` in CI; owner guide in `docs/RELEASE.md` §1–3 (D-39).
+- **Store listing (session 4)** — new app icon (concept B, owner's choice) for store + launcher; versionCode 2 / 0.1.1; 16 Play Console assets in `docs/store/play_console/` rendered from the real game, checked by `tools/store_assets.py` in CI (artifact `play-store-assets`); bestiary overflow at phone width fixed (D-40).
 
 ## Verification
 | Check | Result | Evidence |
