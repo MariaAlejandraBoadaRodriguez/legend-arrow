@@ -1,0 +1,145 @@
+name: Release AAB
+
+# Builds the signed Android App Bundle for Google Play with the owner's upload
+# key. Manual only: Actions -> "Release AAB" -> Run workflow.
+#
+# Required secrets (repository or "release" environment):
+#   ANDROID_UPLOAD_KEYSTORE_BASE64    base64 of the .jks upload keystore
+#   ANDROID_UPLOAD_KEYSTORE_PASSWORD  keystore password (= key password, PKCS12)
+#   ANDROID_UPLOAD_KEY_ALIAS          key alias, e.g. "upload"
+# Optional, only for ads: "with-ads":
+#   ADS_RELEASE_JSON                  contents of ads_release.json (AdMob ids)
+#
+# The keystore is decoded to the runner's temp dir, used once and deleted.
+# It is never written to the workspace, committed, logged or uploaded.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ads:
+        description: "without-ads: no ads SDK in the build (no AdMob account needed). with-ads: needs ADS_RELEASE_JSON."
+        type: choice
+        options: [without-ads, with-ads]
+        default: without-ads
+      version_code:
+        description: "Expected versionCode (must match export_presets.cfg)"
+        type: string
+        default: "1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-aab:
+    name: Signed release AAB (${{ inputs.ads }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment: release
+    env:
+      GODOT_HOME: ${{ github.workspace }}/.cache/godot
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: No secrets committed
+        run: scripts/check_no_secrets.sh
+
+      - name: Check required secrets are set
+        env:
+          KS_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ADS_JSON: ${{ secrets.ADS_RELEASE_JSON }}
+        run: |
+          missing=0
+          for v in KS_B64 KS_PASS KS_ALIAS; do
+            if [ -z "${!v}" ]; then echo "::error::secret for $v is not set (see docs/RELEASE.md)"; missing=1; fi
+          done
+          if [ "${{ inputs.ads }}" = "with-ads" ] && [ -z "$ADS_JSON" ]; then
+            echo "::error::ads: with-ads needs the ADS_RELEASE_JSON secret"; missing=1
+          fi
+          exit $missing
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Godot editor
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/godot
+          key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
+
+      - name: Cache Android export templates
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-templates-android-${{ hashFiles('scripts/export_android.sh') }}
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-release-${{ hashFiles('export_presets.cfg', 'addons/legend_ads/legend_ads_editor.gd', 'android/plugins/legend_ads/**/*.kts') }}
+
+      - name: Build ads plugin (with-ads only)
+        if: inputs.ads == 'with-ads'
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/build_ads_plugin.sh
+
+      - name: Decode upload keystore (runner temp, never the workspace)
+        env:
+          KS_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+        run: |
+          umask 077
+          printf '%s' "$KS_B64" | tr -d '\r\n ' | base64 -d > "$RUNNER_TEMP/upload.jks"
+          # Fails here (with a clear message) if the password or alias is wrong.
+          keytool -list -keystore "$RUNNER_TEMP/upload.jks" -storepass:env KS_PASS -alias "$KS_ALIAS" >/dev/null \
+            || { echo "::error::keystore, password or alias do not match"; exit 1; }
+          echo "upload keystore decoded and verified"
+
+      - name: Write ads_release.json (with-ads only)
+        if: inputs.ads == 'with-ads'
+        env:
+          ADS_JSON: ${{ secrets.ADS_RELEASE_JSON }}
+        run: |
+          umask 077
+          printf '%s' "$ADS_JSON" > ads_release.json
+
+      - name: Export, sign and validate the AAB
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          EXPECT_VERSION_CODE: ${{ inputs.version_code }}
+        run: |
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/upload.jks"
+          export ANDROID_HOME="$ANDROID_SDK_ROOT"
+          if [ "${{ inputs.ads }}" = "with-ads" ]; then
+            scripts/export_release.sh
+          else
+            scripts/export_release.sh --no-ads
+          fi
+
+      - name: Remove keystore and ads config
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/upload.jks" ads_release.json
+          scripts/check_no_secrets.sh
+
+      - name: Upload signed AAB
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: legend-arrow-release-aab-vc${{ inputs.version_code }}-${{ inputs.ads }}
+          path: |
+            build/android/legend-arrow-release.aab
+            build/android/legend-arrow-release.aab.sha256
+            build/android/aab_report.txt
+          if-no-files-found: error
+          retention-days: 30

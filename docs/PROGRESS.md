@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-10-27 (session 3, M6)_
+_Last updated: 2026-10-29 (session 4, signed release workflow)_
 
 ## Where things are
 - `main` holds M0–M2 (PR #1 merged). M3–M6 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.
@@ -33,6 +33,8 @@ _Last updated: 2026-10-27 (session 3, M6)_
   - Fixed: bundletool CRLF output broke the size check (reproduced from CI output).
   - Fixed: emulator harness declared a slowly starting app dead on one transient `adb pidof` miss and force-stopped it (PR run 40561130695: no crash in logcat, later journeys cascaded); death now needs 3 consecutive misses over a working adb link after a 60 s grace. `measure_device.sh` no longer exits silently (PR run 40565431363) and always keeps its report + logcat.
 
+- **Signed release (session 4)** — manual `.github/workflows/release.yml` builds the store AAB (`com.mariaalejandraboada.legendarrow`, versionCode 1) signed with the owner's upload key from GitHub secrets (decoded to runner temp, verified with keytool, deleted); `--no-ads` release mode leaves the ads plugin and Google SDKs out so the first upload needs no AdMob account; `scripts/check_no_secrets.sh` in CI; owner guide in `docs/RELEASE.md` §1–3 (D-39).
+
 ## Verification
 | Check | Result | Evidence |
 |---|---|---|
@@ -54,8 +56,8 @@ _Last updated: 2026-10-27 (session 3, M6)_
 | Physical-device performance | **BLOCKED** — no Android phone (D-18) | — |
 
 ## Next
-1. Owner: review/merge PR #2 into `main`.
-2. All milestones M0–M6 delivered. Remaining work needs the owner (see `RELEASE_CHECKLIST.md` → Owner actions): upload key + Play App Signing, AdMob IDs + UMP message → `ads_release.json`, hosted privacy policy, Play Console forms, `scripts/measure_device.sh` on a real phone.
+1. Owner: create the upload keystore and the `release` environment secrets (`docs/RELEASE.md` §1–2), then run **Release AAB** (`without-ads`, versionCode 1). The real signed run has not executed yet: it needs those secrets.
+2. All milestones M0–M6 delivered. Remaining work needs the owner (see `RELEASE_CHECKLIST.md` → Owner actions): Play App Signing, AdMob IDs + UMP message → `ads_release.json`, hosted privacy policy, Play Console forms, `scripts/measure_device.sh` on a real phone.
 3. Recommended: human creature-art pass; physical-device performance run (software-GPU emulator ran ~10 fps, so the 60 fps budget is unverified).
 
 Next command: `scripts/verify_all.sh` (any change), `scripts/measure_device.sh <apk>` on a phone (owner).
