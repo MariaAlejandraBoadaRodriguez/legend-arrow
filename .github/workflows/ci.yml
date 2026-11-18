@@ -229,14 +229,26 @@ jobs:
           key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
 
       - name: Install Xvfb, Mesa and ffmpeg
-        # A mirror once hung this step for 25 min (PR run 40570864428): bound
-        # each attempt and retry instead of waiting for the job timeout.
+        # A mirror once hung this step for 25 min (PR run 40570864428), and on
+        # 2026-11-18 every `apt-get update` attempt timed out (runs 44418636509,
+        # 44418671778). Skip apt when the runner image already has the tools;
+        # otherwise refresh only the Ubuntu archive (not third-party repos),
+        # try the cached package lists first, and show apt's errors.
         timeout-minutes: 12
         run: |
-          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
-          for attempt in 1 2 3; do
-            if timeout 240 sudo apt-get $APT update -qq && \
-               timeout 240 sudo apt-get $APT install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null; then
+          PKGS="xvfb libgl1-mesa-dri ffmpeg"
+          if dpkg -s $PKGS >/dev/null 2>&1; then
+            echo "already installed: $PKGS"; exit 0
+          fi
+          APT="-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20"
+          ONLY_UBUNTU=""
+          if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
+            ONLY_UBUNTU="-o Dir::Etc::SourceList=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::SourceParts=-"
+          fi
+          install() { timeout 120 sudo apt-get $APT install -y -qq --no-install-recommends $PKGS >/dev/null; }
+          if install; then exit 0; fi
+          for attempt in 1 2; do   # 120 + 2 x (120 + 120 + 10) s fits the 12 min step
+            if timeout 120 sudo apt-get $APT $ONLY_UBUNTU update -qq && install; then
               exit 0
             fi
             echo "apt attempt $attempt failed; retrying" >&2
