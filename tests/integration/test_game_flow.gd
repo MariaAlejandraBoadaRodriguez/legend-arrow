@@ -205,6 +205,23 @@ func test_bestiary_shows_locked_creature_as_locked() -> void:
 	assert_not_null(tile.find_child("Locked", true, false))
 
 
+func test_screens_fit_phone_width_with_full_collection() -> void:
+	# 720 is the narrowest logical width (portrait phones, stretch "expand").
+	# A full bestiary once needed 782 px for its 12 progress bars.
+	for level_id in Game.campaign.level_ids():
+		Game.progression.complete_level(level_id)
+	Game.progression.data.tutorial_done = true
+	var screens := [["home", {}], ["level_select", {}], ["bestiary", {}], ["settings", {}],
+		["creature_detail", {"creature_id": "forest_drake"}], ["puzzle", {"level_id": "ancient_dragon_2"}],
+		["tutorial", {}]]
+	for entry in screens:
+		Game.reset_to(entry[0], entry[1])
+		await _layout()
+		var pad: Control = app.screen().get_child(0)
+		var need := pad.get_combined_minimum_size().x
+		assert_lte(need, 720.0, "%s needs %d px of width" % [entry[0], need])
+
+
 func test_kill_during_awakening_replays_without_duplicate_unlock() -> void:
 	Game.progression.data.tutorial_done = true
 	Game.progression.complete_level("forest_drake_1")
