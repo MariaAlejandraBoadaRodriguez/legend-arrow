@@ -54,7 +54,7 @@ The GIF is cut from [`docs/media/legend_arrow_gameplay.mp4`](docs/media/legend_a
 - 12 layered creature rigs, each with its own awakening (wings unfolding, a phoenix shedding embers, a wyrm rising from stone…).
 - Original music and sound effects synthesised in code, with one motif per creature. No third-party audio.
 
-**Languages:** English and Spanish, switchable in Settings.
+**Language:** English only.
 
 **Accessibility**
 - Reduced-motion setting: short fades instead of the full animations.

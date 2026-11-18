@@ -1,6 +1,31 @@
 # Progress
 
-_Last updated: 2026-10-29 (session 4, signed release workflow, store assets)_
+_Last updated: 2026-11-18 (v0.2 milestone A: English only + icon concepts v2)_
+
+## v0.2 — current status
+Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
+
+### Milestone A — DONE, **STOPPED for the owner's icon choice (A, B, C or D)**
+- English only: `locales/strings.csv` is `keys,en`; Spanish translation, language setting/picker and `LANGUAGE_*` strings removed; locale fixed to `en` (device language ignored); obsolete `language` key dropped from old saves on load; Spanish tests replaced (settings persist + UI stays English; device locale `es` forced back to `en`); E2E settings journey now changes sound + reduced motion (touching the music slider) instead of language.
+- `tools/check_english_only.py` (self-test with 7 planted cases + repo scan: locale columns, translation files, `values-es`, `"es"` locale literals, Spanish characters/words in shipped code, data, scenes, Android plugin, store files and file names, privacy page) runs in `verify_all.sh` step 0 and in the CI `godot-tests` job.
+- Store text English: Play Console files renamed to English field names, store README translated, `GUIA_INICIO.md` → `GETTING_STARTED.md`, Spanish M2 screenshots deleted, Spanish half of `docs/privacy.html` removed.
+- Icon concepts v2: `tools/icon_concepts_v2.py` → `docs/store/icon_concepts_v2.png` (A Ember Eye, B Arrow Wyvern, C Crowned Head, D Dragon Arrow).
+- Fix: the owner's 176 MB of raw art was imported and packed into the APK (main CI run 44413626725 failed, APK artifact 183 MB). `assets/creatures/raw/.gdignore` + preset `exclude_filter` (D-43).
+- Roster check: `docs/ART_PROMPTS.md` has 100 unique ids; `assets/creatures/raw/` has exactly those 100 files, all 1024×1536.
+
+### Next
+1. Owner: choose icon **A, B, C or D** from `docs/store/icon_concepts_v2.png`.
+2. Milestone B: chosen icon → `tools/make_icons.py` (adaptive fg/bg/monochrome + 512 store icon), timer, stars, results screen, save schema v3 + v0.1 fixture migration (old creature ids → roster ids).
+
+Next command: `scripts/verify_all.sh`
+
+### Blockers
+- Icon choice (owner).
+- Local Android builds still blocked by the network policy (`dl.google.com`); Android checks run in CI only.
+
+---
+
+## v0.1 history
 
 ## Where things are
 - `main` holds M0–M2 (PR #1 merged). M3–M6 are on `claude/new-session-8a6cy7` in PR [#2](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/pull/2) → `main`, CI green; merge is the owner's call.

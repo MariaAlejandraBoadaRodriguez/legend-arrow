@@ -240,25 +240,30 @@ func test_kill_during_awakening_replays_without_duplicate_unlock() -> void:
 	assert_eq(Game.progression.unlocked_count(), 1)
 
 
-func test_language_and_settings_persist_across_relaunch() -> void:
+func test_settings_persist_across_relaunch_and_ui_stays_english() -> void:
 	Game.reset_to("settings")
 	await _layout()
-	var lang := app.screen().find_child("LanguageOption", true, false) as OptionButton
-	lang.select(2)
-	lang.item_selected.emit(2)
-	assert_eq(TranslationServer.get_locale(), "es")
+	assert_null(app.screen().find_child("LanguageOption", true, false), "no language picker")
+	assert_eq(TranslationServer.get_locale(), "en")
 	var slider := app.screen().find_child("Slider_music_volume", true, false) as HSlider
 	slider.value = 0.0
 	var toggle := app.screen().find_child("Toggle_haptics", true, false) as CheckButton
 	toggle.button_pressed = false
 	app.relaunch()
-	assert_eq(Game.settings().language, "es")
-	assert_eq(TranslationServer.get_locale(), "es")
+	assert_false(Game.settings().has("language"), "no language setting is saved")
+	assert_eq(TranslationServer.get_locale(), "en")
 	assert_eq(Game.settings().music_volume, 0.0)
 	assert_true(AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")), "muted bus restored")
 	assert_false(Game.settings().haptics)
-	assert_eq(tr("HOME_PLAY"), "Jugar")
-	Game.set_setting("language", "en")
+	assert_eq(tr("HOME_PLAY"), "Play")
+
+
+func test_device_language_never_changes_the_ui() -> void:
+	TranslationServer.set_locale("es")
+	Game.apply_settings()
+	assert_eq(TranslationServer.get_locale(), "en", "locale forced back to English")
+	assert_eq(tr("HOME_PLAY"), "Play")
+	assert_false(TranslationServer.get_loaded_locales().has("es"), "no Spanish translation loaded")
 
 
 func test_back_navigation_and_overlays() -> void:

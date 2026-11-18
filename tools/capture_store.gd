@@ -26,7 +26,6 @@ func _init() -> void:
 	for suffix in ["", ".tmp", ".bak"]:
 		DirAccess.remove_absolute(SAVE + suffix)
 	game.boot(SAVE)
-	game.set_setting("language", "en")
 	if mode == "feature":
 		await _feature()
 	else:

@@ -35,6 +35,11 @@ jobs:
       - name: No keystores, keys or ads_release.json committed
         run: scripts/check_no_secrets.sh
 
+      - name: English only (no Spanish locale, strings or store text)
+        run: |
+          python3 tools/check_english_only.py --self-test
+          python3 tools/check_english_only.py
+
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
 

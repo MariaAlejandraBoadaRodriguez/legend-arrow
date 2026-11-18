@@ -107,15 +107,15 @@ func _strings() -> Dictionary:
 	var out := {}
 	var f := FileAccess.open("res://locales/strings.csv", FileAccess.READ)
 	var header := f.get_csv_line()
-	assert_eq(header, PackedStringArray(["keys", "en", "es"]))
+	assert_eq(header, PackedStringArray(["keys", "en"]), "English is the only locale")
 	while not f.eof_reached():
 		var row := f.get_csv_line()
-		if row.size() >= 3 and row[0] != "":
+		if row.size() >= 2 and row[0] != "":
 			out[row[0]] = row
 	return out
 
 
-func test_every_creature_has_name_and_lore_in_both_languages() -> void:
+func test_every_creature_has_name_and_lore_in_english() -> void:
 	var strings := _strings()
 	var c: Campaign = Campaign.load_file().campaign
 	var names := {}
@@ -125,7 +125,6 @@ func test_every_creature_has_name_and_lore_in_both_languages() -> void:
 			assert_true(strings.has(key), "%s: %s present" % [cid, key])
 			if strings.has(key):
 				assert_ne(strings[key][1].strip_edges(), "", "%s EN" % key)
-				assert_ne(strings[key][2].strip_edges(), "", "%s ES" % key)
 		names[strings.get(c.creature(cid).name_key, ["", ""])[1]] = true
 	assert_eq(names.size(), 12, "names are distinct")
 

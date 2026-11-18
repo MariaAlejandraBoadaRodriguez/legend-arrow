@@ -32,8 +32,10 @@ static func default_settings() -> Dictionary:
 		"creature_volume": 0.9,
 		"reduce_motion": false,
 		"haptics": true,
-		"language": "",  # "" = follow device language
 	}
+
+## Settings keys that older builds wrote and this build no longer uses.
+const OBSOLETE_SETTINGS := ["language"]  # v0.1 language picker (removed, D-41)
 
 
 ## Upgrades an older save to VERSION. Returns {} if it cannot be migrated.
@@ -76,6 +78,8 @@ static func sanitize(d: Dictionary) -> Array[String]:
 		hints.free_used = {}
 	hints.ad_entitlements = maxi(0, int(hints.get("ad_entitlements", 0)))
 	var s: Dictionary = d.settings
+	for key in OBSOLETE_SETTINGS:
+		s.erase(key)
 	var ds := default_settings()
 	for key in ds:
 		if not _same_kind(s.get(key), ds[key]):

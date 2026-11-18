@@ -44,7 +44,7 @@ pointing/emulate_touch_from_mouse=true
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://locales/strings.en.translation", "res://locales/strings.es.translation")
+locale/translations=PackedStringArray("res://locales/strings.en.translation")
 locale/fallback="en"
 
 [rendering]

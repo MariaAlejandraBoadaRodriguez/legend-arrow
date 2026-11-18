@@ -2,7 +2,7 @@
 
 File `user://save.json` (+ `.tmp`, `.bak`, `.corrupt`). Envelope: `{"format":"legend_arrow_save","sha256":<hex of payload>,"payload":<JSON text>}`.
 
-Payload keys: `schema_version`, `levels{id:{completed}}`, `creatures{id:{unlocked,awakening_seen}}`, `transactions{"complete:<level>"|"unlock:<creature>":true}`, `in_progress{level_id,removed[],completed}`, `hints{free_used{level:n},ad_entitlements}`, `ad_receipts{presentation_id:true}`, `tutorial_done`, `settings{music_volume,sfx_volume,creature_volume,reduce_motion,haptics,language}`.
+Payload keys: `schema_version`, `levels{id:{completed}}`, `creatures{id:{unlocked,awakening_seen}}`, `transactions{"complete:<level>"|"unlock:<creature>":true}`, `in_progress{level_id,removed[],completed}`, `hints{free_used{level:n},ad_entitlements}`, `ad_receipts{presentation_id:true}`, `tutorial_done`, `settings{music_volume,sfx_volume,creature_volume,reduce_motion,haptics}` (a `language` key written by v0.1 is dropped on load, D-41).
 
 Not stored: advertising identifiers, consent details, names, ages, tap streams.
 

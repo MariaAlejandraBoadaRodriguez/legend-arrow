@@ -19,7 +19,8 @@ const SCREENS := {
 	"privacy": "res://scenes/screens/privacy.tscn",
 }
 const BUSES := ["Music", "SFX", "Creature"]
-const SUPPORTED_LOCALES := ["en", "es"]
+## English is the only language (owner decision D-41): the locale is fixed.
+const LOCALE := "en"
 
 var campaign: Campaign
 var progression: Progression
@@ -114,12 +115,7 @@ func set_setting(key: String, value: Variant) -> void:
 
 func apply_settings() -> void:
 	var s := settings()
-	var lang: String = s.language
-	if lang == "" or not SUPPORTED_LOCALES.has(lang):
-		lang = OS.get_locale_language()
-		if not SUPPORTED_LOCALES.has(lang):
-			lang = "en"
-	TranslationServer.set_locale(lang)
+	TranslationServer.set_locale(LOCALE)
 	for bus_name in BUSES:
 		var idx := AudioServer.get_bus_index(bus_name)
 		var vol: float = s.get({"Music": "music_volume", "SFX": "sfx_volume", "Creature": "creature_volume"}[bus_name], 1.0)

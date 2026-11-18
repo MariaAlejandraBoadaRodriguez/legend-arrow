@@ -236,36 +236,32 @@ func awakening_replay() -> void:
 	if not await wait_screen("bestiary"): return
 
 
-## 6a. Change language and reduced motion through the settings UI.
+## 6a. Change sound and reduced motion through the settings UI.
 func settings_a() -> void:
 	if not await wait_screen("home"): return
 	if not await tap("SettingsButton"): return
 	if not await wait_screen("settings"): return
+	if not check(find("LanguageOption") == null, "no language picker (English only)"): return
 	var before: bool = Game.settings().reduce_motion
 	if not await tap("Toggle_reduce_motion"): return
 	if not check(Game.settings().reduce_motion != before, "reduce motion toggled"): return
-	if not await tap("LanguageOption"): return
-	var opt := find("LanguageOption") as OptionButton
-	var popup := opt.get_popup()
-	if not await wait_for(func(): return popup.visible, 2.0, "language list opens"): return
-	await shot("language_popup")
-	# Choose "Español" with the keyboard/D-pad path inside the open list.
-	popup.set_focused_item(0)
-	for i in 2:
-		await key_action("ui_down")
-	await key_action("ui_accept")
-	if not await wait_for(func(): return Game.settings().language == "es", 2.0, "language saved as es"): return
-	if not check(TranslationServer.get_locale().begins_with("es"), "UI switched to Spanish"): return
-	await shot("settings_es")
+	# Touch the far left end of the music slider: volume goes to 0 (muted).
+	var slider := find("Slider_music_volume") as HSlider
+	if not check(slider != null, "music slider present"): return
+	await touch(to_window(slider, Vector2(2.0, slider.size.y * 0.5)))
+	if not await wait_for(func(): return Game.settings().music_volume <= 0.001, 2.0, "music muted by touch"): return
+	if not check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")), "Music bus muted"): return
+	await shot("settings_changed")
 
 
 ## 6b. After a restart the preferences are still there.
 func settings_b() -> void:
 	if not await wait_screen("home"): return
-	if not check(Game.settings().language == "es", "language persisted"): return
-	if not check(TranslationServer.get_locale().begins_with("es"), "Spanish after restart"): return
+	if not check(Game.settings().music_volume <= 0.001, "music mute persisted"): return
+	if not check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")), "Music bus muted after restart"): return
 	if not check(Game.settings().reduce_motion == true, "reduce motion persisted"): return
-	await shot("home_es")
+	if not check(TranslationServer.get_locale() == "en", "UI in English"): return
+	await shot("home_after_restart")
 
 
 # --- helpers ------------------------------------------------------------------

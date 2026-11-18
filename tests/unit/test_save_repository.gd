@@ -161,11 +161,11 @@ func test_sanitize_repairs_settings_and_fills_missing_keys() -> void:
 	var d := SaveSchema.defaults()
 	d.erase("hints")
 	d.settings.music_volume = 7.0
-	d.settings.language = 3
+	d.settings.language = "es"  # written by v0.1; obsolete since D-41
 	assert_eq(SaveSchema.sanitize(d), [] as Array[String])
 	assert_eq(d.hints, {"free_used": {}, "ad_entitlements": 0})
 	assert_eq(d.settings.music_volume, 1.0)
-	assert_eq(d.settings.language, "")
+	assert_false(d.settings.has("language"), "obsolete language setting dropped")
 	var bad := SaveSchema.defaults()
 	bad.levels = []
 	assert_false(SaveSchema.sanitize(bad).is_empty(), "wrong top-level type is corrupt")

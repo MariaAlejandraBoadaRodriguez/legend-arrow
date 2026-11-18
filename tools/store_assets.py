@@ -36,23 +36,23 @@ CAPTIONS = {
     "creature": "Every creature has its story",
 }
 
-PHONE = [("01_inicio", "home"), ("02_tutorial", "tutorial"), ("03_puzzle", "puzzle"),
-         ("04_despertar", "awakening"), ("05_bestiario", "bestiary"), ("06_criatura", "creature")]
-TABLET = [("01_inicio", "home"), ("02_puzzle", "puzzle"), ("03_despertar", "awakening"),
-          ("04_bestiario", "bestiary")]
+PHONE = [("01_home", "home"), ("02_tutorial", "tutorial"), ("03_puzzle", "puzzle"),
+         ("04_awakening", "awakening"), ("05_bestiary", "bestiary"), ("06_creature", "creature")]
+TABLET = [("01_home", "home"), ("02_puzzle", "puzzle"), ("03_awakening", "awakening"),
+          ("04_bestiary", "bestiary")]
 
 
 def expected():
     """[(file name, (w, h), mode, byte limit, source)] in Play Console order."""
     files = [
-        ("01_Recursos_visuales_comunes__Icono_de_la_aplicacion__512x512.png", (512, 512), "RGBA", 1 * MB, "icon"),
-        ("02_Recursos_visuales_comunes__Grafico_de_funciones__1024x500.png", (1024, 500), "RGB", 15 * MB, "feature"),
+        ("01_Graphics__App_icon__512x512.png", (512, 512), "RGBA", 1 * MB, "icon"),
+        ("02_Graphics__Feature_graphic__1024x500.png", (1024, 500), "RGB", 15 * MB, "feature"),
     ]
     for tag, shot in PHONE:
-        files.append((f"03_Recursos_visuales_comunes__Capturas_telefono__{tag}__1080x1920.png",
+        files.append((f"03_Graphics__Phone_screenshots__{tag}__1080x1920.png",
                       (1080, 1920), "RGB", 8 * MB, ("phone", shot)))
-    for prefix, profile, (w, h) in (("04_Recursos_para_tablet__Capturas_7_pulgadas", "tablet7", (1200, 2133)),
-                                    ("05_Recursos_para_tablet__Capturas_10_pulgadas", "tablet10", (1440, 2560))):
+    for prefix, profile, (w, h) in (("04_Graphics__7-inch_tablet_screenshots", "tablet7", (1200, 2133)),
+                                    ("05_Graphics__10-inch_tablet_screenshots", "tablet10", (1440, 2560))):
         for tag, shot in TABLET:
             files.append((f"{prefix}__{tag}__{w}x{h}.png", (w, h), "RGB", 8 * MB, (profile, shot)))
     return files
