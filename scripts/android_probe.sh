@@ -6,7 +6,7 @@
 
 # System log lines that can explain a data-directory change, from a logcat file.
 probe_system_lines() {   # logcat_file
-  grep -iE "PackageManager|installd|clearApplicationUserData|DATA_CLEARED|Clearing|PackageInstaller|dexopt|BackupManager|FullBackup|Restore|avc: +denied|run-as|storaged|vold|DeviceStorage|Low on storage|Force stopping|Killing [0-9]+:$PKG|Process $PKG .*died|am_kill|wm_on_destroy" \
+  grep -iE "Fatal signal|DEBUG   :|backtrace|tombstone|SIGSEGV|SIGABRT|Low on memory|lowmemorykiller: Kill|freeCache|Freeing|DeviceStorageMonitor|PackageManager|installd|clearApplicationUserData|DATA_CLEARED|Clearing|PackageInstaller|dexopt|BackupManager|FullBackup|Restore|avc: +denied|run-as|storaged|vold|DeviceStorage|Low on storage|Force stopping|Killing [0-9]+:$PKG|Process $PKG .*died|am_kill|wm_on_destroy" \
     "$1" 2>/dev/null | grep -v "GodotPluginRegistry" | tail -120 || true
 }
 
@@ -22,4 +22,12 @@ probe_data_dir() {
   echo "[dumpsys package]"; adb shell dumpsys package "$PKG" 2>/dev/null | tr -d '\r' | grep -E "dataDir|codePath|firstInstallTime|lastUpdateTime|pkgFlags|privateFlags|versionCode|installerPackageName|User 0:" | head -12
   echo "[df /data]";        adb shell df /data 2>&1 | tail -1
   echo "---- end probe ----"
+}
+
+# Where /data is going (v0.2: storage churned by GB in some stress jobs).
+probe_storage() {
+  local used
+  used="$(adb shell df /data 2>/dev/null | tail -1 | tr -s ' ' | cut -d' ' -f3)"
+  echo "storage used_kb=$used | $(adb shell "su 0 du -sk /data/data/$PKG /data/media/0/Android/data/$PKG /data/tombstones /data/system/dropbox /data/anr /data/dalvik-cache /data/app /data/local/tmp /data/misc/logd" 2>/dev/null | tr -d '\r' | awk '{printf "%s=%sKB ", $2, $1}')"
+  echo "storage top: $(adb shell "su 0 sh -c 'du -sk /data/* 2>/dev/null | sort -n | tail -4'" 2>/dev/null | tr -d '\r' | awk '{printf "%s=%sKB ", $2, $1}')"
 }

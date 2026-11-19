@@ -90,7 +90,7 @@ else
 fi
 
 # --- iterations -----------------------------------------------------------------
-pass=0; fail=0; committed_unshown=0; controls=0; before_shown=0; after_shown=0; late=0; nodata=0
+pass=0; fail=0; committed_unshown=0; declare -A vpass vfail vnov; vpass[0]=0; vpass[1]=0; vfail[0]=0; vfail[1]=0; vnov[0]=0; vnov[1]=0; controls=0; before_shown=0; after_shown=0; late=0; nodata=0
 : > "$OUT/results.tsv"
 for i in $(seq 1 "$N"); do
   r=$((RANDOM % 100))
@@ -100,7 +100,10 @@ for i in $(seq 1 "$N"); do
   elif (( r < 82 )); then kill_ms=$((1500 + RANDOM % 2000)); phase=last   # results already on screen
   else kill_ms=$((RANDOM % 2500)); phase=play; fi                          # in-progress saves while playing
   t_clear
-  t_put e2e_param.txt "i=$i kill_ms=$kill_ms phase=$phase legacy=${LEGACY:-0}"
+  # LEGACY=alt alternates old/new save code per iteration on one emulator,
+  # so emulator-instance differences cannot masquerade as code differences.
+  if [[ "${LEGACY:-0}" == alt ]]; then legacy=$((i % 2)); else legacy="${LEGACY:-0}"; fi
+  t_put e2e_param.txt "i=$i kill_ms=$kill_ms phase=$phase legacy=$legacy"
   t_rm e2e_expect.txt
   t_run save_kill 90 "$OUT/logs/$i-kill.log"
   shown="$(grep -oE 'SHOWN level=[a-z_0-9]+ stars=[0-9]+ time_ms=[0-9]+' "$OUT/logs/$i-kill.log" | head -1 | sed 's/^SHOWN //')"
@@ -123,9 +126,9 @@ for i in $(seq 1 "$N"); do
   t_run save_verify 60 "$OUT/logs/$i-verify.log"
   v="$(grep -oE 'LEGEND_E2E (PASS|FAIL) save_verify.*' "$OUT/logs/$i-verify.log" | head -1)"
   detail="$(grep -oE 'VERIFY .*' "$OUT/logs/$i-verify.log" | head -1)"
-  if [[ "$v" == *" PASS "* ]]; then pass=$((pass + 1)); st=PASS; else fail=$((fail + 1)); st=FAIL; fi
+  if [[ "$v" == *" PASS "* ]]; then pass=$((pass + 1)); st=PASS; vpass[$legacy]=$((vpass[$legacy] + 1)); else fail=$((fail + 1)); st=FAIL; vfail[$legacy]=$((vfail[$legacy] + 1)); [[ -z "$v" ]] && vnov[$legacy]=$((vnov[$legacy] + 1)); fi
   if grep -q "COMMITTED yes" "$OUT/logs/$i-verify.log" && [[ "$kind" == killed_before_shown ]]; then committed_unshown=$((committed_unshown + 1)); fi
-  echo -e "$i\t$kill_ms\t$phase\t$kind\t$st\t${shown:--}\t$detail" >> "$OUT/results.tsv"
+  echo -e "$i\tlegacy=$legacy\t$kill_ms\t$phase\t$kind\t$st\t${shown:--}\t$detail" >> "$OUT/results.tsv"
   if [[ "$st" == FAIL ]]; then
     echo "iteration $i FAIL ($kind, kill_ms=$kill_ms): ${v:-no verdict} | $detail"
     if [[ "$TARGET" == android ]]; then
@@ -136,6 +139,7 @@ for i in $(seq 1 "$N"); do
     rm -f "$OUT/logs/$i-kill.log.full" "$OUT/logs/$i-verify.log.full"
   fi
   if (( i % 10 == 0 )); then echo "after $i: pass=$pass fail=$fail | df: $(t_df)"; fi
+  if [[ "$TARGET" == android ]] && (( i % 5 == 0 )); then echo "i=$i legacy=$legacy $(probe_storage | tr '\n' ' ')" | tee -a "$OUT/storage.log"; fi
 done
 
 {
@@ -151,5 +155,12 @@ done
   echo "| Killed after the results screen showed | $after_shown |"
   echo "| Kill planned but the app outlived it (KILL_LATE) | $late |"
   echo "| Skipped (app never reached the plan) | $nodata |"
+  if [[ "${LEGACY:-0}" == alt ]]; then
+    echo
+    echo "| Save code (same emulator, alternating) | PASS | FAIL | of which no verdict |"
+    echo "|---|---|---|---|"
+    echo "| old (pre-fix) | ${vpass[1]} | ${vfail[1]} | ${vnov[1]} |"
+    echo "| new (verified + retry) | ${vpass[0]} | ${vfail[0]} | ${vnov[0]} |"
+  fi
 } | tee "$OUT/summary.md"
 (( fail == 0 )) && echo "save_stress: PASS" || { echo "save_stress: FAIL"; exit 1; }
