@@ -716,8 +716,25 @@ func results_problem(level_id: String) -> String:
 		return "empty time label"
 	var rec: Dictionary = _saved().levels.get(level_id, {})
 	if st.earned < 1 or int(rec.get("best_stars", 0)) < st.earned or int(rec.get("best_time_ms", -1)) < 0:
-		return "stars shown %d, saved %s" % [st.earned, str(rec)]
+		return "stars shown %d, saved %s; %s" % [st.earned, str(rec), _save_forensics(level_id)]
 	return ""
+
+
+## Where the save on disk came from and what is next to it (for a mismatch
+## between the screen and the file).
+func _save_forensics(level_id: String) -> String:
+	var path: String = Game.repository.path
+	var loaded := SaveRepository.new(path).load_save()
+	var files: Array[String] = []
+	var dir := DirAccess.open(path.get_base_dir())
+	if dir != null:
+		for f in dir.get_files():
+			if f.begins_with(path.get_file()):
+				var fa := FileAccess.open(path.get_base_dir().path_join(f), FileAccess.READ)
+				files.append("%s=%d" % [f, fa.get_length() if fa != null else -1])
+	return "source=%s problems=%s files=%s last_persist_error=%d in_memory=%s" % [
+		loaded.get("source"), str(loaded.get("problems")), ",".join(files),
+		Game.last_persist_error, str(Game.progression.data.levels.get(level_id, {}))]
 
 
 ## Results check that allows a slow device a moment to build the screen, and

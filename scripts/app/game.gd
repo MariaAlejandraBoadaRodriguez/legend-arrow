@@ -99,9 +99,14 @@ func _on_ad_fullscreen_ended() -> void:
 	apply_settings()
 
 
+## Result of the last save write (OK or an Error code), for diagnostics.
+var last_persist_error := OK
+
+
 func persist() -> void:
 	if booted:
 		var err := repository.write(progression.data)
+		last_persist_error = err
 		if err != OK:
 			push_error("Game: save failed (%d)" % err)
 

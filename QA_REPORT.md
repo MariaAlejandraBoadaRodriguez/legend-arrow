@@ -65,7 +65,7 @@ Journeys:
 
 | Emulator | Result | Evidence |
 |---|---|---|
-| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **PASS**: 13/13 journeys + smoke (run 44470278817) | run 44464519633 job 135361615436 (also run 44462316343), artifact `e2e-android-api26-P1` |
+| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **OPEN (intermittent)**: 13/13 + smoke in runs 44470278817 and 44472596603. But in 44472596603 the measurement run's `fresh_install`, right after `pm clear`, showed 3 stars on the results screen while the save file on disk had **no record** for the level ("stars shown 3, saved { }"). Run 44466657570 failed at the same step. Never seen on API 34/36 or desktop. Diagnostics added (save source, files, last write result); investigating as a possible save issue on Android 8 | run 44464519633 job 135361615436 (also run 44462316343), artifact `e2e-android-api26-P1` |
 | API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615190, artifact `e2e-android-api34-P3` |
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
@@ -126,6 +126,7 @@ Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (
 | 20 English files named by Play Console field: icon 512, feature 1024×500, 8 phone 1080×1920, 5 × 7" 1200×2133, 5 × 10" 1440×2560 | PASS | `tools/store_assets.py`: 20 expected, 20 present; sizes, format, no alpha, limits. CI artifact **play-store-assets** |
 
 ## Known limitations
+- **Open:** intermittent screen/save mismatch on the API 26 emulator right after a data clear (see 9.3). It is not explained yet, and it blocks "Ready for Play upload" until it is understood.
 - Frame-time budgets are unverified on real hardware (software-GPU emulators only) until the Lenovo run.
 - Puzzle silhouettes resemble their dragon only loosely; accepted for v0.2 (D-50, `docs/ART_STATUS.md`).
 - The live UMP consent form and live ads have never been shown or clicked in CI (test IDs, nothing clicked). Check manually before a with-ads release.

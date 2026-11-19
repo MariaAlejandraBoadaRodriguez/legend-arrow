@@ -19,7 +19,7 @@ Statuses:
 | 8 | Content: 100 certified puzzles, rising difficulty, English only | PASS | `QA_REPORT.md` 9.1 |
 | 9 | All 100 dragons imported (no ART PENDING) | PASS | `docs/ART_STATUS.md`: 100/100 |
 | 10 | Save migration from v0.1 (real save) | PASS | fixture test |
-| 11 | Emulator E2E on API 26 / 34 / 36 | PASS (13/13 each) | run 44464519633 |
+| 11 | Emulator E2E on API 26 / 34 / 36 | **OPEN** / PASS / PASS | API 26: intermittent results-screen vs save-file mismatch after `pm clear` (QA_REPORT 9.3) |
 | 12 | Screen matrix P1–P7 reviewed | PASS | `docs/qa/VISUAL_QA.md` |
 | 13 | Memory settles; download ≤ 120 MB | PASS | 48.8 MB arm64 (with ads) |
 | 14 | Frame time and feel on a real device | BLOCKED | owner's Lenovo tablet, `docs/DEVICE_TEST.md` |
