@@ -9,17 +9,21 @@ Every file here goes in **Play Console → Grow users → Store presence → Mai
 | `03_Graphics__Phone_screenshots__01_home__1080x1920.png` | Phone screenshots, 1 | Yes (at least 2) |
 | `03_Graphics__Phone_screenshots__02_tutorial__1080x1920.png` | Phone screenshots, 2 | Yes (at least 2) |
 | `03_Graphics__Phone_screenshots__03_puzzle__1080x1920.png` | Phone screenshots, 3 | Recommended |
-| `03_Graphics__Phone_screenshots__04_awakening__1080x1920.png` | Phone screenshots, 4 | Recommended |
-| `03_Graphics__Phone_screenshots__05_bestiary__1080x1920.png` | Phone screenshots, 5 | Recommended |
-| `03_Graphics__Phone_screenshots__06_creature__1080x1920.png` | Phone screenshots, 6 | Recommended |
+| `03_Graphics__Phone_screenshots__04_results__1080x1920.png` | Phone screenshots, 4 | Recommended |
+| `03_Graphics__Phone_screenshots__05_awakening__1080x1920.png` | Phone screenshots, 5 | Recommended |
+| `03_Graphics__Phone_screenshots__06_worlds__1080x1920.png` | Phone screenshots, 6 | Recommended |
+| `03_Graphics__Phone_screenshots__07_bestiary__1080x1920.png` | Phone screenshots, 7 | Recommended |
+| `03_Graphics__Phone_screenshots__08_creature__1080x1920.png` | Phone screenshots, 8 | Recommended |
 | `04_Graphics__7-inch_tablet_screenshots__01_home__1200x2133.png` | 7-inch tablet screenshots, 1 | Optional (needed to be featured on tablets) |
 | `04_Graphics__7-inch_tablet_screenshots__02_puzzle__1200x2133.png` | 7-inch tablet screenshots, 2 | Optional |
-| `04_Graphics__7-inch_tablet_screenshots__03_awakening__1200x2133.png` | 7-inch tablet screenshots, 3 | Optional |
-| `04_Graphics__7-inch_tablet_screenshots__04_bestiary__1200x2133.png` | 7-inch tablet screenshots, 4 | Optional |
+| `04_Graphics__7-inch_tablet_screenshots__03_results__1200x2133.png` | 7-inch tablet screenshots, 3 | Optional |
+| `04_Graphics__7-inch_tablet_screenshots__04_awakening__1200x2133.png` | 7-inch tablet screenshots, 4 | Optional |
+| `04_Graphics__7-inch_tablet_screenshots__05_bestiary__1200x2133.png` | 7-inch tablet screenshots, 5 | Optional |
 | `05_Graphics__10-inch_tablet_screenshots__01_home__1440x2560.png` | 10-inch tablet screenshots, 1 | Optional (needed to be featured on tablets) |
 | `05_Graphics__10-inch_tablet_screenshots__02_puzzle__1440x2560.png` | 10-inch tablet screenshots, 2 | Optional |
-| `05_Graphics__10-inch_tablet_screenshots__03_awakening__1440x2560.png` | 10-inch tablet screenshots, 3 | Optional |
-| `05_Graphics__10-inch_tablet_screenshots__04_bestiary__1440x2560.png` | 10-inch tablet screenshots, 4 | Optional |
+| `05_Graphics__10-inch_tablet_screenshots__03_results__1440x2560.png` | 10-inch tablet screenshots, 3 | Optional |
+| `05_Graphics__10-inch_tablet_screenshots__04_awakening__1440x2560.png` | 10-inch tablet screenshots, 4 | Optional |
+| `05_Graphics__10-inch_tablet_screenshots__05_bestiary__1440x2560.png` | 10-inch tablet screenshots, 5 | Optional |
 
 Upload them in number order: Play shows screenshots in upload order.
 
@@ -33,7 +37,7 @@ Upload them in number order: Play shows screenshots in upload order.
   - 7" tablet: 10:16 tablet screen (1200×1920) + 213 px band.
   - 10" tablet: 10:16 tablet screen (1440×2304) + 256 px band.
 - **Icon**: `tools/make_icons.py`; the same drawing as the launcher icon.
-- **Feature graphic**: the awakening landscape and a creature rendered by Godot, with the title "Legend Arrow".
+- **Feature graphic**: the awakening landscape and the photoreal Cloud Peaks Monarch rendered by Godot, with the title "Legend Arrow".
 
 These v0.1 graphics are regenerated for 0.2.0 after the final dragon art is integrated (milestone F).
 
@@ -42,4 +46,4 @@ These v0.1 graphics are regenerated for 0.2.0 after the final dragon art is inte
 GODOT=/path/to/godot tools/make_store_graphics.sh   # regenerate everything and verify
 python3 tools/store_assets.py check                 # verify only
 ```
-The check confirms all 16 files exist with the exact name, are PNG, have the exact pixel size, have no alpha channel (the icon: 32-bit and fully opaque) and respect the size limits (icon ≤ 1 MB, feature graphic ≤ 15 MB, screenshots ≤ 8 MB). CI runs it on every push and publishes this folder as the `play-store-assets` artifact.
+The check confirms all 20 files exist with the exact name, are PNG, have the exact pixel size, have no alpha channel (the icon: 32-bit and fully opaque) and respect the size limits (icon ≤ 1 MB, feature graphic ≤ 15 MB, screenshots ≤ 8 MB). CI runs it on every push and publishes this folder as the `play-store-assets` artifact.

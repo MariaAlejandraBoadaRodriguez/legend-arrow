@@ -28,18 +28,21 @@ PROFILES = {
 }
 
 CAPTIONS = {
-    "home": "Calm puzzles. Legendary creatures.",
+    "home": "Calm puzzles. Legendary dragons.",
     "tutorial": "Tap an arrow with a clear way out",
     "puzzle": "Clear the board, arrow by arrow",
-    "awakening": "Solve both puzzles to awaken it",
-    "bestiary": "Collect 12 legends in 3 realms",
-    "creature": "Every creature has its story",
+    "results": "Beat your time. Earn three stars.",
+    "awakening": "Every puzzle awakens a dragon",
+    "worlds": "10 worlds, harder as you go",
+    "bestiary": "Collect 100 dragons",
+    "creature": "Every dragon has its story",
 }
 
 PHONE = [("01_home", "home"), ("02_tutorial", "tutorial"), ("03_puzzle", "puzzle"),
-         ("04_awakening", "awakening"), ("05_bestiary", "bestiary"), ("06_creature", "creature")]
-TABLET = [("01_home", "home"), ("02_puzzle", "puzzle"), ("03_awakening", "awakening"),
-          ("04_bestiary", "bestiary")]
+         ("04_results", "results"), ("05_awakening", "awakening"), ("06_worlds", "worlds"),
+         ("07_bestiary", "bestiary"), ("08_creature", "creature")]
+TABLET = [("01_home", "home"), ("02_puzzle", "puzzle"), ("03_results", "results"),
+          ("04_awakening", "awakening"), ("05_bestiary", "bestiary")]
 
 
 def expected():
