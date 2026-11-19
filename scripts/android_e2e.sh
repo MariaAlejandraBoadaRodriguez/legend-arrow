@@ -133,6 +133,7 @@ for j in "${JOURNEYS[@]}"; do
   adb shell am force-stop "$PKG" || true
   secs=$(( $(date +%s) - start ))
   echo "$verdict (${secs}s)"
+  grep -oE "LEGEND_E2E TAPSTATS.*" "$OUT/logcat/$j.txt" | tr -d '\r' | head -1 || true
   results+=("$j|$verdict|$secs")
   case "$verdict" in
     *" PASS "*) ;;
@@ -141,6 +142,8 @@ for j in "${JOURNEYS[@]}"; do
        echo "---- $j: crash / kill / app lines from logcat ----"
        grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|SCRIPT ERROR|USER ERROR|godot" \
          "$OUT/logcat/$j.txt" | grep -v "GodotPluginRegistry: Registering" | tail -80 || true
+       echo "---- $j: in-app step log ----"
+       adb shell "run-as $PKG cat files/e2e/result_$j.txt" 2>/dev/null | tr -d '\r' | tail -60 || true
        echo "---- end $j ----" ;;
   esac
 done
