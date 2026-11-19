@@ -355,7 +355,7 @@ func rotate() -> void:
 ## last are recorded through the real progression rules (to keep the
 ## emulator run short) and the world's last dragon is solved by taps.
 func world_unlock() -> void:
-	if not await wait_screen("home"): return
+	if not await reach_home(): return
 	for l in Game.campaign.levels_in_world("w01"):
 		if l != "mistwood_elder" and not Game.progression.is_level_completed(l):
 			Game.progression.complete_level(l)
@@ -570,8 +570,28 @@ func _scroll_parent(c: Node) -> ScrollContainer:
 
 
 ## From Home: Play -> level select (which preselects the next level) -> Play.
+## Home, as a player reaches it. On the emulator the save carries over between
+## journeys, and an earlier journey may have finished a level without watching
+## its awakening; the app then (correctly) replays that awakening at launch.
+## Watch it out, as a player would, before going on.
+func reach_home() -> bool:
+	var end := Time.get_ticks_msec() + 8000
+	while Time.get_ticks_msec() < end and Game.current_screen_name() not in ["home", "awakening"]:
+		await frames(5)
+	if Game.current_screen_name() == "awakening":
+		_say("launch replays a pending awakening (%s)" % Game.current_screen().creature_id)
+		await seconds(1.2)
+		if Game.current_screen().get("finished") != true:
+			if not await tap("SkipButton"): return false
+		if not await wait_for(func(): return Game.current_screen().get("finished") == true, 3.0, "pending awakening finished"): return false
+		if not await tap("ContinueButton"): return false
+		await seconds(0.5)
+		Game.reset_to("home")
+	return await wait_screen("home")
+
+
 func open_next_puzzle(level_id: String) -> bool:
-	if not await wait_screen("home"): return false
+	if not await reach_home(): return false
 	if not await tap("PlayButton"): return false
 	if not await wait_screen("level_select"): return false
 	if not await tap("PlayButton"): return false

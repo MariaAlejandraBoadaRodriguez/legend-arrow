@@ -79,9 +79,13 @@ static func full_rect(c: Control) -> Control:
 
 ## Header row: [back]  title/subtitle  [action]
 static func top_bar(title: String, subtitle: String, on_back: Callable, action: Control = null) -> Control:
-	var row := hbox(0)
+	# A gap between the side controls and the titles, and side controls that
+	# keep their size when the titles wrap (Larger text: the title used to run
+	# into the "Worlds" link and the back button grew tall; screen matrix P7).
+	var row := hbox(8)
 	var back := icon_button("‹", on_back, "BACK", "BackButton") if on_back.is_valid() else spacer()
 	back.custom_minimum_size = Vector2(Palette.TOUCH_MIN, Palette.TOUCH_MIN)
+	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(back)
 	var titles := vbox(2)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -96,6 +100,7 @@ static func top_bar(title: String, subtitle: String, on_back: Callable, action: 
 	if action == null:
 		action = spacer()
 		action.custom_minimum_size = Vector2(Palette.TOUCH_MIN, Palette.TOUCH_MIN)
+	action.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(action)
 	return row
 

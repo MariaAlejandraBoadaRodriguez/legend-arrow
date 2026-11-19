@@ -60,7 +60,8 @@ for _ in $(seq 1 15); do
 done
 sleep 2
 adb shell "run-as $PKG sh -c 'mkdir -p files && echo fresh_install > files/e2e_journey.txt'"
-adb logcat -c
+adb logcat -c >/dev/null 2>&1 || true   # fails on some API 26 images
+SINCE="$(adb shell "date +'%m-%d %H:%M:%S.000'" | tr -d '\r')"
 adb shell am start -n "$ACTIVITY" >/dev/null
 peak_pss=0; samples=0; died=""
 start=$(date +%s)
@@ -69,18 +70,18 @@ while (( $(date +%s) - start < LOAD_TIMEOUT_S )); do
   pss="$(adb shell dumpsys meminfo "$PKG" 2>/dev/null | tr -d '\r' | awk '/TOTAL PSS:/ {print $3; exit} /^ *TOTAL / {print $2; exit}' || true)"
   if [[ "$pss" =~ ^[0-9]+$ ]] && (( pss > peak_pss )); then peak_pss=$pss; fi
   samples=$((samples + 1))
-  if adb logcat -d 2>/dev/null | grep -qE "LEGEND_E2E (PASS|FAIL) fresh_install"; then break; fi
+  if adb logcat -d -T "$SINCE" 2>/dev/null | grep -qE "LEGEND_E2E (PASS|FAIL) fresh_install"; then break; fi
   if (( $(date +%s) - start > 60 )) && app_dead; then died="app process died"; break; fi
   sleep 2
 done
 # Never exit silently: every probe below tolerates "no match".
-verdict="$(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) fresh_install.*" | head -1 | tr -d '\r' || true)"
+verdict="$(adb logcat -d -T "$SINCE" 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) fresh_install.*" | head -1 | tr -d '\r' || true)"
 [[ -n "$verdict" ]] || verdict="no verdict (${died:-timeout after ${LOAD_TIMEOUT_S}s}); see logcat.txt"
-frametimes="$(adb logcat -d 2>/dev/null | grep -oE "FRAMETIME [a-z]+ p50=[0-9.]+ p95=[0-9.]+ n=[0-9]+" | tr -d '\r' | sed 's/^FRAMETIME //' | paste -sd ';' - || true)"
+frametimes="$(adb logcat -d -T "$SINCE" 2>/dev/null | grep -oE "FRAMETIME [a-z]+ p50=[0-9.]+ p95=[0-9.]+ n=[0-9]+" | tr -d '\r' | sed 's/^FRAMETIME //' | paste -sd ';' - || true)"
 gfx="$(adb shell dumpsys gfxinfo "$PKG" 2>/dev/null | tr -d '\r' | grep -E "Total frames rendered|Janky frames|50th percentile|90th percentile|99th percentile" || true)"
 thermal="$(adb shell dumpsys thermalservice 2>/dev/null | tr -d '\r' | grep -E "Thermal Status|mValue" | head -5 || true)"
 adb shell dumpsys meminfo "$PKG" > "$OUT/meminfo_end.txt" 2>/dev/null || true
-adb logcat -d > "$OUT/logcat.txt" 2>/dev/null || true
+adb logcat -d -T "$SINCE" > "$OUT/logcat.txt" 2>/dev/null || true
 adb shell am force-stop "$PKG"
 
 {

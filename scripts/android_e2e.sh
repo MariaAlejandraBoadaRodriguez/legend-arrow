@@ -77,6 +77,15 @@ do_action() {
   echo "action $1 done"
 }
 
+# `logcat -c` fails on some images (API 26: "failed to clear the 'main'
+# log", CI run 44458808071), so each journey reads logcat from a device-side
+# start time instead of relying on a clear.
+mark_log() {
+  adb logcat -c >/dev/null 2>&1 || true
+  SINCE="$(adb shell "date +'%m-%d %H:%M:%S.000'" | tr -d '\r')"
+}
+logs() { adb logcat -d -T "$SINCE" 2>/dev/null || true; }
+
 results=()
 fail=0
 clear_data
@@ -84,17 +93,17 @@ for j in "${JOURNEYS[@]}"; do
   start=$(date +%s)
   # Trigger file in the app's private files dir (debuggable build: run-as).
   adb shell "run-as $PKG sh -c 'mkdir -p files && echo $j > files/e2e_journey.txt'"
-  adb logcat -c
+  mark_log
   adb shell am start -W -n "$ACTIVITY" >/dev/null
   verdict=""
   done_actions=0
   while (( $(date +%s) - start < TIMEOUT_S )); do
-    actions=( $(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E ACTION [a-z]+" | awk '{print $3}' | tr -d '\r' || true) )
+    actions=( $(logs | grep -oE "LEGEND_E2E ACTION [a-z]+" | awk '{print $3}' | tr -d '\r' || true) )
     while (( done_actions < ${#actions[@]} )); do
       do_action "${actions[$done_actions]}"
       done_actions=$((done_actions + 1))
     done
-    verdict="$(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) $j.*" | head -1 | tr -d '\r' || true)"
+    verdict="$(logs | grep -oE "LEGEND_E2E (PASS|FAIL) $j.*" | head -1 | tr -d '\r' || true)"
     [[ -n "$verdict" ]] && break
     if (( $(date +%s) - start > 60 )) && app_dead; then
       verdict="LEGEND_E2E FAIL $j: app process died"
@@ -104,7 +113,7 @@ for j in "${JOURNEYS[@]}"; do
   done
   [[ -n "$verdict" ]] || verdict="LEGEND_E2E FAIL $j: no verdict within ${TIMEOUT_S}s"
   adb exec-out screencap -p > "$OUT/screencap/$j.png" || true
-  adb logcat -d > "$OUT/logcat/$j.txt" || true
+  logs > "$OUT/logcat/$j.txt"
   adb shell am force-stop "$PKG"
   secs=$(( $(date +%s) - start ))
   echo "$verdict (${secs}s)"
@@ -127,20 +136,20 @@ adb exec-out run-as "$PKG" tar -c -C files e2e 2>/dev/null | tar -x -C "$OUT/app
 # path, including the real UMP + Google Mobile Ads start-up with Google's
 # test IDs (no live ads, nothing is clicked). The app must come up and stay up.
 clear_data
-adb logcat -c
+mark_log
 adb shell am start -W -n "$ACTIVITY" | tr -d '\r' | grep -E "Status|TotalTime|WaitTime" | sed 's/^/cold start: /' || true
 sleep 30
-if ! app_dead && ! adb logcat -d | grep -qiE "FATAL EXCEPTION|Fatal signal"; then
+if ! app_dead && ! logs | grep -qiE "FATAL EXCEPTION|Fatal signal"; then
   echo "LEGEND_E2E PASS cold_start_smoke"
   results+=("cold_start_smoke|LEGEND_E2E PASS cold_start_smoke|8")
 else
   echo "LEGEND_E2E FAIL cold_start_smoke"
-  adb logcat -d | grep -iE "fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|godot|Ads|UserMessaging" | tail -80 || true
+  logs | grep -iE "fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|godot|Ads|UserMessaging" | tail -80 || true
   results+=("cold_start_smoke|LEGEND_E2E FAIL cold_start_smoke: not running|8")
   fail=1
 fi
 adb exec-out screencap -p > "$OUT/screencap/cold_start.png" || true
-adb logcat -d > "$OUT/logcat/cold_start.txt" || true
+logs > "$OUT/logcat/cold_start.txt"
 adb shell am force-stop "$PKG"
 
 

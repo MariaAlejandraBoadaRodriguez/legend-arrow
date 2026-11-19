@@ -61,8 +61,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		Game.back()
 
 
+## Screen captures simulate a device's cutout and system bars: insets in
+## window pixels (left, top, right, bottom). Zero = off.
+static var safe_insets_override := Vector4.ZERO
+
+
 ## Keeps screens clear of notches and gesture bars on phones.
 func _apply_safe_area(host: Control) -> void:
+	if safe_insets_override != Vector4.ZERO:
+		var k := get_viewport_rect().size / Vector2(DisplayServer.window_get_size())
+		host.offset_left = safe_insets_override.x * k.x
+		host.offset_top = safe_insets_override.y * k.y
+		host.offset_right = -safe_insets_override.z * k.x
+		host.offset_bottom = -safe_insets_override.w * k.y
+		return
 	if not OS.has_feature("mobile"):
 		return
 	var screen := Vector2(DisplayServer.screen_get_size())
