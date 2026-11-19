@@ -14,7 +14,7 @@ Source of truth for the Play Console form. Built from the **merged manifest of t
 `INTERNET`, `ACCESS_NETWORK_STATE`, `VIBRATE`, plus `WAKE_LOCK` / `FOREGROUND_SERVICE`-type entries merged by WorkManager inside the ads SDK (no identifiers). **Removed on purpose:** `com.google.android.gms.permission.AD_ID`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION`, `ACCESS_ADSERVICES_TOPICS`. Enforced by `check_apk.sh` on every CI build.
 
 ## Data collected by the app's own code
-None leaves the device. Progress, settings, hint counts and random ad receipts are stored locally (`user://save.json`). Event counters are local only (`EventLog`, no upload).
+None leaves the device. Progress, best times and star ratings (v0.2, local personal bests only), settings, hint counts and random ad receipts are stored locally (`user://save.json`). Event counters are local only (`EventLog`, no upload).
 
 ## Data collected or shared through SDKs (to declare)
 | Play category → type | Collected by | Purpose (Play wording) | Notes |

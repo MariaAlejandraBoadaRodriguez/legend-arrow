@@ -10,7 +10,7 @@ Legend Arrow ("the game") is published by [publisher name] ("we"). Contact: [con
 Legend Arrow is a puzzle game for a general audience, including children. We do not ask for anyone's age, name, email or any account. Every player receives our most protective settings (described below).
 
 ## What the game itself stores
-- **On your device only:** game progress, unlocked creatures, settings (volumes, reduced motion, haptics), hint counts and short random receipt codes for rewarded hints. This file stays in the game's private storage. It is deleted when you uninstall the game or clear its data.
+- **On your device only:** game progress, unlocked dragons, your best time and star rating per puzzle (personal records only: no leaderboard or account), settings (volumes, reduced motion, haptics, larger text), hint counts and short random receipt codes for rewarded hints. This file stays in the game's private storage. It is deleted when you uninstall the game or clear its data.
 - **Local event counters** (for example "level completed", "hint requested") stay on the device and are **never uploaded** in this version.
 - We have **no servers**. We do not collect, receive, sell or share any personal information ourselves. There are no accounts, no cloud saves, no analytics uploads and no notifications.
 
