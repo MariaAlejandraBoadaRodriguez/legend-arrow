@@ -38,10 +38,14 @@ func _ready() -> void:
 static func route_after_boot(result: Dictionary) -> void:
 	var home := Game.reset_to("home")
 	var pending := Game.progression.pending_awakening()
-	if pending != "":
+	if result.get("recovered", false):
+		# The recovery message always shows; an earned awakening follows it.
+		var then := func():
+			if pending != "":
+				Game.go("awakening", {"creature_id": pending, "replay": false})
+		Dialog.open(home, "SAVE_RESTORED_TITLE", "SAVE_RESTORED_BODY", [["CONTINUE", then, true, "RestoredContinue"]], "SaveRestoredDialog")
+	elif pending != "":
 		Game.go("awakening", {"creature_id": pending, "replay": false})
-	elif result.get("recovered", false):
-		Dialog.open(home, "SAVE_RESTORED_TITLE", "SAVE_RESTORED_BODY", [["CONTINUE", func(): pass, true, "RestoredContinue"]], "SaveRestoredDialog")
 
 
 func _notification(what: int) -> void:

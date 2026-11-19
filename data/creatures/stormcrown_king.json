@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "stormcrown_king",
+ "world": "w08",
+ "number": 80,
+ "name_key": "CREATURE_STORMCROWN_KING",
+ "lore_key": "CREATURE_STORMCROWN_KING_LORE",
+ "source_image": "assets/creatures/raw/stormcrown_king.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

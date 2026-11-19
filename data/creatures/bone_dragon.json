@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "bone_dragon",
+ "world": "w10",
+ "number": 93,
+ "name_key": "CREATURE_BONE_DRAGON",
+ "lore_key": "CREATURE_BONE_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/bone_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

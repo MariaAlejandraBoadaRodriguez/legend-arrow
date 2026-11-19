@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "depth_warden",
+ "world": "w09",
+ "number": 90,
+ "name_key": "CREATURE_DEPTH_WARDEN",
+ "lore_key": "CREATURE_DEPTH_WARDEN_LORE",
+ "source_image": "assets/creatures/raw/depth_warden.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "reedtail_wyvern",
+ "world": "w02",
+ "number": 14,
+ "name_key": "CREATURE_REEDTAIL_WYVERN",
+ "lore_key": "CREATURE_REEDTAIL_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/reedtail_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

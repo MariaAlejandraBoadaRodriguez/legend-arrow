@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "summit_drake",
+ "world": "w04",
+ "number": 37,
+ "name_key": "CREATURE_SUMMIT_DRAKE",
+ "lore_key": "CREATURE_SUMMIT_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/summit_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

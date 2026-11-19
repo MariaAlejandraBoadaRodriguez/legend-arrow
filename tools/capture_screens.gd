@@ -43,7 +43,7 @@ func _init() -> void:
 	await _settle()
 	await shot("03_level_select")
 
-	game.go("puzzle", {"level_id": "forest_drake_2"})
+	game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	await shot("04_puzzle")
 	var pz: Control = game.current_screen()
@@ -64,7 +64,7 @@ func _init() -> void:
 	game.leave()
 	await _settle()
 
-	game.go("puzzle", {"level_id": "forest_drake_1"})
+	game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	pz = game.current_screen()
 	for id in pz.level.solution:
@@ -72,7 +72,7 @@ func _init() -> void:
 		await _settle(0.45)
 	await _settle(0.5)
 	await shot("05_level_complete")
-	game.go("puzzle", {"level_id": "forest_drake_2"}, true)
+	game.go("puzzle", {"level_id": "forest_drake"}, true)
 	await _settle()
 	pz = game.current_screen()
 	for id in pz.level.solution:
@@ -100,10 +100,10 @@ func _init() -> void:
 	await _settle()
 	await shot("12_privacy")
 	game.reset_to("home")
-	pz = game.go("puzzle", {"level_id": "forest_drake_1"})
+	pz = game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	for i in 4:
-		game.progression.spend_hint("forest_drake_1")
+		game.progression.spend_hint("forest_drake")
 	pz.open_hint_sheet()
 	await _settle()
 	await shot("11_hint_sheet")

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "hoarfrost_wyvern",
+ "world": "w05",
+ "number": 48,
+ "name_key": "CREATURE_HOARFROST_WYVERN",
+ "lore_key": "CREATURE_HOARFROST_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/hoarfrost_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "tide_serpent",
+ "world": "w07",
+ "number": 65,
+ "name_key": "CREATURE_TIDE_SERPENT",
+ "lore_key": "CREATURE_TIDE_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/tide_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

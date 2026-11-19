@@ -97,16 +97,11 @@ func fresh_install() -> void:
 	if not await wait_screen("level_select"): return
 	await shot("level_select")
 	if not await tap("PlayButton"): return
-	if not await solve_current("forest_drake_1"): return
+	if not await solve_current("forest_drake"): return
 	if not await wait_screen("level_complete"): return
-	if not check(not Game.progression.is_creature_unlocked("forest_drake"), "1 of 2 does not unlock"): return
-	if not check(results_ok("forest_drake_1"), "results show time and stars, both saved"): return
+	if not check(results_ok("forest_drake"), "results show time and stars, both saved"): return
 	await seconds(1.2)  # let the stars appear
 	await shot("results")
-	if not await tap("NextButton"): return
-	if not await solve_current("forest_drake_2"): return
-	if not await wait_screen("level_complete"): return
-	if not check(results_ok("forest_drake_2"), "results for puzzle 2"): return
 	if not await tap("NextButton"): return
 	if not await wait_screen("awakening"): return
 	if not check(_saved().creatures.forest_drake.unlocked, "unlock on disk before the awakening ends"): return
@@ -121,13 +116,13 @@ func fresh_install() -> void:
 
 ## 2a. Partial puzzle, then the CI script kills the app.
 func partial_a() -> void:
-	if not await open_next_puzzle("moon_owl_1"): return
+	if not await open_next_puzzle("fern_wyrmling"): return
 	var pz: Control = Game.current_screen()
 	for id in pz.level.solution.slice(0, 2):
 		if not await tap_arrow(pz.board, id): return
 	await idle(pz.board)
 	var saved: Dictionary = _saved().get("in_progress", {})
-	if not check(saved.get("level_id", "") == "moon_owl_1" and saved.get("removed", []).size() == 2,
+	if not check(saved.get("level_id", "") == "fern_wyrmling" and saved.get("removed", []).size() == 2,
 			"partial state on disk: %s" % str(saved)): return
 	if not check(bool(saved.get("timer_started", false)) and int(saved.get("elapsed_ms", -1)) > 0,
 			"timer running and saved: %s" % str(saved)): return
@@ -137,7 +132,7 @@ func partial_a() -> void:
 ## 2b. Relaunch after termination restores the partial puzzle, then finish it.
 func partial_b() -> void:
 	if not await wait_screen("home"): return
-	if not await open_next_puzzle("moon_owl_1"): return
+	if not await open_next_puzzle("fern_wyrmling"): return
 	var pz: Control = Game.current_screen()
 	var total: int = pz.level.arrows.size()
 	if not check(pz.session.board.remaining_count() == total - 2,
@@ -150,11 +145,12 @@ func partial_b() -> void:
 		if pz.session.board.has_arrow(id) and pz.session.board.remaining_ids().has(id):
 			if not await tap_arrow(pz.board, id): return
 	if not await wait_screen("level_complete"): return
+	if not await collect_awakening(): return
 
 
 ## 3. Blocked move -> undo/restart -> successful completion.
 func blocked_undo() -> void:
-	if not await open_next_puzzle("moon_owl_2"): return
+	if not await open_next_puzzle("mossback_drake"): return
 	var pz: Control = Game.current_screen()
 	var board: PuzzleBoard = pz.session.board
 	var blocked := ""
@@ -179,11 +175,11 @@ func blocked_undo() -> void:
 	await idle(pz.board)
 	if not await tap("RestartButton"): return
 	if not check(board.remaining_count() == total, "restart restores every arrow"): return
-	if not await solve_current("moon_owl_2"): return
+	if not await solve_current("mossback_drake"): return
 	if not await wait_screen("level_complete"): return
 	if not await tap("NextButton"): return
 	if not await wait_screen("awakening"): return
-	if not check(Game.progression.is_creature_unlocked("moon_owl"), "moon owl unlocked"): return
+	if not check(Game.progression.is_creature_unlocked("mossback_drake"), "mossback drake unlocked"): return
 	if not await wait_for(func(): return Game.current_screen().get("finished") == true, 30.0, "awakening finishes"): return
 	if not await tap("ContinueButton"): return
 	if not await wait_screen("creature_detail"): return
@@ -191,7 +187,7 @@ func blocked_undo() -> void:
 
 ## 4. Rewarded hint success, then the ad-unavailable fallback.
 func hint_ad() -> void:
-	if not await open_next_puzzle("antler_fox_1"): return
+	if not await open_next_puzzle("thornclaw_whelp"): return
 	var pz: Control = Game.current_screen()
 	for i in 3:  # spend the three free hints by following them
 		if not await tap("HintButton"): return
@@ -224,9 +220,10 @@ func hint_ad() -> void:
 	else:
 		if not await tap("KeepPlaying"): return
 	if not await wait_for(func(): return Dialog.top(pz) == null, 2.0, "sheet closes"): return
-	if not await solve_current("antler_fox_1"): return
+	if not await solve_current("thornclaw_whelp"): return
 	if not await wait_screen("level_complete"): return
 	if not check(int(Game.current_screen().params.get("stars", 3)) <= 2, "a run with hints earns at most 2 stars"): return
+	if not await collect_awakening(): return
 
 
 ## 5. Creature awakening -> skip/replay -> bestiary.
@@ -387,6 +384,9 @@ func tap_arrow(board: BoardView, id: String) -> bool:
 		return false
 	await idle(board)
 	var cells := board.session.board.arrow(id).cells
+	if not board.is_cell_visible(cells[cells.size() / 2]):
+		board.reveal(id)  # zoomed board: bring the arrow into view first
+		await frames(2)
 	var local := board.cell_center(cells[cells.size() / 2])
 	await touch(to_window(board, local))
 	return true
@@ -451,6 +451,18 @@ func solve_current(level_id: String) -> bool:
 		if pz.session.board.remaining_ids().has(id):
 			if not await tap_arrow(pz.board, id): return false
 	return check(pz.session.is_complete(), "%s solved by taps" % level_id)
+
+
+## Results -> Next -> the earned awakening -> skip -> continue. One puzzle
+## awakens its dragon (v0.2), so a journey that ends on results would leave
+## an awakening pending and the next launch would open it instead of Home.
+func collect_awakening() -> bool:
+	if not await tap("NextButton"): return false
+	if not await wait_screen("awakening"): return false
+	await seconds(1.2)
+	if not await tap("SkipButton"): return false
+	if not await tap("ContinueButton"): return false
+	return await wait_screen("creature_detail")
 
 
 ## The results screen shows this run's time and stars and they match the save.

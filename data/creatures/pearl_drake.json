@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "pearl_drake",
+ "world": "w07",
+ "number": 69,
+ "name_key": "CREATURE_PEARL_DRAKE",
+ "lore_key": "CREATURE_PEARL_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/pearl_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

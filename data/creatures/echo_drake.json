@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "echo_drake",
+ "world": "w09",
+ "number": 89,
+ "name_key": "CREATURE_ECHO_DRAKE",
+ "lore_key": "CREATURE_ECHO_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/echo_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

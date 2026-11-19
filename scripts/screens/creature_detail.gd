@@ -18,8 +18,8 @@ func build() -> void:
 	var title := Ui.label(cr.name_key, "TitleLabel")
 	title.name = "CreatureName"
 	content.add_child(title)
-	var realm_key: String = Game.campaign.realms.filter(func(r): return r.id == cr.realm)[0].name_key
-	content.add_child(Ui.label(realm_key, "CaptionLabel"))
+	var w := Game.campaign.world(str(cr.get("world", "")))
+	content.add_child(Ui.label(tr("WORLD_N_NAME") % [int(w.get("number", 0)), tr(str(w.get("name_key", "")))], "CaptionLabel"))
 	content.add_child(Ui.label(cr.name_key + "_LORE"))
 	content.add_child(Ui.spacer(Palette.SPACE * 2))
 	content.add_child(Ui.button("OPEN_BESTIARY", func(): Game.go("bestiary"), true, "OpenBestiary"))

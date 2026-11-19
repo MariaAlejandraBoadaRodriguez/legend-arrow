@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "sea_drake",
+ "world": "w07",
+ "number": 61,
+ "name_key": "CREATURE_SEA_DRAKE",
+ "lore_key": "CREATURE_SEA_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/sea_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

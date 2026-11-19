@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "ember_serpent",
+ "world": "w06",
+ "number": 56,
+ "name_key": "CREATURE_EMBER_SERPENT",
+ "lore_key": "CREATURE_EMBER_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/ember_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

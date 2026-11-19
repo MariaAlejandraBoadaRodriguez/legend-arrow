@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cascade_serpent",
+ "world": "w03",
+ "number": 23,
+ "name_key": "CREATURE_CASCADE_SERPENT",
+ "lore_key": "CREATURE_CASCADE_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/cascade_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

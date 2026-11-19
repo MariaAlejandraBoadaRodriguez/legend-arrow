@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "squall_dragon",
+ "world": "w08",
+ "number": 79,
+ "name_key": "CREATURE_SQUALL_DRAGON",
+ "lore_key": "CREATURE_SQUALL_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/squall_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

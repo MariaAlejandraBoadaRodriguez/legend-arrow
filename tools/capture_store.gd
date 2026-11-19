@@ -43,7 +43,7 @@ func _screens(phone: bool) -> void:
 		await shot("tutorial")
 	# A first creature already awakened, reached through the real rules.
 	game.progression.data.tutorial_done = true
-	game.progression.complete_level("forest_drake_1")
+	game.progression.complete_level("forest_drake")
 	game.reset_to("home")
 	await _settle(0.5)
 	await shot("home")
@@ -58,7 +58,7 @@ func _screens(phone: bool) -> void:
 	await shot("puzzle")
 	game.reset_to("home")
 
-	game.go("puzzle", {"level_id": "forest_drake_2"})
+	game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	pz = game.current_screen()
 	for id in pz.level.solution:

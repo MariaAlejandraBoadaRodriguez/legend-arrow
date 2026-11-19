@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "twilight_dragon",
+ "world": "w10",
+ "number": 96,
+ "name_key": "CREATURE_TWILIGHT_DRAGON",
+ "lore_key": "CREATURE_TWILIGHT_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/twilight_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,43 +1,11 @@
 {
-  "schema_version": 1.0,
-  "id": "stone_wyrm",
-  "realm": "ancient_highlands",
-  "name_key": "CREATURE_STONE_WYRM",
-  "lore_key": "CREATURE_STONE_WYRM_LORE",
-  "art": "res://scenes/creatures/stone_wyrm.tscn",
-  "signature": "emerges_from_stone",
-  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
-  "level_masks": [
-    [
-      "......#####",
-      ".....######",
-      "....#######",
-      "...######..",
-      "...####....",
-      "..#####....",
-      "..#####....",
-      "..#####....",
-      "..#####....",
-      "#######....",
-      "######.....",
-      "#####......",
-      "####......."
-    ],
-    [
-      ".......#####",
-      "......######",
-      ".....#######",
-      "....######..",
-      "...#####....",
-      "...#####....",
-      "...####.....",
-      "..#####.....",
-      "..#####.....",
-      "..#####.....",
-      "#######.....",
-      "######......",
-      "######......",
-      "#####......."
-    ]
-  ]
+ "schema_version": 2,
+ "id": "stone_wyrm",
+ "world": "w09",
+ "number": 87,
+ "name_key": "CREATURE_STONE_WYRM",
+ "lore_key": "CREATURE_STONE_WYRM_LORE",
+ "source_image": "assets/creatures/raw/stone_wyrm.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use.",
+ "art": "res://scenes/creatures/stone_wyrm.tscn"
 }

@@ -1,39 +1,11 @@
 {
-  "schema_version": 1.0,
-  "id": "arctic_drake",
-  "realm": "cloud_peaks",
-  "name_key": "CREATURE_ARCTIC_DRAKE",
-  "lore_key": "CREATURE_ARCTIC_DRAKE_LORE",
-  "art": "res://scenes/creatures/arctic_drake.tscn",
-  "signature": "exhales_frost",
-  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
-  "level_masks": [
-    [
-      "............",
-      "....#.......",
-      "....####.###",
-      "...#####.###",
-      "...#####.#..",
-      "....######..",
-      ".....####...",
-      "....#####...",
-      "..##.##.#...",
-      ".##.........",
-      "............"
-    ],
-    [
-      "............",
-      "............",
-      "....###..#..",
-      "...#####.###",
-      "...#####.#..",
-      "...#######..",
-      "....######..",
-      "....#####...",
-      "...####.#...",
-      ".###.##.#...",
-      "............",
-      "............"
-    ]
-  ]
+ "schema_version": 2,
+ "id": "arctic_drake",
+ "world": "w05",
+ "number": 41,
+ "name_key": "CREATURE_ARCTIC_DRAKE",
+ "lore_key": "CREATURE_ARCTIC_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/arctic_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use.",
+ "art": "res://scenes/creatures/arctic_drake.tscn"
 }

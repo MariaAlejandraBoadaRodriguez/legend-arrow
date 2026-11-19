@@ -12,7 +12,13 @@ const SIZE_CAPTION := 24
 const SIZE_HEADING := 40
 const SIZE_TITLE := 60
 
+## Text size multiplier (1.0, or LARGE_TEXT with the "Larger text" setting).
+## Godot does not follow Android's system font scale, so the app offers its
+## own (D-48); profile P7 is tested with it.
+const LARGE_TEXT := 1.3
+
 static var _cached: Theme
+static var text_scale := 1.0
 
 
 static func get_theme() -> Theme:
@@ -21,22 +27,36 @@ static func get_theme() -> Theme:
 	return _cached
 
 
+## Changing the scale rebuilds the shared theme for screens opened afterwards.
+static func set_text_scale(s: float) -> bool:
+	if is_equal_approx(s, text_scale):
+		return false
+	text_scale = s
+	_cached = null
+	return true
+
+
+## A design font size scaled by the current text scale.
+static func fs(design_size: int) -> int:
+	return int(round(design_size * text_scale))
+
+
 static func build() -> Theme:
 	var t := Theme.new()
 	var regular: Font = load(FONT_REGULAR)
 	var semibold: Font = load(FONT_SEMIBOLD)
 	t.default_font = regular
-	t.default_font_size = SIZE_BODY
+	t.default_font_size = fs(SIZE_BODY)
 
 	# Labels
 	t.set_color("font_color", "Label", Palette.INK)
 	for v in ["TitleLabel", "HeadingLabel", "CaptionLabel"]:
 		t.set_type_variation(v, "Label")
 	t.set_font("font", "TitleLabel", regular)
-	t.set_font_size("font_size", "TitleLabel", SIZE_TITLE)
+	t.set_font_size("font_size", "TitleLabel", fs(SIZE_TITLE))
 	t.set_font("font", "HeadingLabel", semibold)
-	t.set_font_size("font_size", "HeadingLabel", SIZE_HEADING)
-	t.set_font_size("font_size", "CaptionLabel", SIZE_CAPTION)
+	t.set_font_size("font_size", "HeadingLabel", fs(SIZE_HEADING))
+	t.set_font_size("font_size", "CaptionLabel", fs(SIZE_CAPTION))
 	t.set_color("font_color", "CaptionLabel", Palette.SECONDARY)
 
 	# Buttons: secondary (outlined) by default.
@@ -71,7 +91,7 @@ static func build() -> Theme:
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		t.set_color(state, "FlatLinkButton", Palette.SECONDARY)
 	t.set_font("font", "FlatLinkButton", regular)
-	t.set_font_size("font_size", "FlatLinkButton", SIZE_CAPTION)
+	t.set_font_size("font_size", "FlatLinkButton", fs(SIZE_CAPTION))
 
 	# Panels
 	t.set_stylebox("panel", "PanelContainer", _box(Palette.CARD, Palette.CARD, 0, 18, 24))

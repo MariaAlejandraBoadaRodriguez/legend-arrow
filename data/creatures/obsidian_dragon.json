@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "obsidian_dragon",
+ "world": "w09",
+ "number": 83,
+ "name_key": "CREATURE_OBSIDIAN_DRAGON",
+ "lore_key": "CREATURE_OBSIDIAN_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/obsidian_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

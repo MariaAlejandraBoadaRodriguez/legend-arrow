@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "reef_dragon",
+ "world": "w07",
+ "number": 64,
+ "name_key": "CREATURE_REEF_DRAGON",
+ "lore_key": "CREATURE_REEF_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/reef_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

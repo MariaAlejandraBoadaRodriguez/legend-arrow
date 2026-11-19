@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "ravine_stalker",
+ "world": "w03",
+ "number": 28,
+ "name_key": "CREATURE_RAVINE_STALKER",
+ "lore_key": "CREATURE_RAVINE_STALKER_LORE",
+ "source_image": "assets/creatures/raw/ravine_stalker.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

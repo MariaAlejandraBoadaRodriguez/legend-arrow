@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cirrus_dragon",
+ "world": "w04",
+ "number": 36,
+ "name_key": "CREATURE_CIRRUS_DRAGON",
+ "lore_key": "CREATURE_CIRRUS_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/cirrus_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

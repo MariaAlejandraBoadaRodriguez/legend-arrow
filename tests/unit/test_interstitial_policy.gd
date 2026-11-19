@@ -89,8 +89,8 @@ func test_disabled_interstitials() -> void:
 func test_ad_service_never_waits_for_interstitial() -> void:
 	var mock := MockAdProvider.new()
 	mock.manual = true
-	var prog := Progression.new(Campaign.from_dict({"schema_version": 1, "realms": [{"id": "r"}],
-		"creatures": [{"id": "d", "realm": "r", "levels": ["a", "b"]}]}).campaign, SaveSchema.defaults())
+	var prog := Progression.new(Campaign.from_dict({"schema_version": 2, "worlds": [{"id": "r"}],
+		"dragons": [{"id": "d", "world": "r", "levels": ["a", "b"]}]}).campaign, SaveSchema.defaults())
 	var cfg := AdConfig.test_config()
 	cfg.audience = "adult"
 	var ads := AdService.new(mock, cfg, prog, null)

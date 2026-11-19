@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "bogfire_drake",
+ "world": "w02",
+ "number": 13,
+ "name_key": "CREATURE_BOGFIRE_DRAKE",
+ "lore_key": "CREATURE_BOGFIRE_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/bogfire_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "deepdark_wyvern",
+ "world": "w09",
+ "number": 84,
+ "name_key": "CREATURE_DEEPDARK_WYVERN",
+ "lore_key": "CREATURE_DEEPDARK_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/deepdark_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

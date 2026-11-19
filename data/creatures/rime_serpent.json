@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "rime_serpent",
+ "world": "w05",
+ "number": 44,
+ "name_key": "CREATURE_RIME_SERPENT",
+ "lore_key": "CREATURE_RIME_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/rime_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

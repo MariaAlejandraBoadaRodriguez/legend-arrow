@@ -24,10 +24,14 @@ func after_each() -> void:
 func test_every_sound_and_creature_motif_is_packaged() -> void:
 	for s in AudioDirector.SFX:
 		assert_true(ResourceLoader.exists(AudioDirector.DIR + s + ".wav"), s)
-	var roster: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign.json")).creatures
-	assert_gt(roster.size(), 0)
-	for c in roster:
-		assert_true(ResourceLoader.exists(AudioDirector.DIR + "creature_%s.wav" % c.id), c.id)
+	var roster: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign.json")).dragons
+	assert_eq(roster.size(), 100)
+	for c in roster:  # its own motif, or its world's (D-47)
+		var own := ResourceLoader.exists(AudioDirector.DIR + "creature_%s.wav" % c.id)
+		var world := ResourceLoader.exists(AudioDirector.DIR + "%s.wav" % AudioDirector.WORLD_MOTIF.get(c.world, "-"))
+		assert_true(own or world, c.id)
+	for w in AudioDirector.WORLD_MOTIF:
+		assert_true(ResourceLoader.exists(AudioDirector.DIR + AudioDirector.WORLD_MOTIF[w] + ".wav"), "%s motif" % w)
 	var music := load(AudioDirector.DIR + "music_ambient.wav") as AudioStreamWAV
 	assert_not_null(music)
 	assert_eq(music.loop_mode, AudioStreamWAV.LOOP_FORWARD, "music loops")
@@ -87,6 +91,6 @@ func test_music_starts_once() -> void:
 
 
 func test_every_creature_motif_plays() -> void:
-	for c in JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign.json")).creatures:
-		assert_true(director.play_creature(c.id), c.id)
+	for c in JSON.parse_string(FileAccess.get_file_as_string("res://data/campaign.json")).dragons:
+		assert_true(director.play_creature(c.id, c.world), c.id)
 	director.stop_creature()

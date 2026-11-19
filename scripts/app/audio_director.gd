@@ -75,8 +75,19 @@ func play_sfx(sound: String) -> AudioStreamPlayer:
 	return voice
 
 
-func play_creature(creature_id: String) -> bool:
+## One original motif per world for dragons without their own sound (D-47).
+const WORLD_MOTIF := {
+	"w01": "creature_forest_drake", "w02": "creature_basilisk", "w03": "creature_cloud_serpent",
+	"w04": "creature_wyvern", "w05": "creature_arctic_drake", "w06": "creature_phoenix",
+	"w07": "creature_moon_owl", "w08": "creature_griffin", "w09": "creature_stone_wyrm",
+	"w10": "creature_ancient_dragon",
+}
+
+
+func play_creature(creature_id: String, world_id: String = "") -> bool:
 	var stream := _stream("creature_" + creature_id)
+	if stream == null and WORLD_MOTIF.has(world_id):
+		stream = _stream(WORLD_MOTIF[world_id])
 	if stream == null:
 		return false
 	_creature.stream = stream

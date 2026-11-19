@@ -18,24 +18,51 @@ func is_level_completed(level_id: String) -> bool:
 	return data.levels.has(level_id) and bool(data.levels[level_id].get("completed", false))
 
 
-## First creature's first level is always open; a creature's second level opens
-## after its first; the next creature opens once the previous one is unlocked.
+## World 1 is always open; world N+1 opens when every level of world N is
+## completed (v0.2 §2).
+func is_world_unlocked(world_id: String) -> bool:
+	var i := campaign.world_index(world_id)
+	if i <= 0:
+		return i == 0
+	for l in campaign.levels_in_world(campaign.worlds[i - 1].id):
+		if not is_level_completed(l):
+			return false
+	return true
+
+
+func is_world_complete(world_id: String) -> bool:
+	var ls := campaign.levels_in_world(world_id)
+	return not ls.is_empty() and ls.all(func(l): return is_level_completed(l))
+
+
+func world_completed_count(world_id: String) -> int:
+	return campaign.levels_in_world(world_id).filter(func(l): return is_level_completed(l)).size()
+
+
+## Inside an open world, dragons open one by one: the first is open, each next
+## one after the previous dragon's level is completed. A dragon's later levels
+## (none in v0.2) follow its earlier ones. Completed levels stay open.
 func is_level_unlocked(level_id: String) -> bool:
 	var cid := campaign.creature_of_level(level_id)
-	if cid == "":
+	if cid == "" or not is_world_unlocked(campaign.world_of(cid)):
 		return false
+	if is_level_completed(level_id):
+		return true
 	var slot := campaign.level_slot(level_id)
-	if slot == 1:
-		return is_level_completed(campaign.creature(cid).levels[0])
-	var idx := campaign.creature_index(cid)
-	return idx == 0 or is_creature_unlocked(campaign.creatures[idx - 1].id)
+	if slot > 0:
+		return is_level_completed(campaign.creature(cid).levels[slot - 1])
+	var k := campaign.index_in_world(cid)
+	if k <= 0:
+		return true
+	var prev: Dictionary = campaign.creatures_in_world(campaign.world_of(cid))[k - 1]
+	return (prev.levels as Array).all(func(l): return is_level_completed(l))
 
 
 func is_creature_unlocked(cid: String) -> bool:
 	return data.creatures.has(cid) and bool(data.creatures[cid].get("unlocked", false))
 
 
-## Number of the creature's puzzles completed (0..2).
+## Number of the dragon's puzzles completed (0..levels).
 func creature_progress(cid: String) -> int:
 	var n := 0
 	for l in campaign.creature(cid).get("levels", []):
@@ -70,7 +97,7 @@ func complete_level(level_id: String) -> Dictionary:
 		data.levels[level_id] = rec
 		result.first_completion = true
 	var unlock_tx := "unlock:%s" % cid
-	if creature_progress(cid) == 2 and not data.transactions.has(unlock_tx):
+	if creature_progress(cid) == (campaign.creature(cid).levels as Array).size() and not data.transactions.has(unlock_tx):
 		data.transactions[unlock_tx] = true
 		data.creatures[cid] = {"unlocked": true, "awakening_seen": false}
 		result.unlocked_creature = cid

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "river_drake",
+ "world": "w03",
+ "number": 21,
+ "name_key": "CREATURE_RIVER_DRAKE",
+ "lore_key": "CREATURE_RIVER_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/river_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

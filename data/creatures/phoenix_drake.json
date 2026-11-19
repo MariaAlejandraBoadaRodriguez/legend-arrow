@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "phoenix_drake",
+ "world": "w06",
+ "number": 59,
+ "name_key": "CREATURE_PHOENIX_DRAKE",
+ "lore_key": "CREATURE_PHOENIX_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/phoenix_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

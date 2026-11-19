@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "thunderhead_drake",
+ "world": "w04",
+ "number": 38,
+ "name_key": "CREATURE_THUNDERHEAD_DRAKE",
+ "lore_key": "CREATURE_THUNDERHEAD_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/thunderhead_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

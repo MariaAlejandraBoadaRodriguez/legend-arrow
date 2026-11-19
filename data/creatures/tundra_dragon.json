@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "tundra_dragon",
+ "world": "w05",
+ "number": 47,
+ "name_key": "CREATURE_TUNDRA_DRAGON",
+ "lore_key": "CREATURE_TUNDRA_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/tundra_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "sentinel_dragon",
+ "world": "w10",
+ "number": 99,
+ "name_key": "CREATURE_SENTINEL_DRAGON",
+ "lore_key": "CREATURE_SENTINEL_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/sentinel_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

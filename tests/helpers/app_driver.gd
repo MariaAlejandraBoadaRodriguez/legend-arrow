@@ -76,6 +76,8 @@ func press(node_name: String) -> bool:
 ## Finger down + up at the middle cell of an arrow, in board-local coords.
 func tap_arrow(board: BoardView, id: String) -> void:
 	var cells := board.session.board.arrow(id).cells
+	if not board.is_cell_visible(cells[cells.size() / 2]):
+		board.reveal(id)
 	tap_at(board, board.cell_center(cells[cells.size() / 2]))
 
 

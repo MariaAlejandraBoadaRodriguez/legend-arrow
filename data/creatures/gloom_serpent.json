@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "gloom_serpent",
+ "world": "w09",
+ "number": 86,
+ "name_key": "CREATURE_GLOOM_SERPENT",
+ "lore_key": "CREATURE_GLOOM_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/gloom_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

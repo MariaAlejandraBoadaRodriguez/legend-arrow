@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "elder_wyvern",
+ "world": "w10",
+ "number": 94,
+ "name_key": "CREATURE_ELDER_WYVERN",
+ "lore_key": "CREATURE_ELDER_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/elder_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

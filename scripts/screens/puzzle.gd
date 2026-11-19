@@ -28,7 +28,8 @@ func build() -> void:
 	var saved: Dictionary = Game.progression.data.in_progress
 	if saved.get("level_id", "") == level_id:
 		session.apply_saved(saved)
-	var subtitle := "%s · %s" % [tr("PUZZLE_N_OF_2") % (Game.campaign.level_slot(level_id) + 1), tr("DIFFICULTY_%s" % str(level.difficulty).to_upper())]
+	var w := Game.campaign.world(Game.campaign.world_of(creature_id))
+	var subtitle := tr("PUZZLE_SUBTITLE") % [int(w.get("number", 0)), tr("DIFFICULTY_%s" % str(level.difficulty).to_upper())]
 	var pause := Ui.icon_button("II", open_pause, "PAUSE", "PauseButton")
 	pause.add_theme_font_size_override("font_size", 30)
 	content.add_child(Ui.top_bar(Game.campaign.creature(creature_id).name_key, subtitle, open_pause, pause))

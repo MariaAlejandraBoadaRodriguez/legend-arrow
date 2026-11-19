@@ -1,43 +1,11 @@
 {
-  "schema_version": 1.0,
-  "id": "cloud_serpent",
-  "realm": "cloud_peaks",
-  "name_key": "CREATURE_CLOUD_SERPENT",
-  "lore_key": "CREATURE_CLOUD_SERPENT_LORE",
-  "art": "res://scenes/creatures/cloud_serpent.tscn",
-  "signature": "coils_and_rises",
-  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
-  "level_masks": [
-    [
-      "............",
-      ".........##.",
-      "........####",
-      ".......####.",
-      "...#######..",
-      "..#######...",
-      ".#######....",
-      ".###........",
-      "####........",
-      "###.........",
-      "##..........",
-      "............"
-    ],
-    [
-      "..............",
-      "..............",
-      "..........###.",
-      ".........#####",
-      ".........####.",
-      ".....#######..",
-      "...########...",
-      "..########....",
-      ".#######......",
-      ".####.........",
-      "####..........",
-      "###...........",
-      "##............",
-      "..............",
-      ".............."
-    ]
-  ]
+ "schema_version": 2,
+ "id": "cloud_serpent",
+ "world": "w04",
+ "number": 31,
+ "name_key": "CREATURE_CLOUD_SERPENT",
+ "lore_key": "CREATURE_CLOUD_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/cloud_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use.",
+ "art": "res://scenes/creatures/cloud_serpent.tscn"
 }

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "leviathan",
+ "world": "w07",
+ "number": 70,
+ "name_key": "CREATURE_LEVIATHAN",
+ "lore_key": "CREATURE_LEVIATHAN_LORE",
+ "source_image": "assets/creatures/raw/leviathan.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

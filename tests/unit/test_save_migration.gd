@@ -78,10 +78,10 @@ func test_no_reward_can_be_granted_twice_after_migration() -> void:
 		assert_true(d.transactions.has("unlock:%s" % dragon))
 	assert_eq(d.transactions.size(), 4, "one completion + one unlock per migrated dragon")
 	# A roster campaign: completing the migrated levels again unlocks nothing new.
-	var c: Campaign = Campaign.from_dict({"schema_version": 1, "realms": [{"id": "w1", "name_key": "W"}],
-		"creatures": [
-			{"id": "forest_drake", "realm": "w1", "name_key": "A", "levels": ["forest_drake", "forest_drake_b"]},
-			{"id": "fern_wyrmling", "realm": "w1", "name_key": "B", "levels": ["fern_wyrmling", "fern_wyrmling_b"]},
+	var c: Campaign = Campaign.from_dict({"schema_version": 2, "worlds": [{"id": "w1", "name_key": "W"}],
+		"dragons": [
+			{"id": "forest_drake", "world": "w1", "name_key": "A", "levels": ["forest_drake", "forest_drake_b"]},
+			{"id": "fern_wyrmling", "world": "w1", "name_key": "B", "levels": ["fern_wyrmling", "fern_wyrmling_b"]},
 		]}).campaign
 	var p := Progression.new(c, d)
 	var tx: Dictionary = d.transactions.duplicate()

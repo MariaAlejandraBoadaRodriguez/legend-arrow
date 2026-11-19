@@ -63,7 +63,7 @@ func _begin() -> void:
 func _play_motif() -> void:
 	if is_inside_tree() and not has_meta("motif"):
 		set_meta("motif", true)
-		Game.audio.play_creature(creature_id)
+		Game.audio.play_creature(creature_id, Game.campaign.world_of(creature_id))
 
 
 func _process(delta: float) -> void:

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "windrider_drake",
+ "world": "w04",
+ "number": 34,
+ "name_key": "CREATURE_WINDRIDER_DRAKE",
+ "lore_key": "CREATURE_WINDRIDER_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/windrider_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

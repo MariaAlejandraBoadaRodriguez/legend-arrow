@@ -57,22 +57,16 @@ func test_journey_fresh_install_tutorial_to_first_creature() -> void:
 	await _layout()
 	assert_true(app.press("PlayButton"))
 	assert_eq(Game.current_screen_name(), "puzzle")
-	assert_eq(app.screen().level_id, "forest_drake_1")
+	assert_eq(app.screen().level_id, "forest_drake")
 	await _layout()
 	await app.solve_current_puzzle()
 	assert_eq(Game.current_screen_name(), "level_complete", "results after every puzzle")
-	assert_false(Game.progression.is_creature_unlocked("forest_drake"), "1 of 2 does not unlock")
+	assert_true(Game.progression.is_creature_unlocked("forest_drake"), "one puzzle awakens its dragon")
 	var res: Control = app.screen()
 	assert_eq((res.find_child("RecordLabel", true, false) as Label).text, tr("FIRST_CLEAR"))
 	assert_between((res.find_child("Stars", true, false) as StarRow).earned, 1, 3)
 	assert_eq((res.find_child("TimeLabel", true, false) as Label).text, SpeedTimer.format_ms(int(res.params.time_ms)))
-	assert_eq(Game.progression.best_time_ms("forest_drake_1"), int(res.params.time_ms), "time saved")
-	assert_true(app.press("NextButton"))
-	assert_eq(app.screen().level_id, "forest_drake_2")
-	await _layout()
-	await app.solve_current_puzzle()
-	assert_eq(Game.current_screen_name(), "level_complete")
-	assert_true(Game.progression.is_creature_unlocked("forest_drake"))
+	assert_eq(Game.progression.best_time_ms("forest_drake"), int(res.params.time_ms), "time saved")
 	assert_true(app.press("NextButton"), "Next opens the earned awakening")
 	assert_eq(Game.current_screen_name(), "awakening")
 	# Unlock is on disk before the awakening finishes.
@@ -90,7 +84,7 @@ func test_journey_partial_puzzle_survives_termination() -> void:
 	Game.progression.data.tutorial_done = true
 	Game.reset_to("home")
 	Game.go("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	var pz: Control = app.screen()
 	var first: String = pz.level.solution[0]
@@ -103,7 +97,7 @@ func test_journey_partial_puzzle_survives_termination() -> void:
 	var res := app.relaunch()
 	assert_eq(res.source, SaveRepository.Source.MAIN)
 	Game.reset_to("home")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	assert_eq(app.screen().session.board.state_key(), expected_key, "board restored exactly")
 	assert_eq(app.screen().session.history, [first, second] as Array[String], "undo history restored")
@@ -112,7 +106,7 @@ func test_journey_partial_puzzle_survives_termination() -> void:
 func test_journey_blocked_then_undo_restart_then_complete() -> void:
 	Game.progression.data.tutorial_done = true
 	Game.reset_to("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_1"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	var pz: Control = app.screen()
 	var blocked := ""
@@ -137,12 +131,12 @@ func test_journey_blocked_then_undo_restart_then_complete() -> void:
 	assert_eq(Game.progression.data.in_progress.removed, [], "restart is saved")
 	await app.solve_current_puzzle()
 	assert_eq(Game.current_screen_name(), "level_complete")
-	assert_true(Game.progression.is_level_completed("forest_drake_1"))
+	assert_true(Game.progression.is_level_completed("forest_drake"))
 
 
 func test_hints_spend_free_then_show_sheet() -> void:
 	Game.reset_to("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	var pz: Control = app.screen()
 	assert_eq(app.button("HintButton").text, tr("HINT_FREE") % 3)
@@ -151,12 +145,12 @@ func test_hints_spend_free_then_show_sheet() -> void:
 	assert_ne(hinted, "")
 	assert_true(pz.session.board.is_removable(hinted), "hint is a removable arrow")
 	app.press("HintButton")
-	assert_eq(Game.progression.free_hints_left("forest_drake_2"), 2, "re-pressing while shown costs nothing")
+	assert_eq(Game.progression.free_hints_left("forest_drake"), 2, "re-pressing while shown costs nothing")
 	for i in 2:
 		app.tap_arrow(pz.board, pz.board.hint_id())
 		await app.board_idle(pz.board)
 		app.press("HintButton")
-	assert_eq(Game.progression.free_hints_left("forest_drake_2"), 0)
+	assert_eq(Game.progression.free_hints_left("forest_drake"), 0)
 	app.tap_arrow(pz.board, pz.board.hint_id())
 	await app.board_idle(pz.board)
 	app.press("HintButton")
@@ -168,8 +162,7 @@ func test_hints_spend_free_then_show_sheet() -> void:
 
 func test_awakening_skip_replay_and_bestiary() -> void:
 	Game.set_setting("reduce_motion", false)
-	for l in ["forest_drake_1", "forest_drake_2"]:
-		Game.progression.complete_level(l)
+	Game.progression.complete_level("forest_drake")
 	Game.reset_to("home")
 	Game.go("awakening", {"creature_id": "forest_drake", "replay": false})
 	await _layout()
@@ -218,8 +211,9 @@ func test_screens_fit_phone_width_with_full_collection() -> void:
 		Game.progression.complete_level(level_id)
 	Game.progression.data.tutorial_done = true
 	var screens := [["home", {}], ["level_select", {}], ["bestiary", {}], ["settings", {}],
-		["creature_detail", {"creature_id": "forest_drake"}], ["puzzle", {"level_id": "ancient_dragon_2"}],
-		["tutorial", {}]]
+		["creature_detail", {"creature_id": "forest_drake"}], ["puzzle", {"level_id": "ancient_dragon"}],
+		["tutorial", {}], ["world_select", {}], ["level_select", {"world_id": "w10"}], ["level_complete",
+		{"level_id": "ancient_dragon", "stars": 3, "time_ms": 3_599_000, "par_ms": 99_000, "new_record": true}]]
 	for entry in screens:
 		Game.reset_to(entry[0], entry[1])
 		await _layout()
@@ -230,10 +224,9 @@ func test_screens_fit_phone_width_with_full_collection() -> void:
 
 func test_kill_during_awakening_replays_without_duplicate_unlock() -> void:
 	Game.progression.data.tutorial_done = true
-	Game.progression.complete_level("forest_drake_1")
 	Game.persist()
 	Game.reset_to("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	await app.solve_current_puzzle()
 	assert_eq(Game.current_screen_name(), "level_complete")
@@ -277,7 +270,7 @@ func test_device_language_never_changes_the_ui() -> void:
 func test_back_navigation_and_overlays() -> void:
 	Game.reset_to("home")
 	Game.go("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_1"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	var pz: Control = app.screen()
 	assert_true(Game.back())
@@ -299,7 +292,7 @@ func test_back_navigation_and_overlays() -> void:
 
 func test_app_pause_saves_in_progress_state() -> void:
 	Game.reset_to("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await _layout()
 	var pz: Control = app.screen()
 	pz.session.tap(pz.level.solution[0])  # model-only move: not yet saved
@@ -309,7 +302,7 @@ func test_app_pause_saves_in_progress_state() -> void:
 
 
 func test_corrupt_save_shows_recovery_message_once() -> void:
-	Game.progression.complete_level("forest_drake_1")
+	Game.progression.complete_level("forest_drake")
 	Game.persist()
 	Game.persist()  # second write rotates a valid backup
 	var f := FileAccess.open(app.save_path, FileAccess.WRITE)
@@ -320,8 +313,12 @@ func test_corrupt_save_shows_recovery_message_once() -> void:
 	load("res://scripts/app/main.gd").route_after_boot(res)
 	assert_not_null(Dialog.top(app.screen()))
 	assert_eq(Dialog.top(app.screen()).name, "SaveRestoredDialog")
-	assert_true(Game.progression.is_level_completed("forest_drake_1"), "progress kept")
+	assert_true(Game.progression.is_level_completed("forest_drake"), "progress kept")
 	assert_eq(Game.events.count("save_recovery"), 1)
+	# The awakening earned before the crash follows the message.
+	assert_eq(Game.progression.pending_awakening(), "forest_drake")
+	assert_true(app.press("RestoredContinue"))
+	assert_eq(Game.current_screen_name(), "awakening")
 	var again := app.relaunch()
 	assert_false(again.recovered, "repaired file loads normally next time")
 
@@ -329,11 +326,10 @@ func test_corrupt_save_shows_recovery_message_once() -> void:
 func test_twenty_transitions_do_not_leak_nodes() -> void:
 	# Engine-level proxy for spec §14 (memory settles after 20 transitions).
 	# Device PSS measurements are separate and need a physical phone.
-	for l in ["forest_drake_1", "forest_drake_2"]:
-		Game.progression.complete_level(l)
+	Game.progression.complete_level("forest_drake")
 	var cycle := func():
 		Game.reset_to("level_select")
-		Game.go("puzzle", {"level_id": "forest_drake_1"})
+		Game.go("puzzle", {"level_id": "forest_drake"})
 		Game.go("creature_detail", {"creature_id": "forest_drake"})
 		Game.go("bestiary")
 	cycle.call()  # warm caches (theme, fonts, scripts)
@@ -378,7 +374,7 @@ func _first_tap(pz: Control) -> void:
 
 
 func test_timer_waits_for_the_first_tap_and_shows_discreetly() -> void:
-	var pz := await _open_timed("forest_drake_1")
+	var pz := await _open_timed("forest_drake")
 	_tick(pz, 3000)
 	assert_eq(pz.session.elapsed_ms(), 0, "no clock before the first tap")
 	assert_eq((pz.find_child("TimerLabel", true, false) as Label).text, "0:00")
@@ -389,7 +385,7 @@ func test_timer_waits_for_the_first_tap_and_shows_discreetly() -> void:
 
 
 func test_timer_pauses_for_pause_menu_overlays_background_and_ads() -> void:
-	var pz := await _open_timed("forest_drake_1")
+	var pz := await _open_timed("forest_drake")
 	await _first_tap(pz)
 	_tick(pz, 1000)
 	var d: Dialog = pz.open_pause()
@@ -421,7 +417,7 @@ func test_timer_pauses_for_pause_menu_overlays_background_and_ads() -> void:
 
 
 func test_timer_survives_kill_and_relaunch() -> void:
-	var pz := await _open_timed("forest_drake_1")
+	var pz := await _open_timed("forest_drake")
 	await _first_tap(pz)
 	_tick(pz, 7000)
 	app.tap_arrow(pz.board, pz.level.solution[1])  # a move saves time + board
@@ -429,7 +425,7 @@ func test_timer_survives_kill_and_relaunch() -> void:
 	var saved_ms: int = pz.session.elapsed_ms()
 	app.relaunch()
 	Game.reset_to("level_select")
-	var again: Control = Game.go("puzzle", {"level_id": "forest_drake_1"})
+	var again: Control = Game.go("puzzle", {"level_id": "forest_drake"})
 	again.set_process(false)  # before its first frame, so only the test feeds time
 	await _layout()
 	assert_eq(again.session.history.size(), 2)
@@ -449,14 +445,14 @@ func _solve_timed(pz: Control, ms_per_arrow: float) -> void:
 
 
 func test_results_and_replays_only_improve_bests() -> void:
-	var pz := await _open_timed("forest_drake_1")
+	var pz := await _open_timed("forest_drake")
 	var par: int = pz.session.par_ms
 	await _solve_timed(pz, float(par) / pz.level.solution.size() * 1.5)  # ~1.5x par: 2 stars
 	assert_eq(Game.current_screen_name(), "level_complete")
 	var r: Control = app.screen()
 	assert_eq(int(r.params.stars), 2)
 	assert_eq((r.find_child("Stars", true, false) as StarRow).earned, 2)
-	var slow_ms := Game.progression.best_time_ms("forest_drake_1")
+	var slow_ms := Game.progression.best_time_ms("forest_drake")
 	assert_gt(slow_ms, par)
 	# Faster replay from the results screen: 3 stars, new record.
 	assert_true(app.press("RetryButton"))
@@ -468,9 +464,9 @@ func test_results_and_replays_only_improve_bests() -> void:
 	assert_eq(int(r.params.stars), 3)
 	assert_true(r.params.new_record)
 	assert_eq((r.find_child("RecordLabel", true, false) as Label).text, tr("NEW_RECORD"))
-	var fast_ms := Game.progression.best_time_ms("forest_drake_1")
+	var fast_ms := Game.progression.best_time_ms("forest_drake")
 	assert_lt(fast_ms, slow_ms)
-	assert_eq(Game.progression.best_stars("forest_drake_1"), 3)
+	assert_eq(Game.progression.best_stars("forest_drake"), 3)
 	# Slower replay with a hint: nothing drops.
 	assert_true(app.press("RetryButton"))
 	await _layout()
@@ -481,26 +477,26 @@ func test_results_and_replays_only_improve_bests() -> void:
 	r = app.screen()
 	assert_eq(int(r.params.stars), 1)
 	assert_false(r.params.new_record)
-	assert_eq(Game.progression.best_time_ms("forest_drake_1"), fast_ms, "best time kept")
-	assert_eq(Game.progression.best_stars("forest_drake_1"), 3, "best stars kept")
+	assert_eq(Game.progression.best_time_ms("forest_drake"), fast_ms, "best time kept")
+	assert_eq(Game.progression.best_stars("forest_drake"), 3, "best stars kept")
 	var on_disk: Dictionary = SaveRepository.new(app.save_path).load_save().data
-	assert_eq(int(on_disk.levels.forest_drake_1.best_time_ms), fast_ms)
-	assert_eq(int(on_disk.levels.forest_drake_1.best_stars), 3)
-	assert_eq(Game.events.count("creature_unlock"), 0, "replays never unlock")
+	assert_eq(int(on_disk.levels.forest_drake.best_time_ms), fast_ms)
+	assert_eq(int(on_disk.levels.forest_drake.best_stars), 3)
+	assert_eq(Game.events.count("creature_unlock"), 1, "the first clear awakens the dragon; replays never unlock again")
 	# Level select shows them.
-	Game.reset_to("level_select", {"creature_id": "forest_drake"})
+	Game.reset_to("level_select", {"world_id": "w01"})
 	await _layout()
-	var line := app.screen().find_child("Best_forest_drake_1", true, false)
+	var line := app.screen().find_child("Best_forest_drake", true, false)
 	assert_not_null(line)
 	assert_eq((line.find_child("Stars", true, false) as StarRow).earned, 3)
-	assert_eq((line.find_child("BestTime", true, false) as Label).text, tr("BEST_TIME_STARS") % SpeedTimer.format_ms(fast_ms))
+	assert_eq((line.find_child("BestTime", true, false) as Label).text, SpeedTimer.format_ms(fast_ms))
 	assert_eq((app.screen().find_child("TotalStars", true, false) as Label).text, tr("TOTAL_STARS") % [3, 3 * Game.campaign.level_ids().size()])
 
 
 func test_results_stars_reveal_one_by_one_or_fade_with_reduced_motion() -> void:
 	for rm in [true, false]:
 		Game.set_setting("reduce_motion", rm)
-		Game.reset_to("level_complete", {"level_id": "forest_drake_1", "stars": 3, "time_ms": 1000, "par_ms": 9000})
+		Game.reset_to("level_complete", {"level_id": "forest_drake", "stars": 3, "time_ms": 1000, "par_ms": 9000})
 		await _layout()
 		var st: StarRow = app.screen().find_child("Stars", true, false)
 		assert_false(st.revealed, "starts hidden")

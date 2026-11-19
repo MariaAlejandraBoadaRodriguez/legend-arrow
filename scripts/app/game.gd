@@ -9,6 +9,7 @@ signal settings_changed
 const SCREENS := {
 	"home": "res://scenes/screens/home.tscn",
 	"tutorial": "res://scenes/screens/tutorial.tscn",
+	"world_select": "res://scenes/screens/world_select.tscn",
 	"level_select": "res://scenes/screens/level_select.tscn",
 	"puzzle": "res://scenes/screens/puzzle.tscn",
 	"level_complete": "res://scenes/screens/level_complete.tscn",
@@ -119,6 +120,9 @@ func set_setting(key: String, value: Variant) -> void:
 func apply_settings() -> void:
 	var s := settings()
 	TranslationServer.set_locale(LOCALE)
+	if UiTheme.set_text_scale(UiTheme.LARGE_TEXT if bool(s.get("large_text", false)) else 1.0):
+		if _host != null and _host.get_parent() is Control:
+			(_host.get_parent() as Control).theme = UiTheme.get_theme()
 	for bus_name in BUSES:
 		var idx := AudioServer.get_bus_index(bus_name)
 		var vol: float = s.get({"Music": "music_volume", "SFX": "sfx_volume", "Creature": "creature_volume"}[bus_name], 1.0)

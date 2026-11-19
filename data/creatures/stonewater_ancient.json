@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "stonewater_ancient",
+ "world": "w03",
+ "number": 30,
+ "name_key": "CREATURE_STONEWATER_ANCIENT",
+ "lore_key": "CREATURE_STONEWATER_ANCIENT_LORE",
+ "source_image": "assets/creatures/raw/stonewater_ancient.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

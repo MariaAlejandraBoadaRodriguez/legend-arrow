@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "peak_drake",
+ "world": "w04",
+ "number": 33,
+ "name_key": "CREATURE_PEAK_DRAKE",
+ "lore_key": "CREATURE_PEAK_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/peak_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

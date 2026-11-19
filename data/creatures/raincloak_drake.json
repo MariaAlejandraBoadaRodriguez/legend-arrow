@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "raincloak_drake",
+ "world": "w08",
+ "number": 76,
+ "name_key": "CREATURE_RAINCLOAK_DRAKE",
+ "lore_key": "CREATURE_RAINCLOAK_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/raincloak_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

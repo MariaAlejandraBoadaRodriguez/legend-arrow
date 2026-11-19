@@ -1,11 +1,50 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2 milestone B: final icon, timer, stars, results, save migration)_
+_Last updated: 2026-11-19 (v0.2 milestone C done)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
 
-### Milestone B — DONE (CI pending at the time of writing)
+### Milestone C — DONE (CI pending at the time of writing)
+- `data/roster.json` from `docs/ART_PROMPTS.md` (`tools/roster.py`; `--check` in CI and verify_all; `--strings` writes the 10 world and 100 dragon names + lore).
+- 100 certified levels from the dragons' real silhouettes (`tools/build_campaign.py` → `tools/generate_campaign.gd`, D-47); `data/campaign.json` schema 2 (worlds + dragons, level id = dragon id), `data/creatures/<id>.json`, `assets/creatures/silhouettes/<id>.png`. Deepening passes (`DEEPEN=1`) on the shallowest later-world boards so average dependency depth never falls.
+- Worlds open in order; dragons one by one inside a world; one level awakens its dragon. Screens: `world_select` (atmosphere thumbnails; locked worlds show their dragons' silhouettes and what opens them), per-world `level_select` (silhouette tiles, stars, best time, Worlds button), bestiary grouped by world with still thumbnails, `SilhouetteRig` interim art (7 v0.1 rigs kept), per-world sound motifs.
+- Multi-screen (D-48): centred ≤ 900 px column, board cells ≥ 40 dp (≥ 48 dp hit band) with zoom/pan and `BoardView.reveal()`, Larger text ×1.3, recovery message now shown before a pending awakening (bug found by the new tests).
+- `tools/capture_matrix.gd` (profile + density + text scale) for the §9.4 screen matrix.
+
+#### Difficulty curve (from `test_difficulty_curve_rises_world_by_world`)
+| World | Arrows avg / min / max | Depth avg / min / max | Free at start avg (share) | Blocked at start avg |
+|---|---|---|---|---|
+| 1 Mistwood | 9.0 / 6 / 12 | 4.7 / 4 / 6 | 3.3 (37%) | 5.7 |
+| 2 Moorland Hollows | 13.7 / 10 / 17 | 5.1 / 4 / 6 | 5.8 (42%) | 7.9 |
+| 3 Riverstone Gorge | 18.5 / 14 / 23 | 5.9 / 5 / 7 | 9.6 (52%) | 8.9 |
+| 4 Cloud Peaks | 22.9 / 18 / 28 | 6.2 / 5 / 8 | 11.6 (51%) | 11.3 |
+| 5 Frostfall Reach | 27.4 / 22 / 33 | 6.7 / 5 / 8 | 12.8 (47%) | 14.6 |
+| 6 Ashen Wastes | 32.0 / 25 / 39 | 6.7 / 6 / 8 | 15.1 (47%) | 16.9 |
+| 7 Tidewrack Coast | 36.6 / 29 / 44 | 7.2 / 7 / 8 | 18.5 (51%) | 18.1 |
+| 8 Stormcrown Heights | 41.3 / 33 / 49 | 7.6 / 7 / 9 | 18.8 (46%) | 22.5 |
+| 9 Obsidian Depths | 46.0 / 37 / 55 | 7.6 / 7 / 9 | 21.6 (47%) | 24.4 |
+| 10 Ancient Highlands | 50.5 / 41 / 60 | 7.6 / 7 / 8 | 22.8 (45%) | 27.7 |
+
+#### Verification (milestone C, local)
+| Check | Result | Evidence |
+|---|---|---|
+| `scripts/verify_all.sh` | **PASS**: 234 / 234, 0 failed / skipped; English-only + roster checks pass | `build/reports/junit.xml` |
+| Certification of all 100 levels (validator, exact solver, legal first move, solution replays to empty) + full offline playthrough (each dragon once, worlds in order) | **PASS** | `test_packaged_content.gd` |
+| Coverage | **PASS**: puzzle/solver/progression/timer/stars 94.3% (≥ 90); save/reward 95.0% (≥ 80) | `tools/coverage.py` |
+| Desktop E2E phone 720×1280 | **PASS** 8/8 journeys | `scripts/desktop_e2e.sh` |
+| Screen check P1, P3, P6, P7 (12 screens each, Xvfb) | Inspected; fixed: board zoom on unsized layout, bestiary names at ×1.3 | `build/matrix/` (local) |
+| Safe-area cutouts, emulator profiles | **NOT RUN**: milestone F (emulators) | — |
+| CI | **NOT RUN yet** at time of writing | — |
+
+Known trade-off for owner review: on phones, expert boards (up to 18×24) open zoomed at 40 dp per cell and need panning; tablets show more of the board.
+
+#### Next
+1. Milestone D: art import pipeline (rembg cut-outs, thumbnails, masks, WebP), photoreal awakening/bestiary, `docs/ART_STATUS.md`, art review sheet, re-certify levels from the new masks.
+
+Next command: `scripts/verify_all.sh`
+
+### Milestone B — DONE
 - Final icon = owner artwork (`assets/icon/icon_source.png`, D-44): `tools/make_icons.py` → 512 store icon, 192 legacy, adaptive background (her own gray vignette), cut-out foreground with horns/eye/snout/chin inside the 66 dp safe circle, monochrome; `--check` in CI. Preview `docs/store/icon_final_preview.png` (readable at 48 dp on light and dark).
 - Speed timer `scripts/core/speed_timer.gd`, stars/par `scripts/core/star_rating.gd` (D-45); timer in `PuzzleSession` (saved with the board), discreet `TimerLabel` on the puzzle, holds for dialogs/ads/background.
 - Results screen (`scripts/screens/level_complete.gd`): time, par, New record / First clear / personal best, `StarRow` reveal (fade with reduced motion), Retry / Next / Level selection; shown after every puzzle, Next opens an earned awakening.

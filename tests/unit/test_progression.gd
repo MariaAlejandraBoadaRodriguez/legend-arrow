@@ -6,11 +6,11 @@ var p: Progression
 
 func before_each() -> void:
 	var res := Campaign.from_dict({
-		"schema_version": 1,
-		"realms": [{"id": "mistwood", "name_key": "REALM_MISTWOOD"}],
-		"creatures": [
-			{"id": "drake", "realm": "mistwood", "name_key": "X", "levels": ["d1", "d2"]},
-			{"id": "owl", "realm": "mistwood", "name_key": "Y", "levels": ["o1", "o2"]},
+		"schema_version": 2,
+		"worlds": [{"id": "mistwood", "name_key": "WORLD_W01"}],
+		"dragons": [
+			{"id": "drake", "world": "mistwood", "name_key": "X", "levels": ["d1", "d2"]},
+			{"id": "owl", "world": "mistwood", "name_key": "Y", "levels": ["o1", "o2"]},
 		],
 	})
 	assert_eq(res.errors, [] as Array[String])
@@ -106,16 +106,17 @@ func test_ad_hint_grant_is_idempotent_per_presentation() -> void:
 
 
 func test_campaign_validation_errors() -> void:
-	var bad := Campaign.from_dict({"schema_version": 1, "realms": [{"id": "r"}], "creatures": [
-		{"id": "a", "realm": "r", "levels": ["x"]},
-		{"id": "a", "realm": "r", "levels": ["y", "z"]},
-		{"id": "b", "realm": "zz", "levels": ["x", "w"]},
+	var bad := Campaign.from_dict({"schema_version": 2, "worlds": [{"id": "r"}], "dragons": [
+		{"id": "a", "world": "r", "levels": ["x"]},
+		{"id": "a", "world": "r", "levels": ["y", "z"]},
+		{"id": "b", "world": "zz", "levels": ["x", "w"]},
+		{"id": "c", "world": "r", "levels": []},
 	]})
 	assert_null(bad.campaign)
 	var joined := " | ".join(bad.errors)
-	assert_string_contains(joined, "exactly 2 levels")
+	assert_string_contains(joined, "has no level")
 	assert_string_contains(joined, "duplicated")
-	assert_string_contains(joined, "unknown realm")
+	assert_string_contains(joined, "unknown world")
 	assert_string_contains(joined, "listed twice")
 
 
@@ -199,3 +200,47 @@ func test_records_survive_sanitize_and_bad_values_are_repaired() -> void:
 	SaveSchema.sanitize(d)
 	assert_false(d.levels.d1.has("best_time_ms"), "negative time dropped")
 	assert_eq(d.levels.d1.best_stars, 3, "stars clamped")
+
+
+
+# --- v0.2 worlds ------------------------------------------------------------
+
+func _worlds() -> Progression:
+	var c: Campaign = Campaign.from_dict({"schema_version": 2,
+		"worlds": [{"id": "w01", "number": 1}, {"id": "w02", "number": 2}],
+		"dragons": [
+			{"id": "a", "world": "w01", "levels": ["a"]}, {"id": "b", "world": "w01", "levels": ["b"]},
+			{"id": "c", "world": "w02", "levels": ["c"]}, {"id": "d", "world": "w02", "levels": ["d"]},
+		]}).campaign
+	return Progression.new(c, SaveSchema.defaults())
+
+
+func test_world_unlocks_after_the_previous_world_is_complete() -> void:
+	var q := _worlds()
+	assert_true(q.is_world_unlocked("w01"))
+	assert_false(q.is_world_unlocked("w02"))
+	assert_false(q.is_world_unlocked("nope"))
+	assert_true(q.is_level_unlocked("a"))
+	assert_false(q.is_level_unlocked("b"), "dragons open one by one")
+	assert_false(q.is_level_unlocked("c"), "next world locked")
+	var r := q.complete_level("a")
+	assert_eq(r.unlocked_creature, "a", "one level awakens its dragon")
+	assert_true(q.is_level_unlocked("b"))
+	assert_false(q.is_world_unlocked("w02"))
+	assert_eq(q.world_completed_count("w01"), 1)
+	q.complete_level("b")
+	assert_true(q.is_world_complete("w01"))
+	assert_true(q.is_world_unlocked("w02"), "completing world 1 opens world 2")
+	assert_true(q.is_level_unlocked("c"))
+	assert_false(q.is_level_unlocked("d"))
+	assert_eq(q.next_level(), "c")
+
+
+func test_completed_levels_stay_open_and_locked_ones_cannot_complete() -> void:
+	var q := _worlds()
+	assert_false(q.complete_level("c").first_completion, "locked world cannot be completed")
+	assert_eq(q.data.transactions, {})
+	q.complete_level("a")
+	assert_true(q.is_level_unlocked("a"), "replay allowed")
+	assert_false(q.complete_level("a").first_completion)
+	assert_eq(q.unlocked_count(), 1)

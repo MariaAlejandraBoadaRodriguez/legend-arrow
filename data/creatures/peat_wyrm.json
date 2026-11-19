@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "peat_wyrm",
+ "world": "w02",
+ "number": 12,
+ "name_key": "CREATURE_PEAT_WYRM",
+ "lore_key": "CREATURE_PEAT_WYRM_LORE",
+ "source_image": "assets/creatures/raw/peat_wyrm.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

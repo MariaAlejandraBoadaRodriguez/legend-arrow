@@ -44,6 +44,7 @@ static func default_settings() -> Dictionary:
 		"creature_volume": 0.9,
 		"reduce_motion": false,
 		"haptics": true,
+		"large_text": false,      # x1.3 text (D-48)
 	}
 
 ## Settings keys that older builds wrote and this build no longer uses.

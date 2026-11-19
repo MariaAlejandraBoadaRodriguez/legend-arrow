@@ -39,6 +39,7 @@ jobs:
         run: |
           python3 tools/check_english_only.py --self-test
           python3 tools/check_english_only.py
+          python3 tools/roster.py --check   # campaign roster = docs/ART_PROMPTS.md
 
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
