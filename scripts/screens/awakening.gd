@@ -54,7 +54,10 @@ func build() -> void:
 
 func _begin() -> void:
 	stage.rig.awaken()
-	landscape.play()
+	# A photoreal dragon gathers its own arrows into its silhouette (PhotoRig);
+	# the backdrop's generic converging trails would double them.
+	if not stage.rig is PhotoRig:
+		landscape.play()
 	# The motif accompanies the signature move (starts ~2 s in).
 	get_tree().create_timer(SIGNATURE_AT).timeout.connect(_play_motif)
 	set_process(true)

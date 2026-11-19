@@ -40,6 +40,7 @@ jobs:
           python3 tools/check_english_only.py --self-test
           python3 tools/check_english_only.py
           python3 tools/roster.py --check   # campaign roster = docs/ART_PROMPTS.md
+          python3 tools/check_strings.py    # every UI string key exists
 
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
@@ -80,6 +81,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0 numpy==2.5.3
           "$RUNNER_TEMP/venv/bin/python" tools/make_icons.py --check
+          "$RUNNER_TEMP/venv/bin/python" -m unittest -v tools/art/test_import_art.py   # art import checks
           "$RUNNER_TEMP/venv/bin/python" tools/store_assets.py check | tee store_assets_check.txt
           cp store_assets_check.txt docs/store/play_console/
 

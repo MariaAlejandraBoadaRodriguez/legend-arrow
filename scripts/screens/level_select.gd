@@ -79,9 +79,12 @@ func _tile(cr: Dictionary) -> Control:
 	thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if ResourceLoader.exists(SilhouetteRig.path_for(cr.id)):
+	var photo := SilhouetteRig.thumb_for(cr.id) if done else null
+	if photo != null:
+		thumb.texture = photo          # awakened: its real image
+	elif ResourceLoader.exists(SilhouetteRig.path_for(cr.id)):
 		thumb.texture = load(SilhouetteRig.path_for(cr.id))
-	thumb.modulate = SilhouetteRig.WORLD_TINT.get(world_id, Palette.INK) if done else (Palette.SECONDARY if open else Palette.GRID)
+		thumb.modulate = SilhouetteRig.WORLD_TINT.get(world_id, Palette.INK) if done else (Palette.SECONDARY if open else Palette.GRID)
 	col.add_child(thumb)
 	var name_label := Ui.label(cr.name_key, "CaptionLabel")
 	name_label.name = "Name"

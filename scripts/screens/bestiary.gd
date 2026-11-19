@@ -51,10 +51,13 @@ func _tile(cid: String) -> Control:
 	thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if ResourceLoader.exists(SilhouetteRig.path_for(cid)):
-		thumb.texture = load(SilhouetteRig.path_for(cid))
 	var world := Game.campaign.world_of(cid)
-	thumb.modulate = SilhouetteRig.WORLD_TINT.get(world, Palette.INK) if unlocked else Color(Palette.GRID, 0.8)
+	var photo := SilhouetteRig.thumb_for(cid) if unlocked else null
+	if photo != null:
+		thumb.texture = photo          # still photoreal thumbnail (grid stays still)
+	elif ResourceLoader.exists(SilhouetteRig.path_for(cid)):
+		thumb.texture = load(SilhouetteRig.path_for(cid))
+		thumb.modulate = SilhouetteRig.WORLD_TINT.get(world, Palette.INK) if unlocked else Color(Palette.GRID, 0.8)
 	col.add_child(thumb)
 	var name_label := Ui.label(Game.campaign.creature(cid).name_key if unlocked else "LOCKED", "CaptionLabel")
 	name_label.name = "Locked" if not unlocked else "Name"

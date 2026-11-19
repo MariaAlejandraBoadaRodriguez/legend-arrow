@@ -98,7 +98,14 @@ def write_strings(path="locales/strings.csv"):
     import csv
     r = parse()
     rows = list(csv.reader(open(path, newline="", encoding="utf-8")))
-    keep = [row for row in rows if row and not row[0].startswith(("CREATURE_", "REALM_", "WORLD_"))]
+    # Replace only the rows this tool owns: world names, dragon names + lore,
+    # and the retired v0.1 creature/realm names. Every other key (e.g. the
+    # UI string CREATURE_AWAKENED) is kept.
+    owned = {"WORLD_%s" % w["id"].upper() for w in r["worlds"]}
+    for d in r["dragons"]:
+        owned |= {"CREATURE_%s" % d["id"].upper(), "CREATURE_%s_LORE" % d["id"].upper()}
+    retired = re.compile(r"^(REALM_[A-Z_]+|CREATURE_(MOON_OWL|ANTLER_FOX|GRIFFIN|UNICORN|PHOENIX)(_LORE)?)$")
+    keep = [row for row in rows if row and row[0] not in owned and not retired.match(row[0])]
     for w in r["worlds"]:
         keep.append(["WORLD_%s" % w["id"].upper(), w["name"]])
     for d in r["dragons"]:

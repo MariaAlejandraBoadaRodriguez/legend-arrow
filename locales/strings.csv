@@ -92,6 +92,16 @@ PERSONAL_BEST,Personal best %s
 STARS_HINT_NOTE,Three stars need a run without hints
 BEST_TIME_STARS,Best %s
 TOTAL_STARS,%d of %d stars
+WORLDS_TITLE,Worlds
+WORLD_N_NAME,World %d · %s
+WORLD_PROGRESS,%d of %d awakened · %d of %d stars
+WORLD_LOCKED_HINT,Awaken every dragon of %s to open this world
+PLAY_DRAGON,Play · %s
+REPLAY_DRAGON,Replay · %s
+PUZZLE_SUBTITLE,World %d · %s
+SETTINGS_LARGE_TEXT,Larger text
+SETTINGS_LARGE_TEXT_DESC,Makes every text 30% larger
+CREATURE_AWAKENED,Creature awakened
 WORLD_W01,Mistwood
 WORLD_W02,Moorland Hollows
 WORLD_W03,Riverstone Gorge
@@ -302,12 +312,3 @@ CREATURE_SENTINEL_DRAGON,Sentinel Dragon
 CREATURE_SENTINEL_DRAGON_LORE,"A tall vigilant dragon with silver and royal-blue scales and glowing blue eyes, sitting upright with wings folded like a cloak."
 CREATURE_ANCIENT_DRAGON,Ancient Dragon
 CREATURE_ANCIENT_DRAGON_LORE,"The oldest and largest dragon, immense wings fully spread, massive horned head raised, battle-scarred scales of deep gold, bronze and crimson, glowing ember eyes."
-WORLDS_TITLE,Worlds
-WORLD_N_NAME,World %d · %s
-WORLD_PROGRESS,%d of %d awakened · %d of %d stars
-WORLD_LOCKED_HINT,Awaken every dragon of %s to open this world
-PLAY_DRAGON,Play · %s
-REPLAY_DRAGON,Replay · %s
-PUZZLE_SUBTITLE,World %d · %s
-SETTINGS_LARGE_TEXT,Larger text
-SETTINGS_LARGE_TEXT_DESC,Makes every text 30% larger

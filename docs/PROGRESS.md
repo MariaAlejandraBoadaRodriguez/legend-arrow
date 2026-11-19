@@ -1,11 +1,52 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2 milestone C done)_
+_Last updated: 2026-11-19 (v0.2 milestone D done; E folded in)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
 
-### Milestone C — DONE (CI pending at the time of writing)
+### Milestone D — DONE (CI pending at the time of writing); milestone E folded in
+All 100 owner images were already in `assets/creatures/raw/`, so the final art integration (E) ran here; E now only means re-running `scripts/import_art.sh` + `tools/build_campaign.py` when an image is replaced.
+- Import pipeline (D-49): `scripts/import_art.sh` → `tools/art/import_art.py`, pinned `tools/art/requirements.txt` (rembg 2.0.67, model isnet-general-use, SHA-256 checked). **100/100 imported, 0 rejected**, full images 11.4 MB WebP (+ thumbnails, masks, silhouettes); `build/art/report.json`, `docs/ART_STATUS.md`. Unit tests for the checks (`tools/art/test_import_art.py`, 10 tests, synthetic images) run in CI.
+- Levels regenerated from the rembg masks and re-certified (all 100), then deepening passes so the difficulty curve still rises world by world.
+- `PhotoRig`: photoreal awakening (arrows gather into the mask silhouette → image through mist → white rim light → breath; camera push + parallax; ≈ 5 s; reduced motion = dissolve), detail idle loop; grids use still thumbnails; leaving the detail screen frees the full image (test). Awakening backdrop trails off for photoreal dragons.
+- `docs/store/art_review_sheet.png` (cut-out on dark | light + its puzzle silhouette, all 100).
+- Fixes found here: `tools/roster.py --strings` had deleted the UI string `CREATURE_AWAKENED` (shown raw on the awakening screen) → it now only replaces rows it owns, and `tools/check_strings.py` (verify_all + CI) fails on any missing UI string key; proven on the broken table.
+- Icon tweak (owner, D-44): Play icon head +15%, adaptive +6.2% (safe-zone limit), darker radial vignette; `docs/store/icon_final_preview.png`.
+
+#### Difficulty curve after the art masks
+| World | Avg depth | Avg blocked at start |
+|---|---|---|
+| 1 | 4.4 | 5.5 |
+| 2 | 5.4 | 7.4 |
+| 3 | 5.7 | 9.4 |
+| 4 | 6.5 | 10.9 |
+| 5 | 6.7 | 14.0 |
+| 6 | 6.8 | 15.0 |
+| 7 | 7.2 | 19.0 |
+| 8 | 7.3 | 21.9 |
+| 9 | 7.6 | 25.0 |
+| 10 | 7.9 | 29.3 |
+(arrow counts unchanged: world 1 6–12 … world 10 41–60.)
+
+#### Verification (milestone D, local)
+| Check | Result | Evidence |
+|---|---|---|
+| `scripts/verify_all.sh` | **PASS**: 236 / 236; English-only, roster, string-key checks pass | `build/reports/junit.xml` |
+| Art import | **PASS**: 100/100, 0 rejected, 11.4 MB | `build/art/report.json`, `docs/ART_STATUS.md` |
+| Import-check unit tests | **PASS** 10/10 | `python3 -m unittest tools/art/test_import_art.py` |
+| Desktop E2E phone | **PASS** 8/8 | `scripts/desktop_e2e.sh` |
+| Art review (cut-outs) | inspected: clean, consistent, none rejected | `docs/store/art_review_sheet.png` |
+| Puzzle silhouettes resemble their dragon | **open (owner decision)**: loose resemblance (see ART_STATUS review notes) | same sheet |
+| Milestone C CI | **PASS** (all jobs, incl. emulator + desktop E2E) | [push run 44449056026](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44449056026), [PR run 44449062351](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44449062351) |
+| CI for this commit | **NOT RUN yet** at time of writing | — |
+
+#### Next
+1. Milestone F: quality gates 9.1–9.8 (emulators API 26/34/36 with P1/P3/P6, screen matrix P1–P7 + VISUAL_QA.md, performance/memory/size, DEVICE_TEST.md for the Lenovo tablet, release AAB rehearsals, store graphics 0.2.0, QA_REPORT/RELEASE_CHECKLIST).
+
+Next command: `scripts/verify_all.sh`
+
+### Milestone C — DONE (CI green: runs 44449056026 / 44449062351)
 - `data/roster.json` from `docs/ART_PROMPTS.md` (`tools/roster.py`; `--check` in CI and verify_all; `--strings` writes the 10 world and 100 dragon names + lore).
 - 100 certified levels from the dragons' real silhouettes (`tools/build_campaign.py` → `tools/generate_campaign.gd`, D-47); `data/campaign.json` schema 2 (worlds + dragons, level id = dragon id), `data/creatures/<id>.json`, `assets/creatures/silhouettes/<id>.png`. Deepening passes (`DEEPEN=1`) on the shallowest later-world boards so average dependency depth never falls.
 - Worlds open in order; dragons one by one inside a world; one level awakens its dragon. Screens: `world_select` (atmosphere thumbnails; locked worlds show their dragons' silhouettes and what opens them), per-world `level_select` (silhouette tiles, stars, best time, Worlds button), bestiary grouped by world with still thumbnails, `SilhouetteRig` interim art (7 v0.1 rigs kept), per-world sound motifs.

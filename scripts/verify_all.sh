@@ -30,6 +30,7 @@ python3 "$ROOT/tools/check_english_only.py" --self-test | tee "$REPORTS/english_
 python3 "$ROOT/tools/check_english_only.py" | tee -a "$REPORTS/english_only.log"
 [[ ${PIPESTATUS[0]} -eq 0 ]] || { echo "!! English-only check failed" >&2; exit 1; }
 python3 "$ROOT/tools/roster.py" --check | tee "$REPORTS/roster.log"
+python3 "$ROOT/tools/check_strings.py" | tee "$REPORTS/strings.log"
 
 echo "== [1/4] Import project"
 "$GODOT" --headless --path "$ROOT" --import >"$REPORTS/import.log" 2>&1 || { cat "$REPORTS/import.log"; exit 1; }

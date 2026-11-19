@@ -36,6 +36,7 @@ PLAN = "build/campaign_plan.json"
 # used to rebalance the shallowest boards of the later worlds (D-47).
 DEEPEN = os.environ.get("DEEPEN", "") == "1"
 SILHOUETTES = "assets/creatures/silhouettes"
+IMPORTED_MASKS = "assets/creatures/masks"   # written by scripts/import_art.sh
 MASK_W, MASK_H = 256, 384
 
 MAX_W, MAX_H = 18, 24          # board size cap (large boards use pan/zoom on phones)
@@ -217,9 +218,13 @@ def build_once(only):
             if only and did not in only:
                 continue
             mp = os.path.join(MASKS, did + ".png")
-            if not os.path.exists(mp):
-                dragon_mask(os.path.join(RAW, did + ".png")).save(mp)
-            mask = Image.open(mp)
+            imported = os.path.join(IMPORTED_MASKS, did + ".png")
+            if os.path.exists(imported):        # rembg cut-out mask (D-49)
+                mask = Image.open(imported).convert("L")
+            else:                               # backdrop key from the raw image
+                if not os.path.exists(mp):
+                    dragon_mask(os.path.join(RAW, did + ".png")).save(mp)
+                mask = Image.open(mp)
             n = arrows_for(w["number"], k)
             cols, rows, cells, dil, stretch = plan_grid(mask, n, grow.get(did, 0))
             plan.append({"id": did, "world": w["number"], "index": k, "arrows": n,
@@ -260,7 +265,8 @@ def write_campaign(roster):
     os.makedirs("data/creatures", exist_ok=True)
     os.makedirs(SILHOUETTES, exist_ok=True)
     for d in roster["dragons"]:
-        write_silhouette(d["id"])
+        if not os.path.exists(os.path.join(IMPORTED_MASKS, d["id"] + ".png")):
+            write_silhouette(d["id"])   # import_art.sh writes it from the cut-out
         meta = {"schema_version": 2, "id": d["id"], "world": d["world"], "number": d["number"],
                 "name_key": "CREATURE_%s" % d["id"].upper(), "lore_key": "CREATURE_%s_LORE" % d["id"].upper(),
                 "source_image": "assets/creatures/raw/%s" % d["file"],

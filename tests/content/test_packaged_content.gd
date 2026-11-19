@@ -236,18 +236,22 @@ func _pose_signature(rig: CreatureRig) -> Array:
 	return out
 
 
-## Layered v0.1 rigs kept for roster dragons; every other dragon uses the
-## SilhouetteRig until the photoreal art (D-47). Both must awaken and skip.
+## Imported dragons use PhotoRig (D-49); a dragon still ART PENDING keeps its
+## v0.1 layered rig or the SilhouetteRig (D-47). All must awaken and skip.
 func test_every_creature_rig_builds_awakens_and_skips() -> void:
 	var c: Campaign = Campaign.load_file().campaign
 	var layered := 0
+	var photo := 0
 	for cid in c.creature_ids():
 		var stage := CreatureStage.new()
 		add_child(stage)
 		assert_true(stage.show_creature(cid, false, true), "%s has art" % cid)
 		var rig := stage.rig
 		await wait_process_frames(1)
-		if not rig is SilhouetteRig:
+		if PhotoRig.has_art(cid):
+			photo += 1
+			assert_true(rig is PhotoRig, "%s: imported photoreal art is used" % cid)
+		elif not rig is SilhouetteRig:
 			layered += 1
 			assert_gt(rig.parts.size(), 3, "%s has layered parts" % cid)
 		rig.pose_dormant()
@@ -268,7 +272,13 @@ func test_every_creature_rig_builds_awakens_and_skips() -> void:
 		stage.clear()
 		remove_child(stage)
 		stage.free()
-	assert_eq(layered, 7, "the seven v0.1 rigs that are roster dragons are kept")
+	assert_eq(photo + layered + (100 - photo - layered), 100)
+	var pending := 0
+	for cid in c.creature_ids():
+		if not PhotoRig.has_art(cid):
+			pending += 1
+	assert_eq(photo, 100 - pending, "every imported dragon shows its photoreal art")
+	gut.p("art: %d photoreal, %d interim (ART PENDING)" % [photo, pending])
 
 
 func test_reduced_motion_awakening_finishes_quickly() -> void:
@@ -330,3 +340,26 @@ func test_par_times_and_three_stars_reachable_for_every_level() -> void:
 		lines.append("%s | %d | %d | %s | %s | %s" % [level_id, n, depth, SpeedTimer.format_ms(par),
 			SpeedTimer.format_ms(2 * par), SpeedTimer.format_ms(human)])
 	gut.p("\n".join(lines))
+
+
+
+## v0.2 §4: every imported dragon ships its cut-out, thumbnail and mask, and
+## the full images stay inside the download budget.
+func test_imported_art_is_complete_and_within_budget() -> void:
+	var c: Campaign = Campaign.load_file().campaign
+	var total := 0
+	for cid in c.creature_ids():
+		if not PhotoRig.has_art(cid):
+			continue
+		for path in [PhotoRig.art_path(cid), "res://assets/creatures/thumbs/%s.webp" % cid,
+				"res://assets/creatures/masks/%s.png" % cid, SilhouetteRig.path_for(cid)]:
+			assert_true(ResourceLoader.exists(path), path)
+		var f := FileAccess.open("res://assets/creatures/art/%s.webp" % cid, FileAccess.READ)
+		if f != null:
+			total += f.get_length()
+			assert_lte(f.get_length(), 450 * 1024, "%s full image <= 450 KB" % cid)
+		var tex: Texture2D = load(PhotoRig.art_path(cid))
+		var aspect := float(tex.get_width()) / tex.get_height()
+		assert_between(aspect, 0.2, 5.0, "%s keeps a sane aspect" % cid)
+	assert_lte(total, 60 * 1024 * 1024, "all full images <= 60 MB")
+	gut.p("photoreal art total: %.1f MB" % (total / 1048576.0))

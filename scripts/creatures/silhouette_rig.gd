@@ -25,6 +25,13 @@ static func path_for(id: String) -> String:
 	return DIR.path_join(id + ".png")
 
 
+## Still grid thumbnail: the photoreal thumbnail once imported (D-49), else
+## null (callers then show the tinted silhouette).
+static func thumb_for(id: String) -> Texture2D:
+	var p := "res://assets/creatures/thumbs/%s.webp" % id
+	return load(p) if ResourceLoader.exists(p) else null
+
+
 func build() -> void:
 	_sprite = Sprite2D.new()
 	_sprite.name = "Silhouette"

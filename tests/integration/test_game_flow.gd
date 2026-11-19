@@ -502,3 +502,26 @@ func test_results_stars_reveal_one_by_one_or_fade_with_reduced_motion() -> void:
 		assert_false(st.revealed, "starts hidden")
 		await wait_until(func(): return st.revealed, 3.0)
 		assert_true(st.revealed, "reveal finishes (reduce_motion=%s)" % rm)
+
+
+# --- v0.2 §4 / §9.5: photoreal art memory -----------------------------------
+
+func test_detail_releases_its_full_image_and_grid_uses_thumbnails() -> void:
+	Game.progression.complete_level("forest_drake")
+	Game.reset_to("bestiary")
+	await _layout()
+	var tile := app.button("Tile_forest_drake")
+	var thumb := tile.find_child("Thumb", true, false) as TextureRect
+	assert_string_contains(thumb.texture.resource_path, "/thumbs/", "grid shows the still thumbnail")
+	assert_true(app.press("Tile_forest_drake"))
+	await _layout()
+	var rig = app.screen().stage.rig
+	assert_true(rig is PhotoRig, "detail shows the photoreal art")
+	var full: Texture2D = rig._sprite.texture
+	assert_string_contains(full.resource_path, "/art/")
+	var ref: WeakRef = weakref(full)
+	full = null
+	rig = null
+	Game.back()   # leave the detail screen
+	await wait_process_frames(4)
+	assert_null(ref.get_ref(), "the full image is released after leaving the detail screen")
