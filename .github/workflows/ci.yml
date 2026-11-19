@@ -360,9 +360,14 @@ jobs:
           # ram: the spec's low tier is a 3 GB device. The API 26 "pixel" AVD
           # defaults to ~1.5 GB, where the emulator's own services and the
           # app were killed together by lowmemorykiller (run 44467837397).
-          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320", ram: "3072M"}
-          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: "", ram: ""}
-          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320", ram: ""}
+          # disk/data_opts: the API 26 emulator's /data filled up mid-run
+          # ("installd: Failed to free up 624066560 on /data", 326 MB free;
+          # runs 44568586880, 44577702952, 44586544658), so app writes failed.
+          # It gets a 10 GB data partition and a wiped /data on every start;
+          # scripts/device_space.sh fails the job early below 1 GB free.
+          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320", ram: "3072M", disk: "10G", data_opts: "-wipe-data -partition-size 10240"}
+          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: "", ram: "", disk: "", data_opts: ""}
+          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320", ram: "", disk: "", data_opts: ""}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -389,15 +394,19 @@ jobs:
           target: google_apis
           profile: ${{ matrix.avd }}
           ram-size: ${{ matrix.ram }}
+          disk-size: ${{ matrix.disk }}
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim ${{ matrix.data_opts }}
           # API 26 also repeats "fresh install right after a data clear" six
           # times: that step intermittently showed a result the save file
           # did not contain (runs 44466657570, 44472596603); the journey logs
           # save forensics if it happens again.
+          # Each line runs as its own `sh -c`; /data is printed and checked
+          # (>= 1 GB free) before and after the journeys and the repeat step.
           script: |
-            scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
-            if [ "${{ matrix.api }}" = "26" ]; then E2E_CLEAR_EACH=1 E2E_JOURNEYS="fresh_install fresh_install fresh_install fresh_install fresh_install fresh_install" scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android/repro-fresh-after-clear; fi
+            scripts/device_space.sh before-journeys
+            scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator; rc=$?; scripts/device_space.sh after-journeys || rc=1; exit $rc
+            if [ "${{ matrix.api }}" = "26" ]; then scripts/device_space.sh before-repeat && { E2E_CLEAR_EACH=1 E2E_JOURNEYS="fresh_install fresh_install fresh_install fresh_install fresh_install fresh_install" scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android/repro-fresh-after-clear; rc=$?; scripts/device_space.sh after-repeat || rc=1; exit $rc; }; fi
 
       - name: Upload E2E evidence
         if: always()
