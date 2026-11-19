@@ -357,9 +357,12 @@ jobs:
       fail-fast: false
       matrix:
         include:   # v0.2 §9.3: API 26 + P1, API 34 + P3 (cutout), API 36 + P6 (tablet)
-          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320"}
-          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: ""}
-          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320"}
+          # ram: the spec's low tier is a 3 GB device. The API 26 "pixel" AVD
+          # defaults to ~1.5 GB, where the emulator's own services and the
+          # app were killed together by lowmemorykiller (run 44467837397).
+          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320", ram: "3072M"}
+          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: "", ram: ""}
+          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320", ram: ""}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -385,6 +388,7 @@ jobs:
           arch: x86_64
           target: google_apis
           profile: ${{ matrix.avd }}
+          ram-size: ${{ matrix.ram }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
