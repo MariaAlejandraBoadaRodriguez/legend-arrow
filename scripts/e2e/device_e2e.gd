@@ -254,7 +254,7 @@ func hint_ad() -> void:
 
 ## 5. Creature awakening -> skip/replay -> bestiary.
 func awakening_replay() -> void:
-	if not await wait_screen("home"): return
+	if not await reach_home(): return
 	if not await tap("BestiaryButton"): return
 	if not await wait_screen("bestiary"): return
 	await shot("bestiary")
@@ -274,7 +274,7 @@ func awakening_replay() -> void:
 
 ## 6a. Change sound and reduced motion through the settings UI.
 func settings_a() -> void:
-	if not await wait_screen("home"): return
+	if not await reach_home(): return
 	if not await tap("SettingsButton"): return
 	if not await wait_screen("settings"): return
 	if not check(find("LanguageOption") == null, "no language picker (English only)"): return
@@ -292,7 +292,7 @@ func settings_a() -> void:
 
 ## 6b. After a restart the preferences are still there.
 func settings_b() -> void:
-	if not await wait_screen("home"): return
+	if not await reach_home(): return
 	if not check(Game.settings().music_volume <= 0.001, "music mute persisted"): return
 	if not check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")), "Music bus muted after restart"): return
 	if not check(Game.settings().reduce_motion == true, "reduce motion persisted"): return
