@@ -82,5 +82,6 @@ Write down your tablet model (Settings → About tablet) and Android version.
 | 12 | Turn the tablet sideways mid-puzzle: the game stays upright, nothing lost | | |
 | 13 | **15-minute session**: play for 15 minutes without stopping: no lag, no crash | | |
 | 14 | **Battery / heat** after 15 minutes: battery used (%), does the tablet feel warm? | | |
+| 15 | **Progress is kept**: on a fresh install, finish the first level, then close the game completely (Recent apps → swipe it away) and open it again: the level still shows its stars and time | | |
 
 Send me this table (a photo is fine) together with the Part B report if you ran it. I will record the results in `docs/QA_REPORT.md`.
