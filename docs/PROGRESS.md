@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2.0 Ready for Play upload: owner tablet test PASS; API 26 save item closed as test-environment)_
+_Last updated: 2026-11-19 (v0.2.0 closed testing only; save fix required in 0.2.1 before production)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
@@ -15,8 +15,8 @@ Full results: `QA_REPORT.md`, `RELEASE_CHECKLIST.md`. Evidence run [44462316343]
 - `docs/DEVICE_TEST.md` for the Lenovo tablet; physical checks BLOCKED until the owner sends results.
 - **Final run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: all 10 jobs green; emulators API 26/34/36 13/13 each; certificate SHA-256 printed and checked.
 - API 26 emulator: two later failures on the ~1.5 GB default AVD (results check; low-memory-killer storm). It now runs with 3 GB (spec low tier), plus results diagnostics and adb retries; green in [run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`.
-- API 26 save mismatch: **closed as a test-environment issue** (owner decision). The original save code passed 240/240 API 26 kill iterations, 150/150 on desktop and the owner's tablet test (all 15 items, incl. force-close/reopen). See `docs/qa/SAVE_INVESTIGATION.md`. Experimental save hardening is parked on branch `save-hardening-experimental` (possible v0.2.x).
-- **Owner tablet test: PASS** (all 15 `docs/DEVICE_TEST.md` items). **0.2.0: Ready for Play upload** (`QA_REPORT.md`, `RELEASE_CHECKLIST.md`).
+- API 26 save mismatch, owner verdict: **0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release.** Known limitation: on a completely full device the shipped save can report success while writing a 0-byte save (CI run 44577702952). Earlier: closed as a test-environment issue. The original save code passed 240/240 API 26 kill iterations, 150/150 on desktop and the owner's tablet test (all 15 items, incl. force-close/reopen). See `docs/qa/SAVE_INVESTIGATION.md`. Experimental save hardening is parked on branch `save-hardening-experimental` (possible v0.2.x).
+- **Owner tablet test: PASS** (all 15 `docs/DEVICE_TEST.md` items). **0.2.0: closed testing only**; production is blocked until 0.2.1 ships the save fix (`QA_REPORT.md`, `RELEASE_CHECKLIST.md`).
 - **Next (owner):** Lenovo tablet run (`docs/DEVICE_TEST.md`), then the upload steps in `RELEASE_CHECKLIST.md`.
 
 ### Milestone D — DONE (CI pending at the time of writing); milestone E folded in

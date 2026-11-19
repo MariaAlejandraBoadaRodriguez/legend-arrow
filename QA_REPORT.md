@@ -1,6 +1,6 @@
 # QA report — Legend Arrow 0.2.0 (versionCode 3)
 
-> **Release status: Ready for Play upload.** Every gate is PASS, except the optional on-device measurement (`measure_device.sh`, Part B of `docs/DEVICE_TEST.md`), which stays BLOCKED on the owner. The owner's Lenovo tablet test passed every checklist item. The API 26 save item is closed as a test-environment issue (`docs/qa/SAVE_INVESTIGATION.md`). Remaining owner actions: `RELEASE_CHECKLIST.md`.
+> **Release status: Ready for CLOSED TESTING only (not production).** 0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release. Known limitation: when device storage is completely full, the save can report success while writing a 0-byte save, so the latest progress is lost on the next launch (CI run 44577702952; `docs/qa/SAVE_INVESTIGATION.md`). Real players are only affected with a completely full device. All other gates are PASS, except the optional on-device measurement (Part B), which stays BLOCKED on the owner. Production is blocked by `RELEASE_CHECKLIST.md` item 18.
 
 Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
@@ -67,7 +67,7 @@ Journeys:
 
 | Emulator | Result | Evidence |
 |---|---|---|
-| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **PASS**: 13/13 journeys + smoke (runs 44470278817, 44554390772). The intermittent save mismatch seen on this emulator is closed as a **test-environment issue** (owner decision). The original save code passed 240/240 API 26 kill iterations, 150/150 on desktop and the owner's tablet test, including item 15 (force-close and reopen keeps progress). See `docs/qa/SAVE_INVESTIGATION.md` | run 44554390772, artifact `e2e-android-api26-P1` |
+| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **PASS with known limitation**: 13/13 journeys + smoke (runs 44470278817, 44554390772; run 44577702952 passed on its one re-run). The intermittent save mismatch on this emulator happens when its storage is full. In run 44577702952 the shipped save code reported success while writing a 0-byte save. **Known limitation for 0.2.0, fixed for 0.2.1** (`docs/qa/SAVE_INVESTIGATION.md`) | run 44554390772, artifact `e2e-android-api26-P1` |
 | API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615190, artifact `e2e-android-api34-P3` |
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
@@ -128,7 +128,7 @@ Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (
 | 20 English files named by Play Console field: icon 512, feature 1024×500, 8 phone 1080×1920, 5 × 7" 1200×2133, 5 × 10" 1440×2560 | PASS | `tools/store_assets.py`: 20 expected, 20 present; sizes, format, no alpha, limits. CI artifact **play-store-assets** |
 
 ## Known limitations
-- API 26 emulator save mismatch: closed as a test-environment issue (`docs/qa/SAVE_INVESTIGATION.md`). An experimental save hardening is kept on branch `save-hardening-experimental` as a possible v0.2.x item; it is not in 0.2.0.
+- **Save on a completely full device (0.2.0 known limitation):** the save can report success while writing a 0-byte file, so the latest progress is lost on the next launch. Only a completely full device is affected. 0.2.0 ships to closed testing only; the fix on `save-hardening-experimental` must ship in 0.2.1 before any production release (`RELEASE_CHECKLIST.md` item 18).
 - Frame-time budgets are unverified on real hardware (software-GPU emulators only) until the Lenovo run.
 - Puzzle silhouettes resemble their dragon only loosely; accepted for v0.2 (D-50, `docs/ART_STATUS.md`).
 - The live UMP consent form and live ads have never been shown or clicked in CI (test IDs, nothing clicked). Check manually before a with-ads release.

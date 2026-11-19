@@ -1,6 +1,6 @@
 # Release checklist — Legend Arrow 0.2.0 (versionCode 3)
 
-> **Status: Ready for Play upload.** Every item is PASS, except the owner's release-time actions below and the optional on-device measurement (BLOCKED on the owner, not required).
+> **Status: Ready for CLOSED TESTING only. Production is BLOCKED by item 18.** 0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release.
 
 Final run: [CI 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`, all jobs green (also [44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`).
 
@@ -28,9 +28,11 @@ Statuses:
 | 15 | Privacy policy and Data Safety current | PASS (docs) / OWNER (publish) | `docs/privacy.html` updated for 0.2.0; no Data Safety answer changes |
 | 16 | Store graphics (English, 20 files) | PASS | CI artifact `play-store-assets` |
 | 17 | APK/AAB checksums | PASS | `.sha256` files in CI artifacts |
+| 18 | **Save never reports success for a broken write on a full device** (blocks production) | **BLOCKING for production**: known limitation in 0.2.0. Allowed for closed testing | The shipped save code can report success while writing a 0-byte save when storage is completely full (CI run 44577702952). The fix is on branch `save-hardening-experimental` (693a5bf) and must ship in **0.2.1 before any production release**, with `scripts/enospc_check.sh` passing in CI (`docs/qa/SAVE_INVESTIGATION.md`) |
 
-## Owner actions before uploading 0.2.0
+## Owner actions before uploading 0.2.0 (closed testing track only)
 1. ~~Run `docs/DEVICE_TEST.md` on the Lenovo tablet.~~ Done: all 15 items PASS.
 2. Replace the hosted privacy policy page with the new `docs/privacy.html`. No Data Safety changes are needed in Play Console.
 3. Upload the new store graphics from the `play-store-assets` artifact (Main store listing → Graphics). Upload them in number order.
-4. Build the signed AAB with your upload key: `release.yml` (or `scripts/export_release.sh`). Check that the printed certificate SHA-256 matches Play Console → App integrity. Upload to internal testing first.
+4. Use a **closed testing** track for 0.2.0, not production (item 18).
+5. Build the signed AAB with your upload key: `release.yml` (or `scripts/export_release.sh`). Check that the printed certificate SHA-256 matches Play Console → App integrity. Upload to internal testing first.
