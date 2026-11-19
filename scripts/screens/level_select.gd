@@ -1,123 +1,136 @@
 extends Screen
-## Realm tabs, creature cards with "n of 2" progress, and one Play button.
+## One world's ten dragons (v0.2 §2/§3): a tile per dragon with its
+## silhouette, name, best stars and best time; locked dragons show only a
+## faint silhouette. Play opens the selected (default: next) level. The
+## Worlds button opens the world list. params: world_id (default: the world
+## of the next level to play).
 
-var realm := ""
+var world_id := ""
 var selected := ""
-var _tabs: HBoxContainer
-var _list: VBoxContainer
+var _grid: GridContainer
 var _play: Button
-var _title: Label
 
 
 func build() -> void:
 	var p := Game.progression
+	var c := Game.campaign
 	var next := p.next_level()
-	selected = str(params.get("creature_id", Game.campaign.creature_of_level(next) if next != "" else Game.campaign.creatures[0].id))
-	realm = Game.campaign.creature(selected).realm
-	var bar := Ui.top_bar("", "LEVEL_SELECT_SUBTITLE", Game.back)
-	_title = bar.find_child("Title", true, false)
-	content.add_child(bar)
-	_tabs = Ui.hbox(Palette.SPACE)
-	_tabs.name = "RealmTabs"
-	content.add_child(_tabs)
+	world_id = str(params.get("world_id", c.world_of(c.creature_of_level(next)) if next != "" else c.worlds[0].id))
+	if not p.is_world_unlocked(world_id):
+		world_id = c.worlds[0].id
+	var levels := c.levels_in_world(world_id)
+	selected = _default_selection()
+	var w := c.world(world_id)
+	var worlds_btn := Ui.link("WORLDS_TITLE", func(): Game.go("world_select"), "WorldsButton")
+	content.add_child(Ui.top_bar(tr("WORLD_N_NAME") % [int(w.number), tr(w.name_key)],
+		tr("WORLD_PROGRESS") % [p.world_completed_count(world_id), levels.size(), p.stars_in(levels), 3 * levels.size()],
+		Game.back, worlds_btn))
+	var total := Ui.label(tr("TOTAL_STARS") % [p.total_stars(), 3 * c.level_ids().size()], "CaptionLabel")
+	total.name = "TotalStars"
+	content.add_child(total)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	content.add_child(scroll)
-	_list = Ui.vbox(Palette.SPACE * 2)
-	_list.name = "CreatureList"
-	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(_list)
+	_grid = GridContainer.new()
+	_grid.name = "DragonGrid"
+	_grid.columns = 2
+	_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_grid.add_theme_constant_override("h_separation", Palette.SPACE * 2)
+	_grid.add_theme_constant_override("v_separation", Palette.SPACE * 2)
+	scroll.add_child(_grid)
+	for cr in c.creatures_in_world(world_id):
+		_grid.add_child(_tile(cr))
 	_play = Ui.button("", _on_play, true, "PlayButton")
 	content.add_child(_play)
-	_refresh()
-
-
-func _refresh() -> void:
-	var c := Game.campaign
-	_title.text = c.realms.filter(func(r): return r.id == realm)[0].name_key
-	for child in _tabs.get_children():
-		child.queue_free()
-	for r in c.realms:
-		var tab := Ui.link(r.name_key, _select_realm.bind(r.id), "Tab_%s" % r.id)
-		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tab.add_theme_color_override("font_color", Palette.ACCENT if r.id == realm else Palette.SECONDARY)
-		_tabs.add_child(tab)
-	for child in _list.get_children():
-		child.queue_free()
-	var in_realm := c.creatures_in_realm(realm)
-	if in_realm.is_empty():
-		_list.add_child(Ui.label("COMING_SOON", "CaptionLabel"))
-	for cr in in_realm:
-		_list.add_child(_card(cr))
 	_update_play()
 
 
-func _card(cr: Dictionary) -> Control:
+func _default_selection() -> String:
 	var p := Game.progression
-	var unlocked_to_play := p.is_level_unlocked(cr.levels[0])
+	for l in Game.campaign.levels_in_world(world_id):
+		if p.is_level_unlocked(l) and not p.is_level_completed(l):
+			return Game.campaign.creature_of_level(l)
+	return Game.campaign.creatures_in_world(world_id)[0].id
+
+
+func _tile(cr: Dictionary) -> Control:
+	var p := Game.progression
+	var level_id: String = cr.levels[0]
+	var open := p.is_level_unlocked(level_id)
+	var done := p.is_level_completed(level_id)
 	var btn := Button.new()
 	btn.name = "Card_%s" % cr.id
-	btn.custom_minimum_size = Vector2(0, 200)
+	btn.custom_minimum_size = Vector2(0, 300)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	btn.toggle_mode = true
 	btn.button_pressed = cr.id == selected
-	btn.disabled = not unlocked_to_play
-	btn.pressed.connect(_select_creature.bind(cr.id))
-	var row := Ui.hbox(Palette.SPACE * 3)
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	Ui.full_rect(row)
-	row.offset_left = 16
-	row.offset_right = -16
-	btn.add_child(row)
-	var thumb := CreatureStage.new()
-	thumb.custom_minimum_size = Vector2(220, 180)
-	thumb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(thumb)
-	thumb.show_creature(cr.id, true, true)
-	if not p.is_creature_unlocked(cr.id):
-		thumb.set_tint(Color(0.55, 0.58, 0.6, 0.35))
-	var col := Ui.vbox(6)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn.disabled = not open
+	btn.pressed.connect(_select.bind(cr.id))
+	var col := Ui.vbox(4)
+	Ui.full_rect(col)
+	col.offset_top = 12
+	col.offset_bottom = -12
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(col)
-	col.add_child(Ui.label(cr.name_key, "", HORIZONTAL_ALIGNMENT_LEFT))
-	var status := Ui.label("", "CaptionLabel", HORIZONTAL_ALIGNMENT_LEFT)
-	status.name = "Status"
-	status.text = tr("N_OF_2_COMPLETE") % p.creature_progress(cr.id) if unlocked_to_play else tr("LOCKED")
-	col.add_child(status)
+	btn.add_child(col)
+	var thumb := TextureRect.new()
+	thumb.name = "Silhouette"
+	thumb.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	thumb.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var photo := SilhouetteRig.thumb_for(cr.id) if done else null
+	if photo != null:
+		thumb.texture = photo          # awakened: its real image
+	elif ResourceLoader.exists(SilhouetteRig.path_for(cr.id)):
+		thumb.texture = load(SilhouetteRig.path_for(cr.id))
+		thumb.modulate = SilhouetteRig.WORLD_TINT.get(world_id, Palette.INK) if done else (Palette.SECONDARY if open else Palette.GRID)
+	col.add_child(thumb)
+	var name_label := Ui.label(cr.name_key, "CaptionLabel")
+	name_label.name = "Name"
+	col.add_child(name_label)
+	var line := Ui.hbox(Palette.SPACE)
+	line.name = "Best_%s" % level_id
+	line.alignment = BoxContainer.ALIGNMENT_CENTER
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var st := StarRow.new(p.best_stars(level_id), 26.0)
+	st.name = "Stars"
+	line.add_child(st)
+	var bt := p.best_time_ms(level_id)
+	var tl := Ui.label(SpeedTimer.format_ms(bt) if bt >= 0 else ("" if open else tr("LOCKED")), "CaptionLabel")
+	tl.name = "BestTime"
+	tl.autowrap_mode = TextServer.AUTOWRAP_OFF
+	tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_child(tl)
+	col.add_child(line)
 	return btn
 
 
-func _select_realm(id: String) -> void:
-	realm = id
-	_refresh()
-
-
-func _select_creature(id: String) -> void:
+func _select(id: String) -> void:
 	selected = id
-	for child in _list.get_children():
+	for child in _grid.get_children():
 		if child is Button:
 			child.button_pressed = child.name == "Card_%s" % id
 	_update_play()
 
 
-## The level Play opens for the selected creature: its next unfinished
-## puzzle, or puzzle 1 again when both are done (replay).
+## The level Play opens: the selected dragon's level when it is open.
 func target_level() -> String:
 	var cr := Game.campaign.creature(selected)
-	if cr.is_empty() or cr.realm != realm:
+	if cr.is_empty() or cr.world != world_id:
 		return ""
-	for l in cr.levels:
-		if Game.progression.is_level_unlocked(l) and not Game.progression.is_level_completed(l):
-			return l
-	return cr.levels[0] if Game.progression.is_level_unlocked(cr.levels[0]) else ""
+	var l: String = cr.levels[0]
+	return l if Game.progression.is_level_unlocked(l) else ""
 
 
 func _update_play() -> void:
 	var l := target_level()
 	_play.disabled = l == ""
-	_play.text = tr("PLAY_PUZZLE") % (Game.campaign.level_slot(l) + 1) if l != "" else tr("LOCKED")
+	if l == "":
+		_play.text = tr("LOCKED")
+	else:
+		var verb := "REPLAY_DRAGON" if Game.progression.is_level_completed(l) else "PLAY_DRAGON"
+		_play.text = tr(verb) % tr(Game.campaign.creature(selected).name_key)
 
 
 func _on_play() -> void:

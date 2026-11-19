@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "saltspray_wyvern",
+ "world": "w07",
+ "number": 63,
+ "name_key": "CREATURE_SALTSPRAY_WYVERN",
+ "lore_key": "CREATURE_SALTSPRAY_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/saltspray_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

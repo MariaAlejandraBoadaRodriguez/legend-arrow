@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cyclone_wyvern",
+ "world": "w08",
+ "number": 78,
+ "name_key": "CREATURE_CYCLONE_WYVERN",
+ "lore_key": "CREATURE_CYCLONE_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/cyclone_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

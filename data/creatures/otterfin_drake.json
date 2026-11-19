@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "otterfin_drake",
+ "world": "w03",
+ "number": 25,
+ "name_key": "CREATURE_OTTERFIN_DRAKE",
+ "lore_key": "CREATURE_OTTERFIN_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/otterfin_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -28,3 +28,7 @@ addons/legend_ads/bin/
 android/plugins/legend_ads/**/build/
 android/plugins/legend_ads/.gradle/
 android/.build_version
+
+# Python
+__pycache__/
+*.pyc

@@ -154,3 +154,61 @@ func test_tampered_save_is_rejected_safely() -> void:
 	assert_false(t.apply_saved({"level_id": "lvl", "removed": ["c", "c"]}))
 	assert_eq(t.board.remaining_count(), 4)
 	assert_true(t.history.is_empty())
+
+
+# --- v0.2 timer and stars -------------------------------------------------
+
+func test_timer_starts_on_first_tap_blocked_or_not() -> void:
+	var s := _session()
+	s.timer.tick(500)
+	assert_eq(s.elapsed_ms(), 0, "no time before the first tap")
+	s.tap("a")  # blocked, still a deliberate first tap
+	s.timer.tick(100)
+	assert_eq(s.elapsed_ms(), 100)
+
+
+func test_completion_freezes_time_and_restart_resets_attempt() -> void:
+	var s := _session()
+	for id in ["c", "b", "a"]:
+		s.tap(id)
+		s.timer.tick(200)
+	s.note_hint_shown()
+	s.tap("d")
+	s.timer.tick(200)
+	assert_true(s.is_complete())
+	assert_eq(s.elapsed_ms(), 600, "clock stops on the last arrow")
+	assert_eq(s.stars(), 2, "a hint caps the run at 2 stars")
+	s.restart()
+	assert_eq(s.elapsed_ms(), 0)
+	assert_eq(s.hints_used, 0)
+	assert_false(s.timer.started)
+
+
+func test_par_comes_from_the_certified_board() -> void:
+	var s := _session()
+	assert_eq(s.par_ms, StarRating.par_ms(4, PuzzleSolver.dependency_depth(s.board)))
+	assert_eq(PuzzleSolver.dependency_depth(s.board), 3)
+
+
+func test_saved_timer_and_hints_survive_relaunch() -> void:
+	var s := _session()
+	s.tap("c")
+	s.timer.tick(240)
+	s.timer.tick(240)
+	s.note_hint_shown()
+	var saved: Dictionary = JSON.parse_string(JSON.stringify(s.to_dict()))
+	var r := _session()
+	assert_true(r.apply_saved(saved))
+	assert_eq(r.elapsed_ms(), 480, "time restored, not the replay's")
+	assert_eq(r.hints_used, 1)
+	assert_true(r.timer.started)
+	r.timer.tick(100)
+	assert_eq(r.elapsed_ms(), 580, "continues from the saved time")
+
+
+func test_hostile_saved_timer_is_clamped() -> void:
+	var s := _session()
+	assert_true(s.apply_saved({"level_id": "lvl", "removed": ["c"], "elapsed_ms": -999, "hints_used": "x"}))
+	assert_eq(s.elapsed_ms(), 0)
+	assert_eq(s.hints_used, 0)
+	assert_true(s.timer.started, "a saved move means the clock had started")

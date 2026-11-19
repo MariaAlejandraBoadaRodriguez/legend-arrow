@@ -1,37 +1,11 @@
 {
-  "schema_version": 1.0,
-  "id": "wyvern",
-  "realm": "cloud_peaks",
-  "name_key": "CREATURE_WYVERN",
-  "lore_key": "CREATURE_WYVERN_LORE",
-  "art": "res://scenes/creatures/wyvern.tscn",
-  "signature": "unfolds_and_lifts_off",
-  "credits": "Original art for Legend Arrow, made in-repo (procedural vector layers).",
-  "level_masks": [
-    [
-      "...........",
-      "...####....",
-      "..#####.###",
-      "..#####.###",
-      "..#####.#..",
-      "...######..",
-      "....####...",
-      "...###.....",
-      ".##..#.....",
-      "..........."
-    ],
-    [
-      "............",
-      "...####.....",
-      "...#####.#..",
-      "..######.###",
-      "..######.#..",
-      "...#######..",
-      "....#####...",
-      "....####....",
-      "...####.....",
-      ".##..##.....",
-      "............"
-    ]
-  ]
+ "schema_version": 2,
+ "id": "wyvern",
+ "world": "w04",
+ "number": 32,
+ "name_key": "CREATURE_WYVERN",
+ "lore_key": "CREATURE_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use.",
+ "art": "res://scenes/creatures/wyvern.tscn"
 }

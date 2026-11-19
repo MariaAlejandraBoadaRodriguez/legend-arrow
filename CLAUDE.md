@@ -11,12 +11,17 @@ Read this file at the start of every session. Keep it short; details live in `do
 Conflict priority: this file > brief > spec > READ_FIRST > mockup pixels. Record resolutions in `docs/DECISIONS.md`.
 
 ## Fixed decisions (do not re-ask)
-- Product name: **Legend Arrow** everywhere (app label, docs, store). The spec/mockups say "Flechas: Bestiary" or "Arrows" — treat those as the old working title. Spanish UI may show the subtitle "Flechas" only as a localized tagline; the app name stays Legend Arrow in both languages.
+- Product name: **Legend Arrow** everywhere (app label, docs, store). The spec/mockups say "Flechas: Bestiary" or "Arrows" — treat those as the old working title.
+- **English only** (v0.2, D-41): no Spanish locale, strings, language setting, tests or store text. `tools/check_english_only.py` enforces it in CI.
+- **Roster** = `docs/ART_PROMPTS.md` (10 worlds × 10 dragons, ids/names/order verbatim; world order = difficulty). 100 puzzles, one per dragon, all solver-certified. Never rename or regenerate the roster.
+- **Art**: owner's photoreal images at `assets/creatures/raw/<dragon_id>.png` (ChatGPT, owner-generated, commercial use) → `scripts/import_art.sh`. No release AAB while any dragon is ART PENDING (`docs/ART_STATUS.md`).
+- **Speed timer + 1–3 stars**, local personal bests only (no leaderboard/account).
+- Version 0.2.0 / versionCode 3. Portrait only; must work on phones and tablets (profiles P1–P7 in the v0.2 prompt, `docs/DECISIONS.md` D-41).
 - Android application ID: `com.mariaalejandraboada.legendarrow` (permanent on Google Play — never change after first release).
 - GitHub repo: this repository (`legend-arrow`, private). Do not create another one.
 - Engine: stable Godot 4.x + GDScript, Compatibility renderer. Pin the exact version in `BUILDING.md`.
 - No backend, accounts, email, login, cloud saves or paid assets.
-- Owner has **no Android phone** (iPhone only). Device testing = Android Studio emulator on her computer + CI emulator. Mark physical-device performance checks **BLOCKED**, never PASS, and ship `scripts/measure_device.sh` so she can run them later.
+- Owner has **no Android phone**; she has a **Lenovo Android tablet**. Device testing = CI emulators + her tablet (`docs/DEVICE_TEST.md`). Mark physical-device checks **BLOCKED**, never PASS, until she sends results; `scripts/measure_device.sh` is for that run.
 - Ads: official Google **test** IDs only. Real AdMob IDs and release signing keys are owner-supplied later; never fabricate or commit them.
 
 ## How to work within Claude Pro limits
@@ -25,7 +30,7 @@ Conflict priority: this file > brief > spec > READ_FIRST > mockup pixels. Record
 - Keep commits small and coherent. Push after every milestone so nothing is lost if the session ends.
 - If you run out of budget mid-milestone, first write PROGRESS.md (done / next command / blockers), commit "wip: checkpoint", push.
 
-## Milestones
+## Milestones (v0.1: M0–M6 done; v0.2: A–F, see `docs/ROADMAP.md`)
 - **M0** Audit + roadmap (`docs/ROADMAP.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`), Godot project skeleton, `.gitignore`, test runner pinned (GUT or gdUnit4), `scripts/verify_all.sh`, first CI workflow that runs headless tests. Empty test discovery must fail.
 - **M1** Pure puzzle model + swept-body collision + solver + level validator + unit/property tests (1,000 seeded boards).
 - **M2** Vertical slice: tutorial (3 steps), 2 levels, 1 creature (Forest Drake), real awakening animation, bestiary, settings, atomic saves, EN/ES. Debug APK exported in CI.

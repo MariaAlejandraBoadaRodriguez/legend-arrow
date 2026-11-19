@@ -2,7 +2,7 @@ extends SceneTree
 ## Drives the real app through the main flow and saves screenshots to
 ## build/shots/<profile>/. Needs a renderer (xvfb on Linux):
 ## xvfb-run -a godot --path . --rendering-driver opengl3 --audio-driver Dummy \
-##   -s res://tools/capture_screens.gd -- phone|tablet [es]
+##   -s res://tools/capture_screens.gd -- phone|tablet
 ## Screenshots are visual evidence only; behaviour is asserted by tests/.
 
 const PROFILES := {"phone": Vector2i(540, 1170), "tablet": Vector2i(900, 1200)}
@@ -15,8 +15,7 @@ var game: Node
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	var profile: String = args[0] if args.size() > 0 else "phone"
-	var lang: String = args[1] if args.size() > 1 else "en"
-	out_dir = "res://build/shots/%s_%s" % [profile, lang]
+	out_dir = "res://build/shots/%s" % profile
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	DisplayServer.window_set_size(PROFILES[profile])
 	await process_frame
@@ -24,7 +23,6 @@ func _init() -> void:
 	for suffix in ["", ".tmp", ".bak"]:
 		DirAccess.remove_absolute(SAVE + suffix)
 	game.boot(SAVE)
-	game.set_setting("language", lang)
 	root.add_child(load("res://scenes/main.tscn").instantiate())
 	await _settle()
 	await shot("01_home")
@@ -45,7 +43,7 @@ func _init() -> void:
 	await _settle()
 	await shot("03_level_select")
 
-	game.go("puzzle", {"level_id": "forest_drake_2"})
+	game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	await shot("04_puzzle")
 	var pz: Control = game.current_screen()
@@ -66,7 +64,7 @@ func _init() -> void:
 	game.leave()
 	await _settle()
 
-	game.go("puzzle", {"level_id": "forest_drake_1"})
+	game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	pz = game.current_screen()
 	for id in pz.level.solution:
@@ -74,12 +72,15 @@ func _init() -> void:
 		await _settle(0.45)
 	await _settle(0.5)
 	await shot("05_level_complete")
-	game.go("puzzle", {"level_id": "forest_drake_2"}, true)
+	game.go("puzzle", {"level_id": "forest_drake"}, true)
 	await _settle()
 	pz = game.current_screen()
 	for id in pz.level.solution:
 		pz._on_tap(id)
 		await _settle(0.45)
+	await _settle(1.2)
+	await shot("05_results_unlock")
+	game.current_screen()._on_next()
 	await _settle(0.2)
 	await shot("06_awakening_early")
 	await _settle(1.6)
@@ -99,10 +100,10 @@ func _init() -> void:
 	await _settle()
 	await shot("12_privacy")
 	game.reset_to("home")
-	pz = game.go("puzzle", {"level_id": "forest_drake_1"})
+	pz = game.go("puzzle", {"level_id": "forest_drake"})
 	await _settle()
 	for i in 4:
-		game.progression.spend_hint("forest_drake_1")
+		game.progression.spend_hint("forest_drake")
 	pz.open_hint_sheet()
 	await _settle()
 	await shot("11_hint_sheet")

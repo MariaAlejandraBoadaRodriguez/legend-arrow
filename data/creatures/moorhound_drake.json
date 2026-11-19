@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "moorhound_drake",
+ "world": "w02",
+ "number": 15,
+ "name_key": "CREATURE_MOORHOUND_DRAKE",
+ "lore_key": "CREATURE_MOORHOUND_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/moorhound_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

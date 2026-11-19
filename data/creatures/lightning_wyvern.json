@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "lightning_wyvern",
+ "world": "w08",
+ "number": 72,
+ "name_key": "CREATURE_LIGHTNING_WYVERN",
+ "lore_key": "CREATURE_LIGHTNING_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/lightning_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

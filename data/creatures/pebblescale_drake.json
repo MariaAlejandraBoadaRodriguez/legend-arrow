@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "pebblescale_drake",
+ "world": "w03",
+ "number": 22,
+ "name_key": "CREATURE_PEBBLESCALE_DRAKE",
+ "lore_key": "CREATURE_PEBBLESCALE_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/pebblescale_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

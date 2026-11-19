@@ -9,6 +9,7 @@ signal settings_changed
 const SCREENS := {
 	"home": "res://scenes/screens/home.tscn",
 	"tutorial": "res://scenes/screens/tutorial.tscn",
+	"world_select": "res://scenes/screens/world_select.tscn",
 	"level_select": "res://scenes/screens/level_select.tscn",
 	"puzzle": "res://scenes/screens/puzzle.tscn",
 	"level_complete": "res://scenes/screens/level_complete.tscn",
@@ -19,7 +20,8 @@ const SCREENS := {
 	"privacy": "res://scenes/screens/privacy.tscn",
 }
 const BUSES := ["Music", "SFX", "Creature"]
-const SUPPORTED_LOCALES := ["en", "es"]
+## English is the only language (owner decision D-41): the locale is fixed.
+const LOCALE := "en"
 
 var campaign: Campaign
 var progression: Progression
@@ -30,6 +32,7 @@ var audio: AudioDirector
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
+var ad_fullscreen := false    # a full-screen ad is showing (timers hold)
 var force_mock_ads := false   # set by Main for on-device E2E runs (before boot)
 
 var _host: Control            # where screens are mounted (set by main scene)
@@ -86,17 +89,24 @@ func set_ad_provider(provider: AdProvider) -> void:
 
 ## Full-screen ads: silence the game first, restore only if still allowed.
 func _on_ad_fullscreen_started() -> void:
+	ad_fullscreen = true
 	audio.set_muted("ad", true)
 
 
 func _on_ad_fullscreen_ended() -> void:
+	ad_fullscreen = false
 	audio.set_muted("ad", false)
 	apply_settings()
+
+
+## Result of the last save write (OK or an Error code), for diagnostics.
+var last_persist_error := OK
 
 
 func persist() -> void:
 	if booted:
 		var err := repository.write(progression.data)
+		last_persist_error = err
 		if err != OK:
 			push_error("Game: save failed (%d)" % err)
 
@@ -114,12 +124,10 @@ func set_setting(key: String, value: Variant) -> void:
 
 func apply_settings() -> void:
 	var s := settings()
-	var lang: String = s.language
-	if lang == "" or not SUPPORTED_LOCALES.has(lang):
-		lang = OS.get_locale_language()
-		if not SUPPORTED_LOCALES.has(lang):
-			lang = "en"
-	TranslationServer.set_locale(lang)
+	TranslationServer.set_locale(LOCALE)
+	if UiTheme.set_text_scale(UiTheme.LARGE_TEXT if bool(s.get("large_text", false)) else 1.0):
+		if _host != null and _host.get_parent() is Control:
+			(_host.get_parent() as Control).theme = UiTheme.get_theme()
 	for bus_name in BUSES:
 		var idx := AudioServer.get_bus_index(bus_name)
 		var vol: float = s.get({"Music": "music_volume", "SFX": "sfx_volume", "Creature": "creature_volume"}[bus_name], 1.0)
@@ -215,6 +223,8 @@ func _notification(what: int) -> void:
 		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED:
 			if audio != null:
 				audio.set_muted("background", false)
+			if _current != null and _current.has_method("on_app_resumed"):
+				_current.on_app_resumed()
 		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
 			if audio != null and what != NOTIFICATION_WM_CLOSE_REQUEST:
 				audio.set_muted("background", true)

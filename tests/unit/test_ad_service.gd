@@ -17,8 +17,8 @@ var screen_events: Array = []
 func before_each() -> void:
 	mock = MockAdProvider.new()
 	mock.manual = true
-	var c: Campaign = Campaign.from_dict({"schema_version": 1, "realms": [{"id": "r"}],
-		"creatures": [{"id": "d", "realm": "r", "levels": ["d1", "d2"]}]}).campaign
+	var c: Campaign = Campaign.from_dict({"schema_version": 2, "worlds": [{"id": "r"}],
+		"dragons": [{"id": "d", "world": "r", "levels": ["d1", "d2"]}]}).campaign
 	prog = Progression.new(c, SaveSchema.defaults())
 	ads = AdService.new(mock, AdConfig.test_config(), prog, EventLog.new())
 	ads.debug_build = true

@@ -35,6 +35,13 @@ jobs:
       - name: No keystores, keys or ads_release.json committed
         run: scripts/check_no_secrets.sh
 
+      - name: English only (no Spanish locale, strings or store text)
+        run: |
+          python3 tools/check_english_only.py --self-test
+          python3 tools/check_english_only.py
+          python3 tools/roster.py --check   # campaign roster = docs/ART_PROMPTS.md
+          python3 tools/check_strings.py    # every UI string key exists
+
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
 
@@ -72,7 +79,9 @@ jobs:
       - name: Check docs/store/play_console
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
-          "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0 numpy==2.5.3
+          "$RUNNER_TEMP/venv/bin/python" tools/make_icons.py --check
+          "$RUNNER_TEMP/venv/bin/python" -m unittest -v tools/art/test_import_art.py   # art import checks
           "$RUNNER_TEMP/venv/bin/python" tools/store_assets.py check | tee store_assets_check.txt
           cp store_assets_check.txt docs/store/play_console/
 
@@ -169,7 +178,7 @@ jobs:
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
 
       - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal
 
       - name: Upload release AAB rehearsal (NOT for Play upload)
         if: always()
@@ -185,7 +194,7 @@ jobs:
           if-no-files-found: error
 
       - name: Release AAB rehearsal without ads (path used by release.yml "without-ads")
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal --no-ads
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal --no-ads
 
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()
@@ -223,20 +232,60 @@ jobs:
           path: .cache/godot
           key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
 
+      - name: Cache Xvfb / Mesa / ffmpeg packages
+        # The Ubuntu mirror was unreachable from many runners on 2026-11-18/19
+        # (runs 44418636509, 44423038351, 44432245604). Once any run installs
+        # the packages, their .deb files are cached and later runs install
+        # them with dpkg, without the mirror.
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/desktop-debs
+          key: desktop-debs-${{ runner.os }}-ubuntu-24.04-v1
+
       - name: Install Xvfb, Mesa and ffmpeg
-        # A mirror once hung this step for 25 min (PR run 40570864428): bound
-        # each attempt and retry instead of waiting for the job timeout.
+        id: deps
         timeout-minutes: 12
         run: |
-          APT="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
-          for attempt in 1 2 3; do
-            if timeout 240 sudo apt-get $APT update -qq && \
-               timeout 240 sudo apt-get $APT install -y -qq xvfb libgl1-mesa-dri ffmpeg >/dev/null; then
-              exit 0
+          PKGS="xvfb libgl1-mesa-dri ffmpeg"
+          # The journeys need only Xvfb + Mesa's software GL. When the runner
+          # image already has both, never touch the (flaky) mirror for them;
+          # ffmpeg is only for the gameplay video, which is skipped (and
+          # reported) if ffmpeg cannot be installed.
+          have_gl() { command -v Xvfb >/dev/null && compgen -G "/usr/lib/x86_64-linux-gnu/dri/*swrast*" >/dev/null; }
+          if have_gl; then
+            if command -v ffmpeg >/dev/null; then echo "Xvfb, Mesa and ffmpeg already present"; exit 0; fi
+            PKGS="ffmpeg"
+          fi
+          DEBS="$GITHUB_WORKSPACE/.cache/desktop-debs"
+          if dpkg -s $PKGS >/dev/null 2>&1; then
+            echo "already installed: $PKGS"; exit 0
+          fi
+          if compgen -G "$DEBS/*.deb" >/dev/null && sudo dpkg -i "$DEBS"/*.deb >/dev/null 2>&1 \
+             && dpkg -s $PKGS >/dev/null 2>&1; then
+            echo "installed from cached .deb files ($(ls "$DEBS" | wc -l))"; exit 0
+          fi
+          APT="-o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20"
+          APT="$APT -o APT::Keep-Downloaded-Packages=true -o Binary::apt::APT::Keep-Downloaded-Packages=true"
+          ONLY_UBUNTU=""
+          if [[ -f /etc/apt/sources.list.d/ubuntu.sources ]]; then
+            ONLY_UBUNTU="-o Dir::Etc::SourceList=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::SourceParts=-"
+          fi
+          sudo rm -f /var/cache/apt/archives/*.deb
+          install() { timeout 120 sudo apt-get $APT install -y -qq --no-install-recommends $PKGS >/dev/null; }
+          keep() { mkdir -p "$DEBS"; cp /var/cache/apt/archives/*.deb "$DEBS"/ 2>/dev/null || true; }
+          if install; then keep; exit 0; fi
+          for attempt in 1 2; do   # 120 + 2 x (120 + 120 + 10) s fits the 12 min step
+            if timeout 120 sudo apt-get $APT $ONLY_UBUNTU update -qq && install; then
+              keep; exit 0
             fi
             echo "apt attempt $attempt failed; retrying" >&2
             sleep 10
           done
+          if have_gl; then
+            echo "::warning::ffmpeg could not be installed (mirror down); journeys run, the gameplay video is skipped"
+            echo "no_ffmpeg=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           exit 1
 
       - name: Run journeys
@@ -246,7 +295,7 @@ jobs:
           GODOT="$GODOT" E2E_RES=${{ matrix.res }} scripts/desktop_e2e.sh build/e2e-desktop-${{ matrix.form }}
 
       - name: Record gameplay + awakening video (Movie Maker)
-        if: matrix.form == 'phone'
+        if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
         run: GODOT="$(scripts/install_godot.sh)" scripts/record_video.sh build/e2e-desktop-${{ matrix.form }}/legend_arrow_gameplay.mp4
 
       - name: Upload screenshots and logs
@@ -257,11 +306,63 @@ jobs:
           path: build/e2e-desktop-${{ matrix.form }}/
           if-no-files-found: error
 
+  screen-matrix:
+    name: Screen matrix (19 screens x P1-P7)
+    needs: [godot-tests]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GODOT_HOME: ${{ github.workspace }}/.cache/godot
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cache Godot editor
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/godot
+          key: godot-${{ runner.os }}-${{ hashFiles('scripts/install_godot.sh') }}
+
+      - name: Xvfb, Mesa and Pillow
+        timeout-minutes: 8
+        run: |
+          # Same rule as desktop-e2e: never touch the flaky mirror when the
+          # runner image already has Xvfb and Mesa's software GL.
+          if ! { command -v Xvfb >/dev/null && compgen -G "/usr/lib/x86_64-linux-gnu/dri/*swrast*" >/dev/null; }; then
+            timeout 300 sudo apt-get install -y -qq --no-install-recommends xvfb libgl1-mesa-dri \
+              || { timeout 120 sudo apt-get update -qq && timeout 200 sudo apt-get install -y -qq --no-install-recommends xvfb libgl1-mesa-dri; }
+          fi
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pillow==12.3.0
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: Capture every screen on P1-P7
+        run: GODOT="$(scripts/install_godot.sh)" scripts/screen_matrix.sh
+
+      - name: Upload screen matrix
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: screen-matrix
+          path: |
+            docs/qa/screen_matrix.png
+            docs/qa/screens/
+          if-no-files-found: error
+
   android-emulator-e2e:
-    name: Android emulator E2E (API 34)
+    name: Android emulator E2E (API ${{ matrix.api }}, ${{ matrix.profile_name }})
     needs: [android-debug-apk]
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:   # v0.2 §9.3: API 26 + P1, API 34 + P3 (cutout), API 36 + P6 (tablet)
+          # ram: the spec's low tier is a 3 GB device. The API 26 "pixel" AVD
+          # defaults to ~1.5 GB, where the emulator's own services and the
+          # app were killed together by lowmemorykiller (run 44467837397).
+          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320", ram: "3072M"}
+          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: "", ram: ""}
+          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320", ram: ""}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -279,19 +380,29 @@ jobs:
 
       - name: Run E2E on emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          E2E_WM_SIZE: ${{ matrix.wm_size }}
+          E2E_WM_DENSITY: ${{ matrix.wm_density }}
         with:
-          api-level: 34
+          api-level: ${{ matrix.api }}
           arch: x86_64
           target: google_apis
-          profile: pixel_6
+          profile: ${{ matrix.avd }}
+          ram-size: ${{ matrix.ram }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
+          # API 26 also repeats "fresh install right after a data clear" six
+          # times: that step intermittently showed a result the save file
+          # did not contain (runs 44466657570, 44472596603); the journey logs
+          # save forensics if it happens again.
+          script: |
+            scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
+            if [ "${{ matrix.api }}" = "26" ]; then E2E_CLEAR_EACH=1 E2E_JOURNEYS="fresh_install fresh_install fresh_install fresh_install fresh_install fresh_install" scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android/repro-fresh-after-clear; fi
 
       - name: Upload E2E evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-android-api34
+          name: e2e-android-api${{ matrix.api }}-${{ matrix.profile_name }}
           path: build/e2e-android/
           if-no-files-found: error

@@ -205,3 +205,56 @@ func test_mouse_wheel_zooms() -> void:
 	e.position = board.size / 2.0
 	board._gui_input(e)
 	assert_gt(board.zoom, 1.0)
+
+
+# --- v0.2: 48 dp touch targets on large boards (D-48) ----------------------
+
+func _big_session() -> PuzzleSession:
+	var c: Campaign = Campaign.load_file().campaign
+	return PuzzleSession.new(LevelData.load_file(c.level_path("ancient_dragon")).level)
+
+
+func test_large_board_never_shrinks_cells_below_the_touch_minimum() -> void:
+	var big := BoardView.new()
+	big.size = Vector2(360, 640)   # a narrow phone column
+	add_child_autofree(big)
+	big.bind(_big_session())
+	var min_cell := Ui.dp(BoardView.MIN_CELL_DP, big)
+	assert_gte(big.cell_size(), min_cell - 0.01, "cell >= 40 dp")
+	assert_gte(big.cell_size() * BoardView.HIT_RADIUS * 2.0, Ui.dp(48.0, big) - 0.01, "hit band >= 48 dp")
+	assert_gt(big.min_zoom, 1.0, "an 18-column board opens zoomed on a phone column")
+	big.zoom_at(0.1, big.size / 2.0)
+	assert_gte(big.cell_size(), min_cell - 0.01, "pinching out cannot go below the minimum")
+
+
+func test_binding_before_layout_does_not_produce_an_absurd_zoom() -> void:
+	var v := BoardView.new()
+	add_child_autofree(v)
+	v.bind(session)            # size is still zero here
+	v.size = Vector2(600, 500)
+	v._layout()
+	assert_almost_eq(v.zoom, v.min_zoom, 0.001, "follows the minimum zoom, not a zero-size one")
+	assert_eq(v.min_zoom, 1.0, "a small board fits without zoom")
+
+
+func test_reveal_brings_an_off_screen_arrow_into_view_and_taps_hit() -> void:
+	var big := BoardView.new()
+	big.size = Vector2(360, 640)
+	add_child_autofree(big)
+	var s := _big_session()
+	big.bind(s)
+	var hits: Array = []
+	big.arrow_tapped.connect(func(id): hits.append(id))
+	var target := ""
+	for id in s.board.remaining_ids():
+		var cells := s.board.arrow(id).cells
+		if not big.is_cell_visible(cells[cells.size() / 2]):
+			target = id
+			break
+	assert_ne(target, "", "some arrow starts off screen on a zoomed board")
+	big.reveal(target)
+	var mid: Vector2i = s.board.arrow(target).cells[s.board.arrow(target).cells.size() / 2]
+	assert_true(big.is_cell_visible(mid))
+	big._gui_input(AppDriver.touch(big.cell_center(mid), true))
+	big._gui_input(AppDriver.touch(big.cell_center(mid), false))
+	assert_eq(hits, [target])

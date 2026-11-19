@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "aurora_drake",
+ "world": "w05",
+ "number": 49,
+ "name_key": "CREATURE_AURORA_DRAKE",
+ "lore_key": "CREATURE_AURORA_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/aurora_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

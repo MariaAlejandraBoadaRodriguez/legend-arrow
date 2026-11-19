@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "moor_sovereign",
+ "world": "w02",
+ "number": 20,
+ "name_key": "CREATURE_MOOR_SOVEREIGN",
+ "lore_key": "CREATURE_MOOR_SOVEREIGN_LORE",
+ "source_image": "assets/creatures/raw/moor_sovereign.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cairn_dragon",
+ "world": "w02",
+ "number": 16,
+ "name_key": "CREATURE_CAIRN_DRAGON",
+ "lore_key": "CREATURE_CAIRN_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/cairn_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

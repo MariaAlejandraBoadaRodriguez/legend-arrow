@@ -39,7 +39,7 @@ static func link(text: String, on_press: Callable, name := "") -> Button:
 ## Square icon-style button (text glyph) with a 48 dp touch target.
 static func icon_button(glyph: String, on_press: Callable, tooltip := "", name := "") -> Button:
 	var b := link(glyph, on_press, name)
-	b.add_theme_font_size_override("font_size", 44)
+	b.add_theme_font_size_override("font_size", UiTheme.fs(44))
 	b.add_theme_color_override("font_color", Palette.INK)
 	b.tooltip_text = tooltip
 	return b
@@ -79,9 +79,13 @@ static func full_rect(c: Control) -> Control:
 
 ## Header row: [back]  title/subtitle  [action]
 static func top_bar(title: String, subtitle: String, on_back: Callable, action: Control = null) -> Control:
-	var row := hbox(0)
+	# A gap between the side controls and the titles, and side controls that
+	# keep their size when the titles wrap (Larger text: the title used to run
+	# into the "Worlds" link and the back button grew tall; screen matrix P7).
+	var row := hbox(8)
 	var back := icon_button("‹", on_back, "BACK", "BackButton") if on_back.is_valid() else spacer()
 	back.custom_minimum_size = Vector2(Palette.TOUCH_MIN, Palette.TOUCH_MIN)
+	back.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(back)
 	var titles := vbox(2)
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -96,6 +100,7 @@ static func top_bar(title: String, subtitle: String, on_back: Callable, action: 
 	if action == null:
 		action = spacer()
 		action.custom_minimum_size = Vector2(Palette.TOUCH_MIN, Palette.TOUCH_MIN)
+	action.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(action)
 	return row
 
@@ -123,3 +128,18 @@ static func focus_later(c: Control) -> void:
 		if is_instance_valid(c) and c.is_inside_tree() and c.is_visible_in_tree():
 			c.grab_focus()
 	grab.call_deferred()
+
+
+## Density-independent pixels -> this node's logical (canvas) pixels:
+## physical px per dp (dpi / 160) times logical px per physical px (the
+## canvas_items stretch). Falls back to 1 logical px per dp off-device.
+static var dpi_override := 0.0   # screen captures simulate a device density
+
+
+static func dp(value: float, node: CanvasItem) -> float:
+	var dpi := dpi_override if dpi_override > 0.0 else float(DisplayServer.screen_get_dpi())
+	var win := Vector2(DisplayServer.window_get_size())
+	if dpi <= 0.0 or win.x <= 0.0 or node == null or not node.is_inside_tree():
+		return value
+	var logical := node.get_viewport_rect().size.x
+	return value * (dpi / 160.0) * (logical / win.x)

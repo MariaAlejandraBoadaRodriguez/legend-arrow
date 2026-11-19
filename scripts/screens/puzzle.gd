@@ -11,6 +11,8 @@ var _message: Label
 var _hint_btn: Button
 var _undo_btn: Button
 var _completing := false
+var _timer_label: Label
+var _shown_second := -1
 
 
 func build() -> void:
@@ -26,7 +28,8 @@ func build() -> void:
 	var saved: Dictionary = Game.progression.data.in_progress
 	if saved.get("level_id", "") == level_id:
 		session.apply_saved(saved)
-	var subtitle := "%s · %s" % [tr("PUZZLE_N_OF_2") % (Game.campaign.level_slot(level_id) + 1), tr("DIFFICULTY_%s" % str(level.difficulty).to_upper())]
+	var w := Game.campaign.world(Game.campaign.world_of(creature_id))
+	var subtitle := tr("PUZZLE_SUBTITLE") % [int(w.get("number", 0)), tr("DIFFICULTY_%s" % str(level.difficulty).to_upper())]
 	var pause := Ui.icon_button("II", open_pause, "PAUSE", "PauseButton")
 	pause.add_theme_font_size_override("font_size", 30)
 	content.add_child(Ui.top_bar(Game.campaign.creature(creature_id).name_key, subtitle, open_pause, pause))
@@ -38,10 +41,19 @@ func build() -> void:
 	board.exit_finished.connect(_on_exit_finished)
 	content.add_child(board)
 	board.bind(session)
+	var info := Ui.hbox(Palette.SPACE)
 	_message = Ui.label("", "CaptionLabel")
 	_message.name = "Message"
 	_message.custom_minimum_size = Vector2(0, 40)
-	content.add_child(_message)
+	_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_child(_message)
+	# Discreet speed timer (v0.2 §3): starts on the first tap.
+	_timer_label = Ui.label("", "CaptionLabel", HORIZONTAL_ALIGNMENT_RIGHT)
+	_timer_label.name = "TimerLabel"
+	_timer_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_timer_label.custom_minimum_size = Vector2(110, 40)
+	info.add_child(_timer_label)
+	content.add_child(info)
 	var row := Ui.hbox(Palette.SPACE * 2)
 	_undo_btn = Ui.button("UNDO", _on_undo, false, "UndoButton")
 	_hint_btn = Ui.button("", _on_hint, false, "HintButton")
@@ -55,6 +67,29 @@ func build() -> void:
 	Game.ads.rewarded_result.connect(_on_ad_result)
 	Game.ads.hint_granted.connect(_on_ad_hint_granted)
 	_refresh_controls()
+	_update_timer_label()
+
+
+## Clock holds are re-evaluated every frame: any dialog on this screen (pause
+## menu, hint sheet, ad sheets, loading), a full-screen ad, or the app being in
+## the background stops it. Ticks are capped (SpeedTimer.MAX_TICK_MS).
+func _process(delta: float) -> void:
+	if session == null:
+		return
+	var t := session.timer
+	t.hold("overlay", Dialog.top(self) != null)
+	t.hold("ad", Game.ad_fullscreen)
+	t.tick(delta * 1000.0)
+	_update_timer_label()
+
+
+func _update_timer_label() -> void:
+	if _timer_label == null or session == null:
+		return
+	var sec := session.elapsed_ms() / 1000
+	if sec != _shown_second or _timer_label.text == "":
+		_shown_second = sec
+		_timer_label.text = SpeedTimer.format_ms(session.elapsed_ms())
 
 
 func _on_tap(id: String) -> void:
@@ -86,9 +121,15 @@ func _commit_completion() -> void:
 	_completing = true
 	board.input_enabled = false
 	var result := Game.progression.complete_level(level_id)
+	var time_ms := session.timer.finish()
+	var run := Game.progression.record_result(level_id, time_ms, session.stars())
+	run.merge({"level_id": level_id, "time_ms": time_ms, "par_ms": session.par_ms,
+		"hints_used": session.hints_used, "unlocked_creature": result.unlocked_creature})
+	set_meta("run", run)
 	Game.persist()
 	Game.ads.on_level_completed(str(level.difficulty) == "tutorial")
-	Game.events.log_event("level_complete", {"level": level_id, "first": result.first_completion})
+	Game.events.log_event("level_complete", {"level": level_id, "first": result.first_completion,
+		"time_ms": time_ms, "stars": run.stars})
 	if result.unlocked_creature != "":
 		Game.events.log_event("creature_unlock", {"creature": result.unlocked_creature})
 	set_meta("completion", result)
@@ -106,11 +147,8 @@ func _go_next() -> void:
 	if not is_inside_tree() or has_meta("navigated"):
 		return
 	set_meta("navigated", true)
-	var result: Dictionary = get_meta("completion")
-	if result.unlocked_creature != "":
-		Game.go("awakening", {"creature_id": result.unlocked_creature, "replay": false}, true)
-	else:
-		Game.go("level_complete", {"level_id": level_id}, true)
+	# Results first; its Next opens an earned awakening (D-45).
+	Game.go("level_complete", get_meta("run"), true)
 
 
 func _on_undo() -> void:
@@ -147,6 +185,8 @@ func _on_hint() -> void:
 		open_hint_sheet()
 		return
 	Game.events.log_event("hint_requested", {"kind": spent})
+	session.note_hint_shown()
+	Game.progression.save_in_progress(session)
 	Game.persist()
 	board.show_hint(target)
 	Game.audio.play_sfx("hint")
@@ -261,5 +301,18 @@ func handle_back() -> bool:
 func on_app_paused() -> void:
 	if board != null:
 		board.finish_animations()
-	if session != null and not session.is_complete():
+	if session != null:
+		session.timer.hold("background")
+		if not session.is_complete():
+			Game.progression.save_in_progress(session)
+
+
+func on_app_resumed() -> void:
+	if session != null:
+		session.timer.hold("background", false)
+
+
+## Leaving mid-puzzle keeps the time spent so far with the saved board.
+func on_leave() -> void:
+	if session != null and not session.is_complete() and not _completing:
 		Game.progression.save_in_progress(session)

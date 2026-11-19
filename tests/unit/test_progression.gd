@@ -6,11 +6,11 @@ var p: Progression
 
 func before_each() -> void:
 	var res := Campaign.from_dict({
-		"schema_version": 1,
-		"realms": [{"id": "mistwood", "name_key": "REALM_MISTWOOD"}],
-		"creatures": [
-			{"id": "drake", "realm": "mistwood", "name_key": "X", "levels": ["d1", "d2"]},
-			{"id": "owl", "realm": "mistwood", "name_key": "Y", "levels": ["o1", "o2"]},
+		"schema_version": 2,
+		"worlds": [{"id": "mistwood", "name_key": "WORLD_W01"}],
+		"dragons": [
+			{"id": "drake", "world": "mistwood", "name_key": "X", "levels": ["d1", "d2"]},
+			{"id": "owl", "world": "mistwood", "name_key": "Y", "levels": ["o1", "o2"]},
 		],
 	})
 	assert_eq(res.errors, [] as Array[String])
@@ -106,16 +106,17 @@ func test_ad_hint_grant_is_idempotent_per_presentation() -> void:
 
 
 func test_campaign_validation_errors() -> void:
-	var bad := Campaign.from_dict({"schema_version": 1, "realms": [{"id": "r"}], "creatures": [
-		{"id": "a", "realm": "r", "levels": ["x"]},
-		{"id": "a", "realm": "r", "levels": ["y", "z"]},
-		{"id": "b", "realm": "zz", "levels": ["x", "w"]},
+	var bad := Campaign.from_dict({"schema_version": 2, "worlds": [{"id": "r"}], "dragons": [
+		{"id": "a", "world": "r", "levels": ["x"]},
+		{"id": "a", "world": "r", "levels": ["y", "z"]},
+		{"id": "b", "world": "zz", "levels": ["x", "w"]},
+		{"id": "c", "world": "r", "levels": []},
 	]})
 	assert_null(bad.campaign)
 	var joined := " | ".join(bad.errors)
-	assert_string_contains(joined, "exactly 2 levels")
+	assert_string_contains(joined, "has no level")
 	assert_string_contains(joined, "duplicated")
-	assert_string_contains(joined, "unknown realm")
+	assert_string_contains(joined, "unknown world")
 	assert_string_contains(joined, "listed twice")
 
 
@@ -131,3 +132,115 @@ func test_progress_survives_save_round_trip() -> void:
 	assert_true(q.is_level_unlocked("d2"))
 	assert_eq(q.free_hints_left("d2"), 2)
 	DirAccess.remove_absolute(path)
+
+
+# --- v0.2 best time / stars -----------------------------------------------
+
+func test_record_requires_a_completed_level() -> void:
+	var r := p.record_result("d1", 5000, 3)
+	assert_eq(r.best_time_ms, -1)
+	assert_false(p.data.levels.has("d1"))
+
+
+func test_bests_only_improve_and_replays_never_lower_them() -> void:
+	p.complete_level("d1")
+	var first := p.record_result("d1", 20000, 2)
+	assert_true(first.first_record)
+	assert_false(first.new_record)
+	assert_eq(p.best_time_ms("d1"), 20000)
+	assert_eq(p.best_stars("d1"), 2)
+	var slower := p.record_result("d1", 30000, 1)
+	assert_false(slower.new_record)
+	assert_eq(p.best_time_ms("d1"), 20000, "slower replay keeps the best time")
+	assert_eq(p.best_stars("d1"), 2, "1-star replay keeps 2 stars")
+	var faster := p.record_result("d1", 12000, 3)
+	assert_true(faster.new_record)
+	assert_eq(faster.previous_best_ms, 20000)
+	assert_eq(p.best_time_ms("d1"), 12000)
+	assert_eq(p.best_stars("d1"), 3)
+	var same := p.record_result("d1", 12000, 3)
+	assert_false(same.new_record, "equal time is not a new record")
+	# Independent maxima: a faster 2-star run lowers time but keeps 3 stars.
+	p.record_result("d1", 9000, 2)
+	assert_eq(p.best_time_ms("d1"), 9000)
+	assert_eq(p.best_stars("d1"), 3)
+
+
+func test_replays_grant_nothing_twice() -> void:
+	p.complete_level("d1")
+	p.complete_level("d2")
+	var tx: Dictionary = p.data.transactions.duplicate()
+	for i in 3:
+		p.complete_level("d2")
+		p.record_result("d2", 1000 * (i + 1), 3)
+	assert_eq(p.data.transactions, tx)
+	assert_eq(p.unlocked_count(), 1)
+
+
+func test_star_totals() -> void:
+	assert_eq(p.total_stars(), 0)
+	p.complete_level("d1")
+	assert_eq(p.best_stars("d1"), 1, "completed without a record counts 1 star (v0.1 migration)")
+	p.record_result("d1", 1000, 3)
+	p.complete_level("d2")
+	p.record_result("d2", 1000, 2)
+	assert_eq(p.stars_in(["d1", "d2"]), 5)
+	assert_eq(p.total_stars(), 5)
+
+
+func test_records_survive_sanitize_and_bad_values_are_repaired() -> void:
+	p.complete_level("d1")
+	p.record_result("d1", 4321, 3)
+	var d: Dictionary = JSON.parse_string(JSON.stringify(p.data))
+	d = SaveSchema.ints_from_json(d)
+	assert_eq(SaveSchema.sanitize(d), [] as Array[String])
+	assert_eq(d.levels.d1.best_time_ms, 4321)
+	d.levels.d1.best_time_ms = -7
+	d.levels.d1.best_stars = 9
+	SaveSchema.sanitize(d)
+	assert_false(d.levels.d1.has("best_time_ms"), "negative time dropped")
+	assert_eq(d.levels.d1.best_stars, 3, "stars clamped")
+
+
+
+# --- v0.2 worlds ------------------------------------------------------------
+
+func _worlds() -> Progression:
+	var c: Campaign = Campaign.from_dict({"schema_version": 2,
+		"worlds": [{"id": "w01", "number": 1}, {"id": "w02", "number": 2}],
+		"dragons": [
+			{"id": "a", "world": "w01", "levels": ["a"]}, {"id": "b", "world": "w01", "levels": ["b"]},
+			{"id": "c", "world": "w02", "levels": ["c"]}, {"id": "d", "world": "w02", "levels": ["d"]},
+		]}).campaign
+	return Progression.new(c, SaveSchema.defaults())
+
+
+func test_world_unlocks_after_the_previous_world_is_complete() -> void:
+	var q := _worlds()
+	assert_true(q.is_world_unlocked("w01"))
+	assert_false(q.is_world_unlocked("w02"))
+	assert_false(q.is_world_unlocked("nope"))
+	assert_true(q.is_level_unlocked("a"))
+	assert_false(q.is_level_unlocked("b"), "dragons open one by one")
+	assert_false(q.is_level_unlocked("c"), "next world locked")
+	var r := q.complete_level("a")
+	assert_eq(r.unlocked_creature, "a", "one level awakens its dragon")
+	assert_true(q.is_level_unlocked("b"))
+	assert_false(q.is_world_unlocked("w02"))
+	assert_eq(q.world_completed_count("w01"), 1)
+	q.complete_level("b")
+	assert_true(q.is_world_complete("w01"))
+	assert_true(q.is_world_unlocked("w02"), "completing world 1 opens world 2")
+	assert_true(q.is_level_unlocked("c"))
+	assert_false(q.is_level_unlocked("d"))
+	assert_eq(q.next_level(), "c")
+
+
+func test_completed_levels_stay_open_and_locked_ones_cannot_complete() -> void:
+	var q := _worlds()
+	assert_false(q.complete_level("c").first_completion, "locked world cannot be completed")
+	assert_eq(q.data.transactions, {})
+	q.complete_level("a")
+	assert_true(q.is_level_unlocked("a"), "replay allowed")
+	assert_false(q.complete_level("a").first_completion)
+	assert_eq(q.unlocked_count(), 1)

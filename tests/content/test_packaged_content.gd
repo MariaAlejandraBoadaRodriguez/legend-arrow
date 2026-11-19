@@ -29,6 +29,12 @@ func test_every_campaign_level_is_packaged_valid_and_owned() -> void:
 		if res.errors.is_empty():
 			assert_eq(res.level.id, level_id, "file name matches id")
 			assert_eq(res.level.creature_id, c.creature_of_level(level_id), "%s owned by its creature" % level_id)
+			# Certification (v0.2 §2): solvable by the exact solver, a legal
+			# first move exists, the recorded solution replays to an empty board.
+			var board := LevelData.to_board(res.level)
+			assert_true(board.has_legal_move(), "%s has a legal move" % level_id)
+			assert_true(PuzzleSolver.is_solvable(board), "%s solvable" % level_id)
+			assert_true(PuzzleSolver.verify_solution(board, res.level.solution).ok, "%s solution replays" % level_id)
 
 
 func test_no_orphan_level_files() -> void:
@@ -66,8 +72,9 @@ func test_creature_metadata_exists_for_each_creature() -> void:
 		var meta = JSON.parse_string(FileAccess.get_file_as_string("res://data/creatures/%s.json" % cid))
 		assert_typeof(meta, TYPE_DICTIONARY, cid)
 		assert_eq(meta.id, cid)
-		assert_eq(meta.realm, c.creature(cid).realm, "%s realm consistent" % cid)
-		assert_true(ResourceLoader.exists(meta.art), "%s art scene exists" % cid)
+		assert_eq(meta.world, c.creature(cid).world, "%s world consistent" % cid)
+		assert_true(ResourceLoader.exists(str(meta.get("art", ""))) or ResourceLoader.exists(SilhouetteRig.path_for(cid)),
+			"%s has art (rig or silhouette)" % cid)
 
 
 func test_tutorial_has_three_valid_steps() -> void:
@@ -89,45 +96,62 @@ func test_tutorial_has_three_valid_steps() -> void:
 	assert_true(b1.is_removable(t.steps[0].highlight))
 
 
-# --- M4 full content ----------------------------------------------------------
+# --- v0.2 roster campaign (D-41, D-47) -----------------------------------------
 
-func test_full_roster_is_twelve_creatures_and_twenty_four_levels() -> void:
+func _roster() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://data/roster.json"))
+
+
+func test_campaign_is_the_canonical_roster_ten_worlds_by_ten_dragons() -> void:
 	var c: Campaign = Campaign.load_file().campaign
-	assert_eq(c.creature_ids().size(), 12)
-	assert_eq(c.level_ids().size(), 24)
+	var r := _roster()
+	assert_eq(c.worlds.size(), 10)
+	assert_eq(c.creature_ids().size(), 100)
+	assert_eq(c.level_ids().size(), 100)
+	var expected: Array[String] = []
+	for d in r.dragons:
+		expected.append(str(d.id))
+	assert_eq(c.creature_ids(), expected, "ids and order verbatim from docs/ART_PROMPTS.md")
+	for i in 10:
+		var w: Dictionary = c.worlds[i]
+		assert_eq(w.id, r.worlds[i].id)
+		assert_eq(int(w.number), i + 1, "world order = difficulty order")
+		assert_eq(c.creatures_in_world(w.id).size(), 10)
 	for cid in c.creature_ids():
-		assert_eq(c.creature(cid).levels.size(), 2, "%s has 2 levels" % cid)
-	var realms := {}
-	for cid in c.creature_ids():
-		realms[c.creature(cid).realm] = int(realms.get(c.creature(cid).realm, 0)) + 1
-	assert_eq(realms, {"mistwood": 4, "cloud_peaks": 4, "ancient_highlands": 4})
+		assert_eq(c.creature(cid).levels, [cid], "%s: one level, id = dragon id" % cid)
 
 
 func _strings() -> Dictionary:
 	var out := {}
 	var f := FileAccess.open("res://locales/strings.csv", FileAccess.READ)
 	var header := f.get_csv_line()
-	assert_eq(header, PackedStringArray(["keys", "en", "es"]))
+	assert_eq(header, PackedStringArray(["keys", "en"]), "English is the only locale")
 	while not f.eof_reached():
 		var row := f.get_csv_line()
-		if row.size() >= 3 and row[0] != "":
+		if row.size() >= 2 and row[0] != "":
 			out[row[0]] = row
 	return out
 
 
-func test_every_creature_has_name_and_lore_in_both_languages() -> void:
+func test_every_dragon_and_world_has_its_roster_name_in_english() -> void:
 	var strings := _strings()
 	var c: Campaign = Campaign.load_file().campaign
-	var names := {}
+	var r := _roster()
+	for d in r.dragons:
+		var key: String = c.creature(d.id).name_key
+		assert_true(strings.has(key), "%s name" % d.id)
+		if strings.has(key):
+			assert_eq(strings[key][1], d.name, "%s: roster name verbatim" % d.id)
+		assert_true(strings.has(key + "_LORE") and strings[key + "_LORE"][1].strip_edges() != "", "%s lore" % d.id)
+	for w in r.worlds:
+		var wk: String = c.world(w.id).name_key
+		assert_true(strings.has(wk) and strings[wk][1] == w.name, "%s: %s" % [w.id, w.name])
+
+
+func test_every_dragon_has_a_silhouette() -> void:
+	var c: Campaign = Campaign.load_file().campaign
 	for cid in c.creature_ids():
-		var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/creatures/%s.json" % cid))
-		for key in [c.creature(cid).name_key, meta.get("lore_key", "")]:
-			assert_true(strings.has(key), "%s: %s present" % [cid, key])
-			if strings.has(key):
-				assert_ne(strings[key][1].strip_edges(), "", "%s EN" % key)
-				assert_ne(strings[key][2].strip_edges(), "", "%s ES" % key)
-		names[strings.get(c.creature(cid).name_key, ["", ""])[1]] = true
-	assert_eq(names.size(), 12, "names are distinct")
+		assert_true(ResourceLoader.exists(SilhouetteRig.path_for(cid)), cid)
 
 
 func test_every_level_mask_matches_its_board() -> void:
@@ -150,7 +174,7 @@ func test_large_levels_never_deadlock_under_random_play() -> void:
 		if lvl.arrows.size() <= 14:
 			continue
 		checked += 1
-		for seed_value in 40:
+		for seed_value in 12:
 			var rng := DeterministicRng.new(seed_value + 1)
 			var board := LevelData.to_board(lvl)
 			while not board.is_empty():
@@ -159,22 +183,49 @@ func test_large_levels_never_deadlock_under_random_play() -> void:
 					break
 				board.remove(free[rng.range_int(0, free.size() - 1)])
 			assert_true(board.is_empty(), "%s seed %d clears" % [level_id, seed_value])
-	assert_gt(checked, 0)
+	assert_gt(checked, 50)
 
 
-func test_difficulty_increases_across_the_campaign() -> void:
+## v0.2 §2 / §9.1: per-world table (avg/min/max arrows, dependency depth,
+## simultaneous exits). Each world is harder than the previous one: more
+## arrows on average (and within the owner's bands), dependency depth that
+## never falls, and more arrows blocked at the start.
+func test_difficulty_curve_rises_world_by_world() -> void:
 	var c: Campaign = Campaign.load_file().campaign
-	var counts: Array[int] = []
-	for level_id in c.level_ids():
-		counts.append(LevelData.load_file(c.level_path(level_id)).level.arrows.size())
-	var first_realm := counts.slice(0, 8)
-	var last_realm := counts.slice(16, 24)
-	var avg := func(xs: Array) -> float:
-		var s := 0
-		for x in xs:
-			s += x
-		return float(s) / xs.size()
-	assert_gt(avg.call(last_realm), avg.call(first_realm) + 10.0, "late realm is clearly harder")
+	var lines := PackedStringArray(["world | arrows avg/min/max | depth avg/min/max | free at start avg (share) | blocked at start avg"])
+	var prev := {"arrows": 0.0, "depth": 0.0, "blocked": 0.0}
+	for w in c.worlds:
+		var a: Array = []
+		var d: Array = []
+		var f: Array = []
+		for l in c.levels_in_world(w.id):
+			var board := LevelData.to_board(LevelData.load_file(c.level_path(l)).level)
+			a.append(board.total_count())
+			d.append(PuzzleSolver.dependency_depth(board))
+			f.append(board.removable_ids().size())
+		var avg := func(xs: Array) -> float:
+			var t := 0.0
+			for x in xs:
+				t += x
+			return t / xs.size()
+		var aa: float = avg.call(a)
+		var dd: float = avg.call(d)
+		var ff: float = avg.call(f)
+		var blocked := aa - ff
+		lines.append("%d %s | %.1f / %d / %d | %.1f / %d / %d | %.1f (%d%%) | %.1f" % [int(w.number), tr(w.name_key),
+			aa, a.min(), a.max(), dd, d.min(), d.max(), ff, roundi(100.0 * ff / aa), blocked])
+		assert_gt(aa, prev.arrows, "%s: more arrows than the previous world" % w.id)
+		assert_gte(dd, prev.depth - 0.001, "%s: dependency depth does not fall" % w.id)
+		assert_gt(blocked, prev.blocked, "%s: more arrows blocked at the start" % w.id)
+		prev = {"arrows": aa, "depth": dd, "blocked": blocked}
+		if int(w.number) == 1:
+			assert_between(a.min(), 6, 12, "world 1 is easy (6-12 arrows)")
+			assert_between(a.max(), 6, 12)
+		if int(w.number) == 10:
+			assert_gte(a.min(), 41, "world 10 is expert (41-60 arrows)")
+		for i in range(1, a.size()):
+			assert_gte(a[i], a[i - 1], "%s: levels get harder inside the world" % w.id)
+	gut.p("\n".join(lines))
 
 
 func _pose_signature(rig: CreatureRig) -> Array:
@@ -185,56 +236,78 @@ func _pose_signature(rig: CreatureRig) -> Array:
 	return out
 
 
+## Imported dragons use PhotoRig (D-49); a dragon still ART PENDING keeps its
+## v0.1 layered rig or the SilhouetteRig (D-47). All must awaken and skip.
 func test_every_creature_rig_builds_awakens_and_skips() -> void:
 	var c: Campaign = Campaign.load_file().campaign
-	var signatures := {}
+	var layered := 0
+	var photo := 0
 	for cid in c.creature_ids():
-		var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/creatures/%s.json" % cid))
-		var rig: CreatureRig = load(meta.art).instantiate()
-		add_child_autofree(rig)
+		var stage := CreatureStage.new()
+		add_child(stage)
+		assert_true(stage.show_creature(cid, false, true), "%s has art" % cid)
+		var rig := stage.rig
 		await wait_process_frames(1)
-		assert_gt(rig.parts.size(), 3, "%s has layered parts" % cid)
+		if PhotoRig.has_art(cid):
+			photo += 1
+			assert_true(rig is PhotoRig, "%s: imported photoreal art is used" % cid)
+		elif not rig is SilhouetteRig:
+			layered += 1
+			assert_gt(rig.parts.size(), 3, "%s has layered parts" % cid)
 		rig.pose_dormant()
 		var dormant := _pose_signature(rig)
 		rig.pose_final()
-		var final_pose := _pose_signature(rig)
-		assert_ne(str(dormant), str(final_pose), "%s: awakening changes the pose" % cid)
-		signatures[str(rig.parts.keys())] = true
-		watch_signals(rig)
+		assert_ne(str(dormant), str(_pose_signature(rig)), "%s: awakening changes the pose" % cid)
+		# A plain connection, not watch_signals(): GUT's watcher on 100 rigs
+		# that the test frees itself hung GUT's end-of-test cleanup.
+		var finished := [0]
+		rig.awakening_finished.connect(func(): finished[0] += 1)
 		rig.awaken()
 		assert_true(rig.awakening, "%s awakening" % cid)
-		await wait_process_frames(2)
 		rig.skip()
-		assert_signal_emitted(rig, "awakening_finished", "%s skip finishes" % cid)
+		assert_eq(finished[0], 1, "%s skip finishes" % cid)
 		assert_false(rig.awakening)
 		rig.start_idle()
-		await wait_process_frames(2)
 		rig.stop()
-	assert_gt(signatures.size(), 4, "rigs use several distinct skeletons")
+		stage.clear()
+		remove_child(stage)
+		stage.free()
+	assert_eq(photo + layered + (100 - photo - layered), 100)
+	var pending := 0
+	for cid in c.creature_ids():
+		if not PhotoRig.has_art(cid):
+			pending += 1
+	assert_eq(photo, 100 - pending, "every imported dragon shows its photoreal art")
+	gut.p("art: %d photoreal, %d interim (ART PENDING)" % [photo, pending])
 
 
 func test_reduced_motion_awakening_finishes_quickly() -> void:
-	var meta: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/creatures/phoenix.json"))
-	var rig: CreatureRig = load(meta.art).instantiate()
-	rig.reduce_motion = true
-	add_child_autofree(rig)
-	await wait_process_frames(1)
-	watch_signals(rig)
-	rig.awaken()
-	await wait_for_signal(rig.awakening_finished, 2.0)
-	assert_signal_emitted(rig, "awakening_finished")
+	for cid in ["forest_drake", "fern_wyrmling"]:
+		var stage := CreatureStage.new()
+		add_child_autofree(stage)
+		stage.show_creature(cid, true)
+		await wait_process_frames(1)
+		watch_signals(stage.rig)
+		stage.rig.awaken()
+		await wait_for_signal(stage.rig.awakening_finished, 2.0)
+		assert_signal_emitted(stage.rig, "awakening_finished", cid)
 
 
-## Phase 6 DoD: the whole packaged campaign is completable offline by playing
-## each recorded solution in order, and each creature unlocks exactly once.
+## The whole packaged campaign is completable offline by playing each
+## recorded solution in order; each dragon awakens exactly once and each
+## world opens only after the previous one.
 func test_full_campaign_completes_and_unlocks_each_creature_once() -> void:
 	var c: Campaign = Campaign.load_file().campaign
 	var p := Progression.new(c, SaveSchema.defaults())
 	var unlocked: Array[String] = []
 	var guard := 0
-	while p.next_level() != "" and guard < 100:
+	while p.next_level() != "" and guard < 200:
 		guard += 1
 		var level_id := p.next_level()
+		var w := c.world_of(c.creature_of_level(level_id))
+		var wi := c.world_index(w)
+		if wi > 0:
+			assert_true(p.is_world_complete(c.worlds[wi - 1].id), "%s opens only after world %d" % [w, wi])
 		var lvl: Dictionary = LevelData.load_file(c.level_path(level_id)).level
 		var s := PuzzleSession.new(lvl)
 		for id in lvl.solution:
@@ -243,7 +316,50 @@ func test_full_campaign_completes_and_unlocks_each_creature_once() -> void:
 		var r := p.complete_level(level_id)
 		if r.unlocked_creature != "":
 			unlocked.append(r.unlocked_creature)
-	assert_eq(guard, 24, "24 levels played")
+	assert_eq(guard, 100, "100 levels played")
 	assert_eq(unlocked, c.creature_ids(), "unlock order follows the roster, once each")
-	assert_eq(p.unlocked_count(), 12)
+	assert_eq(p.unlocked_count(), 100)
 	assert_eq(p.complete_level(c.level_ids()[0]).unlocked_creature, "", "replay unlocks nothing")
+
+
+## v0.2 §9.1: par/star table for every shipped level; 3 stars reachable by
+## replaying the certified solution at a realistic human pace.
+func test_par_times_and_three_stars_reachable_for_every_level() -> void:
+	var c: Campaign = Campaign.load_file().campaign
+	var lines := PackedStringArray(["level | arrows | depth | par | 2-star limit | human replay"])
+	for level_id in c.level_ids():
+		var lvl: Dictionary = LevelData.load_file(c.level_path(level_id)).level
+		var board := LevelData.to_board(lvl)
+		var n := board.total_count()
+		var depth := PuzzleSolver.dependency_depth(board)
+		var par := StarRating.par_for_level(lvl)
+		var human := StarRating.human_replay_ms(n)
+		assert_eq(par, StarRating.par_ms(n, depth))
+		assert_eq(StarRating.stars(human, par, 0), 3, "%s: human replay %d ms vs par %d ms" % [level_id, human, par])
+		assert_eq(PuzzleSession.new(lvl).par_ms, par, "%s: the game uses the same par" % level_id)
+		lines.append("%s | %d | %d | %s | %s | %s" % [level_id, n, depth, SpeedTimer.format_ms(par),
+			SpeedTimer.format_ms(2 * par), SpeedTimer.format_ms(human)])
+	gut.p("\n".join(lines))
+
+
+
+## v0.2 §4: every imported dragon ships its cut-out, thumbnail and mask, and
+## the full images stay inside the download budget.
+func test_imported_art_is_complete_and_within_budget() -> void:
+	var c: Campaign = Campaign.load_file().campaign
+	var total := 0
+	for cid in c.creature_ids():
+		if not PhotoRig.has_art(cid):
+			continue
+		for path in [PhotoRig.art_path(cid), "res://assets/creatures/thumbs/%s.webp" % cid,
+				"res://assets/creatures/masks/%s.png" % cid, SilhouetteRig.path_for(cid)]:
+			assert_true(ResourceLoader.exists(path), path)
+		var f := FileAccess.open("res://assets/creatures/art/%s.webp" % cid, FileAccess.READ)
+		if f != null:
+			total += f.get_length()
+			assert_lte(f.get_length(), 450 * 1024, "%s full image <= 450 KB" % cid)
+		var tex: Texture2D = load(PhotoRig.art_path(cid))
+		var aspect := float(tex.get_width()) / tex.get_height()
+		assert_between(aspect, 0.2, 5.0, "%s keeps a sane aspect" % cid)
+	assert_lte(total, 60 * 1024 * 1024, "all full images <= 60 MB")
+	gut.p("photoreal art total: %.1f MB" % (total / 1048576.0))

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "eagle_wyvern",
+ "world": "w04",
+ "number": 35,
+ "name_key": "CREATURE_EAGLE_WYVERN",
+ "lore_key": "CREATURE_EAGLE_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/eagle_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

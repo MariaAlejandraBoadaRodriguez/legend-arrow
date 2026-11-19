@@ -26,12 +26,12 @@ func _consent(outcome := "not_required") -> void:
 	mock.consent_info_updated.emit(mock.consent_info())
 
 
-## Opens forest_drake_2 with all free hints already used.
+## Opens forest_drake with all free hints already used.
 func _puzzle_without_free_hints() -> Control:
 	for i in 3:
-		Game.progression.spend_hint("forest_drake_2")
+		Game.progression.spend_hint("forest_drake")
 	Game.reset_to("level_select")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await wait_process_frames(3)
 	return app.screen()
 
@@ -137,7 +137,7 @@ func test_reward_after_leaving_puzzle_is_kept_for_next_board() -> void:
 	mock.rewarded_earned.emit(pid)
 	mock.rewarded_closed.emit(pid)
 	assert_eq(Game.progression.ad_hints_available(), 1, "entitlement retained")
-	Game.go("puzzle", {"level_id": "forest_drake_2"})
+	Game.go("puzzle", {"level_id": "forest_drake"})
 	await wait_process_frames(3)
 	app.press("HintButton")
 	assert_ne(app.screen().board.hint_id(), "", "used on the next valid board")

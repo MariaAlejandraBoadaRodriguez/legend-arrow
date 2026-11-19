@@ -15,8 +15,13 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = UiTheme.get_theme()
 	var pad := Ui.margin(Palette.SPACE * 5)
+	pad.name = "Pad"
 	Ui.full_rect(pad)
 	add_child(pad)
+	# Wide screens (4:3 tablets): keep a centred column instead of stretching
+	# buttons edge to edge (v0.2 §8).
+	resized.connect(_fit_width.bind(pad))
+	_fit_width(pad)
 	content = Ui.vbox(Palette.SPACE * 2)
 	pad.add_child(content)
 	build()
@@ -28,6 +33,15 @@ func _ready() -> void:
 
 func build() -> void:
 	pass
+
+
+const MAX_CONTENT_WIDTH := 900.0
+
+
+func _fit_width(pad: MarginContainer) -> void:
+	var side := maxf(Palette.SPACE * 5, (size.x - MAX_CONTENT_WIDTH) / 2.0)
+	pad.add_theme_constant_override("margin_left", int(side))
+	pad.add_theme_constant_override("margin_right", int(side))
 
 
 ## Return true when the Back press was consumed (e.g. an overlay closed).

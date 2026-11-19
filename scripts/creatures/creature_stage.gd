@@ -22,7 +22,11 @@ func _init() -> void:
 func show_creature(cid: String, reduce_motion := false, still := false) -> bool:
 	clear()
 	var meta = JSON.parse_string(FileAccess.get_file_as_string("res://data/creatures/%s.json" % cid))
-	if typeof(meta) != TYPE_DICTIONARY or not ResourceLoader.exists(str(meta.get("art", ""))):
+	if typeof(meta) != TYPE_DICTIONARY:
+		return false
+	var has_photo := PhotoRig.has_art(cid)
+	var has_rig := ResourceLoader.exists(str(meta.get("art", "")))
+	if not has_photo and not has_rig and not ResourceLoader.exists(SilhouetteRig.path_for(cid)):
 		return false
 	creature_id = cid
 	_viewport = SubViewport.new()
@@ -37,7 +41,17 @@ func show_creature(cid: String, reduce_motion := false, still := false) -> bool:
 	_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	Ui.full_rect(_texture)
 	add_child(_texture)
-	rig = load(meta.art).instantiate()
+	if has_photo:   # the owner's photoreal art wins once imported (D-49)
+		var photo := PhotoRig.new()
+		photo.dragon_id = cid
+		rig = photo
+	elif has_rig:
+		rig = load(meta.art).instantiate()
+	else:
+		var sil := SilhouetteRig.new()
+		sil.dragon_id = cid
+		sil.world_id = str(meta.get("world", ""))
+		rig = sil
 	rig.reduce_motion = reduce_motion
 	rig.fade_target = _texture
 	rig.position = FEET

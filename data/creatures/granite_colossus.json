@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "granite_colossus",
+ "world": "w10",
+ "number": 95,
+ "name_key": "CREATURE_GRANITE_COLOSSUS",
+ "lore_key": "CREATURE_GRANITE_COLOSSUS_LORE",
+ "source_image": "assets/creatures/raw/granite_colossus.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "lichen_serpent",
+ "world": "w01",
+ "number": 7,
+ "name_key": "CREATURE_LICHEN_SERPENT",
+ "lore_key": "CREATURE_LICHEN_SERPENT_LORE",
+ "source_image": "assets/creatures/raw/lichen_serpent.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

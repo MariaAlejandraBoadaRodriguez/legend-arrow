@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "highland_drake",
+ "world": "w10",
+ "number": 91,
+ "name_key": "CREATURE_HIGHLAND_DRAKE",
+ "lore_key": "CREATURE_HIGHLAND_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/highland_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

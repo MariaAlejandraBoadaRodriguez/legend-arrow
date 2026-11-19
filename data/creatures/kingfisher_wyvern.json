@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "kingfisher_wyvern",
+ "world": "w03",
+ "number": 27,
+ "name_key": "CREATURE_KINGFISHER_WYVERN",
+ "lore_key": "CREATURE_KINGFISHER_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/kingfisher_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

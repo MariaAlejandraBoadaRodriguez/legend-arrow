@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "frostfall_ancient",
+ "world": "w05",
+ "number": 50,
+ "name_key": "CREATURE_FROSTFALL_ANCIENT",
+ "lore_key": "CREATURE_FROSTFALL_ANCIENT_LORE",
+ "source_image": "assets/creatures/raw/frostfall_ancient.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

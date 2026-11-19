@@ -1,22 +1,867 @@
 {
-  "schema_version": 1,
-  "realms": [
-    {"id": "mistwood", "name_key": "REALM_MISTWOOD"},
-    {"id": "cloud_peaks", "name_key": "REALM_CLOUD_PEAKS"},
-    {"id": "ancient_highlands", "name_key": "REALM_ANCIENT_HIGHLANDS"}
-  ],
-  "creatures": [
-    {"id": "forest_drake", "realm": "mistwood", "name_key": "CREATURE_FOREST_DRAKE", "levels": ["forest_drake_1", "forest_drake_2"]},
-    {"id": "moon_owl", "realm": "mistwood", "name_key": "CREATURE_MOON_OWL", "levels": ["moon_owl_1", "moon_owl_2"]},
-    {"id": "antler_fox", "realm": "mistwood", "name_key": "CREATURE_ANTLER_FOX", "levels": ["antler_fox_1", "antler_fox_2"]},
-    {"id": "basilisk", "realm": "mistwood", "name_key": "CREATURE_BASILISK", "levels": ["basilisk_1", "basilisk_2"]},
-    {"id": "wyvern", "realm": "cloud_peaks", "name_key": "CREATURE_WYVERN", "levels": ["wyvern_1", "wyvern_2"]},
-    {"id": "arctic_drake", "realm": "cloud_peaks", "name_key": "CREATURE_ARCTIC_DRAKE", "levels": ["arctic_drake_1", "arctic_drake_2"]},
-    {"id": "griffin", "realm": "cloud_peaks", "name_key": "CREATURE_GRIFFIN", "levels": ["griffin_1", "griffin_2"]},
-    {"id": "cloud_serpent", "realm": "cloud_peaks", "name_key": "CREATURE_CLOUD_SERPENT", "levels": ["cloud_serpent_1", "cloud_serpent_2"]},
-    {"id": "stone_wyrm", "realm": "ancient_highlands", "name_key": "CREATURE_STONE_WYRM", "levels": ["stone_wyrm_1", "stone_wyrm_2"]},
-    {"id": "unicorn", "realm": "ancient_highlands", "name_key": "CREATURE_UNICORN", "levels": ["unicorn_1", "unicorn_2"]},
-    {"id": "phoenix", "realm": "ancient_highlands", "name_key": "CREATURE_PHOENIX", "levels": ["phoenix_1", "phoenix_2"]},
-    {"id": "ancient_dragon", "realm": "ancient_highlands", "name_key": "CREATURE_ANCIENT_DRAGON", "levels": ["ancient_dragon_1", "ancient_dragon_2"]}
-  ]
+ "schema_version": 2,
+ "worlds": [
+  {
+   "id": "w01",
+   "number": 1,
+   "name_key": "WORLD_W01",
+   "tone": "muted"
+  },
+  {
+   "id": "w02",
+   "number": 2,
+   "name_key": "WORLD_W02",
+   "tone": "muted"
+  },
+  {
+   "id": "w03",
+   "number": 3,
+   "name_key": "WORLD_W03",
+   "tone": "vivid"
+  },
+  {
+   "id": "w04",
+   "number": 4,
+   "name_key": "WORLD_W04",
+   "tone": "vivid"
+  },
+  {
+   "id": "w05",
+   "number": 5,
+   "name_key": "WORLD_W05",
+   "tone": "jewel"
+  },
+  {
+   "id": "w06",
+   "number": 6,
+   "name_key": "WORLD_W06",
+   "tone": "jewel"
+  },
+  {
+   "id": "w07",
+   "number": 7,
+   "name_key": "WORLD_W07",
+   "tone": "jewel"
+  },
+  {
+   "id": "w08",
+   "number": 8,
+   "name_key": "WORLD_W08",
+   "tone": "legendary"
+  },
+  {
+   "id": "w09",
+   "number": 9,
+   "name_key": "WORLD_W09",
+   "tone": "legendary"
+  },
+  {
+   "id": "w10",
+   "number": 10,
+   "name_key": "WORLD_W10",
+   "tone": "legendary"
+  }
+ ],
+ "dragons": [
+  {
+   "id": "forest_drake",
+   "world": "w01",
+   "name_key": "CREATURE_FOREST_DRAKE",
+   "levels": [
+    "forest_drake"
+   ]
+  },
+  {
+   "id": "fern_wyrmling",
+   "world": "w01",
+   "name_key": "CREATURE_FERN_WYRMLING",
+   "levels": [
+    "fern_wyrmling"
+   ]
+  },
+  {
+   "id": "mossback_drake",
+   "world": "w01",
+   "name_key": "CREATURE_MOSSBACK_DRAKE",
+   "levels": [
+    "mossback_drake"
+   ]
+  },
+  {
+   "id": "thornclaw_whelp",
+   "world": "w01",
+   "name_key": "CREATURE_THORNCLAW_WHELP",
+   "levels": [
+    "thornclaw_whelp"
+   ]
+  },
+  {
+   "id": "dewwing_drake",
+   "world": "w01",
+   "name_key": "CREATURE_DEWWING_DRAKE",
+   "levels": [
+    "dewwing_drake"
+   ]
+  },
+  {
+   "id": "barkhide_wyvern",
+   "world": "w01",
+   "name_key": "CREATURE_BARKHIDE_WYVERN",
+   "levels": [
+    "barkhide_wyvern"
+   ]
+  },
+  {
+   "id": "lichen_serpent",
+   "world": "w01",
+   "name_key": "CREATURE_LICHEN_SERPENT",
+   "levels": [
+    "lichen_serpent"
+   ]
+  },
+  {
+   "id": "hollow_drake",
+   "world": "w01",
+   "name_key": "CREATURE_HOLLOW_DRAKE",
+   "levels": [
+    "hollow_drake"
+   ]
+  },
+  {
+   "id": "rootcoil_wyrm",
+   "world": "w01",
+   "name_key": "CREATURE_ROOTCOIL_WYRM",
+   "levels": [
+    "rootcoil_wyrm"
+   ]
+  },
+  {
+   "id": "mistwood_elder",
+   "world": "w01",
+   "name_key": "CREATURE_MISTWOOD_ELDER",
+   "levels": [
+    "mistwood_elder"
+   ]
+  },
+  {
+   "id": "heather_drake",
+   "world": "w02",
+   "name_key": "CREATURE_HEATHER_DRAKE",
+   "levels": [
+    "heather_drake"
+   ]
+  },
+  {
+   "id": "peat_wyrm",
+   "world": "w02",
+   "name_key": "CREATURE_PEAT_WYRM",
+   "levels": [
+    "peat_wyrm"
+   ]
+  },
+  {
+   "id": "bogfire_drake",
+   "world": "w02",
+   "name_key": "CREATURE_BOGFIRE_DRAKE",
+   "levels": [
+    "bogfire_drake"
+   ]
+  },
+  {
+   "id": "reedtail_wyvern",
+   "world": "w02",
+   "name_key": "CREATURE_REEDTAIL_WYVERN",
+   "levels": [
+    "reedtail_wyvern"
+   ]
+  },
+  {
+   "id": "moorhound_drake",
+   "world": "w02",
+   "name_key": "CREATURE_MOORHOUND_DRAKE",
+   "levels": [
+    "moorhound_drake"
+   ]
+  },
+  {
+   "id": "cairn_dragon",
+   "world": "w02",
+   "name_key": "CREATURE_CAIRN_DRAGON",
+   "levels": [
+    "cairn_dragon"
+   ]
+  },
+  {
+   "id": "fogwing_drake",
+   "world": "w02",
+   "name_key": "CREATURE_FOGWING_DRAKE",
+   "levels": [
+    "fogwing_drake"
+   ]
+  },
+  {
+   "id": "basilisk",
+   "world": "w02",
+   "name_key": "CREATURE_BASILISK",
+   "levels": [
+    "basilisk"
+   ]
+  },
+  {
+   "id": "rushwater_wyrm",
+   "world": "w02",
+   "name_key": "CREATURE_RUSHWATER_WYRM",
+   "levels": [
+    "rushwater_wyrm"
+   ]
+  },
+  {
+   "id": "moor_sovereign",
+   "world": "w02",
+   "name_key": "CREATURE_MOOR_SOVEREIGN",
+   "levels": [
+    "moor_sovereign"
+   ]
+  },
+  {
+   "id": "river_drake",
+   "world": "w03",
+   "name_key": "CREATURE_RIVER_DRAKE",
+   "levels": [
+    "river_drake"
+   ]
+  },
+  {
+   "id": "pebblescale_drake",
+   "world": "w03",
+   "name_key": "CREATURE_PEBBLESCALE_DRAKE",
+   "levels": [
+    "pebblescale_drake"
+   ]
+  },
+  {
+   "id": "cascade_serpent",
+   "world": "w03",
+   "name_key": "CREATURE_CASCADE_SERPENT",
+   "levels": [
+    "cascade_serpent"
+   ]
+  },
+  {
+   "id": "gorge_wyvern",
+   "world": "w03",
+   "name_key": "CREATURE_GORGE_WYVERN",
+   "levels": [
+    "gorge_wyvern"
+   ]
+  },
+  {
+   "id": "otterfin_drake",
+   "world": "w03",
+   "name_key": "CREATURE_OTTERFIN_DRAKE",
+   "levels": [
+    "otterfin_drake"
+   ]
+  },
+  {
+   "id": "shale_drake",
+   "world": "w03",
+   "name_key": "CREATURE_SHALE_DRAKE",
+   "levels": [
+    "shale_drake"
+   ]
+  },
+  {
+   "id": "kingfisher_wyvern",
+   "world": "w03",
+   "name_key": "CREATURE_KINGFISHER_WYVERN",
+   "levels": [
+    "kingfisher_wyvern"
+   ]
+  },
+  {
+   "id": "ravine_stalker",
+   "world": "w03",
+   "name_key": "CREATURE_RAVINE_STALKER",
+   "levels": [
+    "ravine_stalker"
+   ]
+  },
+  {
+   "id": "tidepool_wyrm",
+   "world": "w03",
+   "name_key": "CREATURE_TIDEPOOL_WYRM",
+   "levels": [
+    "tidepool_wyrm"
+   ]
+  },
+  {
+   "id": "stonewater_ancient",
+   "world": "w03",
+   "name_key": "CREATURE_STONEWATER_ANCIENT",
+   "levels": [
+    "stonewater_ancient"
+   ]
+  },
+  {
+   "id": "cloud_serpent",
+   "world": "w04",
+   "name_key": "CREATURE_CLOUD_SERPENT",
+   "levels": [
+    "cloud_serpent"
+   ]
+  },
+  {
+   "id": "wyvern",
+   "world": "w04",
+   "name_key": "CREATURE_WYVERN",
+   "levels": [
+    "wyvern"
+   ]
+  },
+  {
+   "id": "peak_drake",
+   "world": "w04",
+   "name_key": "CREATURE_PEAK_DRAKE",
+   "levels": [
+    "peak_drake"
+   ]
+  },
+  {
+   "id": "windrider_drake",
+   "world": "w04",
+   "name_key": "CREATURE_WINDRIDER_DRAKE",
+   "levels": [
+    "windrider_drake"
+   ]
+  },
+  {
+   "id": "eagle_wyvern",
+   "world": "w04",
+   "name_key": "CREATURE_EAGLE_WYVERN",
+   "levels": [
+    "eagle_wyvern"
+   ]
+  },
+  {
+   "id": "cirrus_dragon",
+   "world": "w04",
+   "name_key": "CREATURE_CIRRUS_DRAGON",
+   "levels": [
+    "cirrus_dragon"
+   ]
+  },
+  {
+   "id": "summit_drake",
+   "world": "w04",
+   "name_key": "CREATURE_SUMMIT_DRAKE",
+   "levels": [
+    "summit_drake"
+   ]
+  },
+  {
+   "id": "thunderhead_drake",
+   "world": "w04",
+   "name_key": "CREATURE_THUNDERHEAD_DRAKE",
+   "levels": [
+    "thunderhead_drake"
+   ]
+  },
+  {
+   "id": "skyreach_wyrm",
+   "world": "w04",
+   "name_key": "CREATURE_SKYREACH_WYRM",
+   "levels": [
+    "skyreach_wyrm"
+   ]
+  },
+  {
+   "id": "cloud_peaks_monarch",
+   "world": "w04",
+   "name_key": "CREATURE_CLOUD_PEAKS_MONARCH",
+   "levels": [
+    "cloud_peaks_monarch"
+   ]
+  },
+  {
+   "id": "arctic_drake",
+   "world": "w05",
+   "name_key": "CREATURE_ARCTIC_DRAKE",
+   "levels": [
+    "arctic_drake"
+   ]
+  },
+  {
+   "id": "frost_wyvern",
+   "world": "w05",
+   "name_key": "CREATURE_FROST_WYVERN",
+   "levels": [
+    "frost_wyvern"
+   ]
+  },
+  {
+   "id": "glacier_wyrm",
+   "world": "w05",
+   "name_key": "CREATURE_GLACIER_WYRM",
+   "levels": [
+    "glacier_wyrm"
+   ]
+  },
+  {
+   "id": "rime_serpent",
+   "world": "w05",
+   "name_key": "CREATURE_RIME_SERPENT",
+   "levels": [
+    "rime_serpent"
+   ]
+  },
+  {
+   "id": "snowmane_drake",
+   "world": "w05",
+   "name_key": "CREATURE_SNOWMANE_DRAKE",
+   "levels": [
+    "snowmane_drake"
+   ]
+  },
+  {
+   "id": "icefang_drake",
+   "world": "w05",
+   "name_key": "CREATURE_ICEFANG_DRAKE",
+   "levels": [
+    "icefang_drake"
+   ]
+  },
+  {
+   "id": "tundra_dragon",
+   "world": "w05",
+   "name_key": "CREATURE_TUNDRA_DRAGON",
+   "levels": [
+    "tundra_dragon"
+   ]
+  },
+  {
+   "id": "hoarfrost_wyvern",
+   "world": "w05",
+   "name_key": "CREATURE_HOARFROST_WYVERN",
+   "levels": [
+    "hoarfrost_wyvern"
+   ]
+  },
+  {
+   "id": "aurora_drake",
+   "world": "w05",
+   "name_key": "CREATURE_AURORA_DRAKE",
+   "levels": [
+    "aurora_drake"
+   ]
+  },
+  {
+   "id": "frostfall_ancient",
+   "world": "w05",
+   "name_key": "CREATURE_FROSTFALL_ANCIENT",
+   "levels": [
+    "frostfall_ancient"
+   ]
+  },
+  {
+   "id": "ash_drake",
+   "world": "w06",
+   "name_key": "CREATURE_ASH_DRAKE",
+   "levels": [
+    "ash_drake"
+   ]
+  },
+  {
+   "id": "cinder_wyvern",
+   "world": "w06",
+   "name_key": "CREATURE_CINDER_WYVERN",
+   "levels": [
+    "cinder_wyvern"
+   ]
+  },
+  {
+   "id": "dune_wyrm",
+   "world": "w06",
+   "name_key": "CREATURE_DUNE_WYRM",
+   "levels": [
+    "dune_wyrm"
+   ]
+  },
+  {
+   "id": "scorch_drake",
+   "world": "w06",
+   "name_key": "CREATURE_SCORCH_DRAKE",
+   "levels": [
+    "scorch_drake"
+   ]
+  },
+  {
+   "id": "basalt_dragon",
+   "world": "w06",
+   "name_key": "CREATURE_BASALT_DRAGON",
+   "levels": [
+    "basalt_dragon"
+   ]
+  },
+  {
+   "id": "ember_serpent",
+   "world": "w06",
+   "name_key": "CREATURE_EMBER_SERPENT",
+   "levels": [
+    "ember_serpent"
+   ]
+  },
+  {
+   "id": "sandstorm_wyvern",
+   "world": "w06",
+   "name_key": "CREATURE_SANDSTORM_WYVERN",
+   "levels": [
+    "sandstorm_wyvern"
+   ]
+  },
+  {
+   "id": "smoke_drake",
+   "world": "w06",
+   "name_key": "CREATURE_SMOKE_DRAKE",
+   "levels": [
+    "smoke_drake"
+   ]
+  },
+  {
+   "id": "phoenix_drake",
+   "world": "w06",
+   "name_key": "CREATURE_PHOENIX_DRAKE",
+   "levels": [
+    "phoenix_drake"
+   ]
+  },
+  {
+   "id": "ashen_tyrant",
+   "world": "w06",
+   "name_key": "CREATURE_ASHEN_TYRANT",
+   "levels": [
+    "ashen_tyrant"
+   ]
+  },
+  {
+   "id": "sea_drake",
+   "world": "w07",
+   "name_key": "CREATURE_SEA_DRAKE",
+   "levels": [
+    "sea_drake"
+   ]
+  },
+  {
+   "id": "kelp_wyrm",
+   "world": "w07",
+   "name_key": "CREATURE_KELP_WYRM",
+   "levels": [
+    "kelp_wyrm"
+   ]
+  },
+  {
+   "id": "saltspray_wyvern",
+   "world": "w07",
+   "name_key": "CREATURE_SALTSPRAY_WYVERN",
+   "levels": [
+    "saltspray_wyvern"
+   ]
+  },
+  {
+   "id": "reef_dragon",
+   "world": "w07",
+   "name_key": "CREATURE_REEF_DRAGON",
+   "levels": [
+    "reef_dragon"
+   ]
+  },
+  {
+   "id": "tide_serpent",
+   "world": "w07",
+   "name_key": "CREATURE_TIDE_SERPENT",
+   "levels": [
+    "tide_serpent"
+   ]
+  },
+  {
+   "id": "shellback_drake",
+   "world": "w07",
+   "name_key": "CREATURE_SHELLBACK_DRAKE",
+   "levels": [
+    "shellback_drake"
+   ]
+  },
+  {
+   "id": "stormsurge_wyvern",
+   "world": "w07",
+   "name_key": "CREATURE_STORMSURGE_WYVERN",
+   "levels": [
+    "stormsurge_wyvern"
+   ]
+  },
+  {
+   "id": "abyssal_wyrm",
+   "world": "w07",
+   "name_key": "CREATURE_ABYSSAL_WYRM",
+   "levels": [
+    "abyssal_wyrm"
+   ]
+  },
+  {
+   "id": "pearl_drake",
+   "world": "w07",
+   "name_key": "CREATURE_PEARL_DRAKE",
+   "levels": [
+    "pearl_drake"
+   ]
+  },
+  {
+   "id": "leviathan",
+   "world": "w07",
+   "name_key": "CREATURE_LEVIATHAN",
+   "levels": [
+    "leviathan"
+   ]
+  },
+  {
+   "id": "storm_drake",
+   "world": "w08",
+   "name_key": "CREATURE_STORM_DRAKE",
+   "levels": [
+    "storm_drake"
+   ]
+  },
+  {
+   "id": "lightning_wyvern",
+   "world": "w08",
+   "name_key": "CREATURE_LIGHTNING_WYVERN",
+   "levels": [
+    "lightning_wyvern"
+   ]
+  },
+  {
+   "id": "gale_serpent",
+   "world": "w08",
+   "name_key": "CREATURE_GALE_SERPENT",
+   "levels": [
+    "gale_serpent"
+   ]
+  },
+  {
+   "id": "thunderclaw_dragon",
+   "world": "w08",
+   "name_key": "CREATURE_THUNDERCLAW_DRAGON",
+   "levels": [
+    "thunderclaw_dragon"
+   ]
+  },
+  {
+   "id": "tempest_wyrm",
+   "world": "w08",
+   "name_key": "CREATURE_TEMPEST_WYRM",
+   "levels": [
+    "tempest_wyrm"
+   ]
+  },
+  {
+   "id": "raincloak_drake",
+   "world": "w08",
+   "name_key": "CREATURE_RAINCLOAK_DRAKE",
+   "levels": [
+    "raincloak_drake"
+   ]
+  },
+  {
+   "id": "static_drake",
+   "world": "w08",
+   "name_key": "CREATURE_STATIC_DRAKE",
+   "levels": [
+    "static_drake"
+   ]
+  },
+  {
+   "id": "cyclone_wyvern",
+   "world": "w08",
+   "name_key": "CREATURE_CYCLONE_WYVERN",
+   "levels": [
+    "cyclone_wyvern"
+   ]
+  },
+  {
+   "id": "squall_dragon",
+   "world": "w08",
+   "name_key": "CREATURE_SQUALL_DRAGON",
+   "levels": [
+    "squall_dragon"
+   ]
+  },
+  {
+   "id": "stormcrown_king",
+   "world": "w08",
+   "name_key": "CREATURE_STORMCROWN_KING",
+   "levels": [
+    "stormcrown_king"
+   ]
+  },
+  {
+   "id": "cave_drake",
+   "world": "w09",
+   "name_key": "CREATURE_CAVE_DRAKE",
+   "levels": [
+    "cave_drake"
+   ]
+  },
+  {
+   "id": "crystal_wyrm",
+   "world": "w09",
+   "name_key": "CREATURE_CRYSTAL_WYRM",
+   "levels": [
+    "crystal_wyrm"
+   ]
+  },
+  {
+   "id": "obsidian_dragon",
+   "world": "w09",
+   "name_key": "CREATURE_OBSIDIAN_DRAGON",
+   "levels": [
+    "obsidian_dragon"
+   ]
+  },
+  {
+   "id": "deepdark_wyvern",
+   "world": "w09",
+   "name_key": "CREATURE_DEEPDARK_WYVERN",
+   "levels": [
+    "deepdark_wyvern"
+   ]
+  },
+  {
+   "id": "magma_wyrm",
+   "world": "w09",
+   "name_key": "CREATURE_MAGMA_WYRM",
+   "levels": [
+    "magma_wyrm"
+   ]
+  },
+  {
+   "id": "gloom_serpent",
+   "world": "w09",
+   "name_key": "CREATURE_GLOOM_SERPENT",
+   "levels": [
+    "gloom_serpent"
+   ]
+  },
+  {
+   "id": "stone_wyrm",
+   "world": "w09",
+   "name_key": "CREATURE_STONE_WYRM",
+   "levels": [
+    "stone_wyrm"
+   ]
+  },
+  {
+   "id": "geode_drake",
+   "world": "w09",
+   "name_key": "CREATURE_GEODE_DRAKE",
+   "levels": [
+    "geode_drake"
+   ]
+  },
+  {
+   "id": "echo_drake",
+   "world": "w09",
+   "name_key": "CREATURE_ECHO_DRAKE",
+   "levels": [
+    "echo_drake"
+   ]
+  },
+  {
+   "id": "depth_warden",
+   "world": "w09",
+   "name_key": "CREATURE_DEPTH_WARDEN",
+   "levels": [
+    "depth_warden"
+   ]
+  },
+  {
+   "id": "highland_drake",
+   "world": "w10",
+   "name_key": "CREATURE_HIGHLAND_DRAKE",
+   "levels": [
+    "highland_drake"
+   ]
+  },
+  {
+   "id": "runeback_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_RUNEBACK_DRAGON",
+   "levels": [
+    "runeback_dragon"
+   ]
+  },
+  {
+   "id": "bone_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_BONE_DRAGON",
+   "levels": [
+    "bone_dragon"
+   ]
+  },
+  {
+   "id": "elder_wyvern",
+   "world": "w10",
+   "name_key": "CREATURE_ELDER_WYVERN",
+   "levels": [
+    "elder_wyvern"
+   ]
+  },
+  {
+   "id": "granite_colossus",
+   "world": "w10",
+   "name_key": "CREATURE_GRANITE_COLOSSUS",
+   "levels": [
+    "granite_colossus"
+   ]
+  },
+  {
+   "id": "twilight_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_TWILIGHT_DRAGON",
+   "levels": [
+    "twilight_dragon"
+   ]
+  },
+  {
+   "id": "starwing_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_STARWING_DRAGON",
+   "levels": [
+    "starwing_dragon"
+   ]
+  },
+  {
+   "id": "crowned_wyrm",
+   "world": "w10",
+   "name_key": "CREATURE_CROWNED_WYRM",
+   "levels": [
+    "crowned_wyrm"
+   ]
+  },
+  {
+   "id": "sentinel_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_SENTINEL_DRAGON",
+   "levels": [
+    "sentinel_dragon"
+   ]
+  },
+  {
+   "id": "ancient_dragon",
+   "world": "w10",
+   "name_key": "CREATURE_ANCIENT_DRAGON",
+   "levels": [
+    "ancient_dragon"
+   ]
+  }
+ ]
 }

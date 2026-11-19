@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "fogwing_drake",
+ "world": "w02",
+ "number": 17,
+ "name_key": "CREATURE_FOGWING_DRAKE",
+ "lore_key": "CREATURE_FOGWING_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/fogwing_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

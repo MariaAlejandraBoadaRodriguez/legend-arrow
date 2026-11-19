@@ -1,9 +1,6 @@
 extends Screen
-## Audio buses, accessibility, language and info links. Every change is
+## Audio buses, accessibility and info links. Every change is
 ## applied and saved immediately.
-
-const LANGS := ["", "en", "es"]
-const LANG_KEYS := ["LANGUAGE_SYSTEM", "LANGUAGE_EN", "LANGUAGE_ES"]
 
 
 func build() -> void:
@@ -25,16 +22,7 @@ func build() -> void:
 	col.add_child(_section("SETTINGS_ACCESSIBILITY"))
 	col.add_child(_toggle("SETTINGS_REDUCE_MOTION", "SETTINGS_REDUCE_MOTION_DESC", "reduce_motion", s.reduce_motion))
 	col.add_child(_toggle("SETTINGS_HAPTICS", "SETTINGS_HAPTICS_DESC", "haptics", s.haptics))
-
-	col.add_child(_section("SETTINGS_LANGUAGE"))
-	var lang := OptionButton.new()
-	lang.name = "LanguageOption"
-	lang.custom_minimum_size = Vector2(0, Palette.TOUCH_MIN)
-	for i in LANGS.size():
-		lang.add_item(LANG_KEYS[i], i)
-	lang.selected = maxi(0, LANGS.find(s.language))
-	lang.item_selected.connect(_on_language)
-	col.add_child(lang)
+	col.add_child(_toggle("SETTINGS_LARGE_TEXT", "SETTINGS_LARGE_TEXT_DESC", "large_text", s.large_text))
 
 	col.add_child(Ui.spacer(Palette.SPACE))
 	col.add_child(_row_link("SETTINGS_REPLAY_TUTORIAL", func(): Game.go("tutorial"), "ReplayTutorial"))
@@ -45,7 +33,7 @@ func build() -> void:
 
 func _section(key: String) -> Label:
 	var l := Ui.label(key, "HeadingLabel", HORIZONTAL_ALIGNMENT_LEFT)
-	l.add_theme_font_size_override("font_size", UiTheme.SIZE_BODY + 2)
+	l.add_theme_font_size_override("font_size", UiTheme.fs(UiTheme.SIZE_BODY + 2))
 	return l
 
 
@@ -85,7 +73,10 @@ func _toggle(key: String, desc: String, setting: String, value: bool) -> Control
 	check.name = "Toggle_%s" % setting
 	check.button_pressed = value
 	check.custom_minimum_size = Vector2(Palette.TOUCH_MIN, Palette.TOUCH_MIN)
-	check.toggled.connect(func(on): Game.set_setting(setting, on))
+	check.toggled.connect(func(on):
+		Game.set_setting(setting, on)
+		if setting == "large_text":
+			Game.go("settings", {}, true))  # rebuild with the new text size
 	row.add_child(check)
 	return row
 
@@ -102,12 +93,6 @@ func _row_link(key: String, cb: Callable, node_name: String) -> Button:
 func _privacy_options() -> void:
 	if not Game.ads.consent.show_privacy_options():
 		Game.go("privacy")
-
-
-func _on_language(index: int) -> void:
-	Game.set_setting("language", LANGS[index])
-	# Formatted strings were built in the old language; rebuild the page.
-	Game.go("settings", {}, true)
 
 
 func handle_back() -> bool:

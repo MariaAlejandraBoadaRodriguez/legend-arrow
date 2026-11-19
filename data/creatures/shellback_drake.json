@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "shellback_drake",
+ "world": "w07",
+ "number": 66,
+ "name_key": "CREATURE_SHELLBACK_DRAKE",
+ "lore_key": "CREATURE_SHELLBACK_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/shellback_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

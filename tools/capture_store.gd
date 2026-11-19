@@ -26,7 +26,6 @@ func _init() -> void:
 	for suffix in ["", ".tmp", ".bak"]:
 		DirAccess.remove_absolute(SAVE + suffix)
 	game.boot(SAVE)
-	game.set_setting("language", "en")
 	if mode == "feature":
 		await _feature()
 	else:
@@ -42,30 +41,38 @@ func _screens(phone: bool) -> void:
 		game.go("tutorial")
 		await _settle(0.6)
 		await shot("tutorial")
-	# A first creature already awakened, reached through the real rules.
-	game.progression.data.tutorial_done = true
-	game.progression.complete_level("forest_drake_1")
+	# A player part-way through: worlds 1-3 done with records, through the
+	# real rules (complete, record, awakening seen).
+	var p = game.progression
+	p.data.tutorial_done = true
+	for w in game.campaign.worlds.slice(0, 3):
+		for l in game.campaign.levels_in_world(w.id):
+			p.complete_level(l)
+			p.record_result(l, 18000 + l.length() * 1100, 2 + l.length() % 2)
+			p.mark_awakening_seen(game.campaign.creature_of_level(l))
+	game.persist()
 	game.reset_to("home")
 	await _settle(0.5)
 	await shot("home")
 
-	game.go("puzzle", {"level_id": "griffin_1"})
+	if phone:
+		game.go("world_select")
+		await _settle(0.8)
+		await shot("worlds")
+		game.reset_to("home")
+
+	# World 4's first dragon, solved cleanly at a believable pace (the timer
+	# runs for real; no hint, so three stars), then the results.
+	game.go("puzzle", {"level_id": "cloud_serpent"})
 	await _settle()
 	var pz: Control = game.current_screen()
-	pz._on_tap(pz.level.solution[0])
-	await _settle(0.6)
-	pz._on_hint()
-	await _settle(0.4)
-	await shot("puzzle")
-	game.reset_to("home")
-
-	game.go("puzzle", {"level_id": "forest_drake_2"})
-	await _settle()
-	pz = game.current_screen()
 	for id in pz.level.solution:
 		pz._on_tap(id)
-		await _settle(0.45)
-	await _settle(3.0)
+		await _settle(0.55)
+	await _settle(2.2)       # stars land one by one
+	await shot("results")
+	game.current_screen()._on_next()  # results -> earned awakening
+	await _settle(3.2)
 	await shot("awakening")
 	await _settle(4.0)
 	game.current_screen()._on_continue()
@@ -73,10 +80,18 @@ func _screens(phone: bool) -> void:
 	if phone:
 		await shot("creature")
 
-	for level_id in game.campaign.level_ids():
-		game.progression.complete_level(level_id)
-	for cid in game.campaign.creature_ids():
-		game.progression.mark_awakening_seen(cid)
+	# The next dragon: one move made, a hint showing.
+	var next_id: String = game.campaign.levels_in_world("w04")[1]
+	game.reset_to("home")
+	game.go("puzzle", {"level_id": next_id})
+	await _settle()
+	pz = game.current_screen()
+	pz._on_tap(pz.level.solution[0])
+	await _settle(0.6)
+	pz._on_hint()
+	await _settle(0.4)
+	await shot("puzzle")
+
 	game.reset_to("home")
 	game.go("bestiary")
 	await _settle(0.8)
@@ -94,10 +109,10 @@ func _feature() -> void:
 	Ui.full_rect(backdrop)
 	ui.add_child(backdrop)
 	var stage := CreatureStage.new()
-	stage.position = Vector2(500, 10)
-	stage.size = Vector2(500, 470)
+	stage.position = Vector2(600, 20)
+	stage.size = Vector2(410, 460)
 	ui.add_child(stage)
-	stage.show_creature("forest_drake")
+	stage.show_creature("cloud_peaks_monarch")
 	var title := Ui.label("Legend Arrow", "TitleLabel", HORIZONTAL_ALIGNMENT_LEFT)
 	title.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	title.add_theme_font_override("font", load(UiTheme.FONT_SEMIBOLD))

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "geode_drake",
+ "world": "w09",
+ "number": 88,
+ "name_key": "CREATURE_GEODE_DRAKE",
+ "lore_key": "CREATURE_GEODE_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/geode_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

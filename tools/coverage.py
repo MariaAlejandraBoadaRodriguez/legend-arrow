@@ -29,11 +29,11 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 GODOT = os.environ.get("GODOT", "godot")
 
 GROUPS = {
-    "puzzle, solver and progression (target 90%)": (90.0, [
+    "puzzle, solver, progression, timer and stars (target 90%)": (90.0, [
         "scripts/core/arrow_path.gd", "scripts/core/puzzle_board.gd", "scripts/core/puzzle_session.gd",
         "scripts/core/puzzle_solver.gd", "scripts/core/level_validator.gd", "scripts/core/level_generator.gd",
         "scripts/core/level_data.gd", "scripts/core/deterministic_rng.gd", "scripts/core/campaign.gd",
-        "scripts/core/progression.gd",
+        "scripts/core/progression.gd", "scripts/core/speed_timer.gd", "scripts/core/star_rating.gd",
     ]),
     "save and reward handling (target 80%)": (80.0, [
         "scripts/core/save_repository.gd", "scripts/core/save_schema.gd", "scripts/services/ad_service.gd",

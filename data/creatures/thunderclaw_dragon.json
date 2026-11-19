@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "thunderclaw_dragon",
+ "world": "w08",
+ "number": 74,
+ "name_key": "CREATURE_THUNDERCLAW_DRAGON",
+ "lore_key": "CREATURE_THUNDERCLAW_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/thunderclaw_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

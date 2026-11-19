@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "mistwood_elder",
+ "world": "w01",
+ "number": 10,
+ "name_key": "CREATURE_MISTWOOD_ELDER",
+ "lore_key": "CREATURE_MISTWOOD_ELDER_LORE",
+ "source_image": "assets/creatures/raw/mistwood_elder.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

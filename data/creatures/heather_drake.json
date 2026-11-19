@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "heather_drake",
+ "world": "w02",
+ "number": 11,
+ "name_key": "CREATURE_HEATHER_DRAKE",
+ "lore_key": "CREATURE_HEATHER_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/heather_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "ashen_tyrant",
+ "world": "w06",
+ "number": 60,
+ "name_key": "CREATURE_ASHEN_TYRANT",
+ "lore_key": "CREATURE_ASHEN_TYRANT_LORE",
+ "source_image": "assets/creatures/raw/ashen_tyrant.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

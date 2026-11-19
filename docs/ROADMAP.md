@@ -1,5 +1,21 @@
 # Legend Arrow — Roadmap
 
+## v0.2 (owner prompt 2026-11-18, `docs/prompts/03_V0_2.md`; decisions D-41)
+| Milestone | Scope | Exit |
+|---|---|---|
+| **A** | English only (strings, setting, tests, store text, CI check) + 4 icon concepts | Owner picks icon A/B/C/D (**STOP**) |
+| **B** | Chosen icon (adaptive + store), speed timer, 1–3 stars, results screen, save schema v3 + v0.1 migration | CI green, PR |
+| **C** | 10 worlds × 10 dragons = 100 certified puzzles (current art), world/level select, multi-screen layout P1–P7 | CI green, PR |
+| **D** | Art import pipeline (`scripts/import_art.sh`), photoreal awakening/bestiary, `docs/ART_STATUS.md` | CI green, PR |
+| **E** | Final art for all 100 dragons, masks → silhouettes → re-certified levels | CI green, PR |
+| **F** | Quality gates 9.1–9.8, store graphics 0.2.0, release AAB rehearsal, QA report | "Ready for Play upload" or the exact blockers |
+
+Gates 9.1 (functional) and 9.2 (regression) run at every milestone; all gates on the final commit.
+
+---
+
+## v0.1 roadmap (M0–M6, delivered)
+
 Planning window: 15–25 working days (provisional; re-estimate after M2's first Android vertical slice).
 Milestones M0–M6 come from `CLAUDE.md`; phases 1–10 from the brief (§3). Every phase lists Activity, Tools, Risk, Justification/trade-off, Deliverable, Definition of Done (DoD), Dependencies and Estimated days.
 

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "shale_drake",
+ "world": "w03",
+ "number": 26,
+ "name_key": "CREATURE_SHALE_DRAKE",
+ "lore_key": "CREATURE_SHALE_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/shale_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

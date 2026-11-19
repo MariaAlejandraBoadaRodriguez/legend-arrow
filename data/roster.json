@@ -1,0 +1,987 @@
+{
+ "source": "docs/ART_PROMPTS.md",
+ "worlds": [
+  {
+   "id": "w01",
+   "number": 1,
+   "name": "Mistwood",
+   "tone": "muted",
+   "dragons": [
+    "forest_drake",
+    "fern_wyrmling",
+    "mossback_drake",
+    "thornclaw_whelp",
+    "dewwing_drake",
+    "barkhide_wyvern",
+    "lichen_serpent",
+    "hollow_drake",
+    "rootcoil_wyrm",
+    "mistwood_elder"
+   ]
+  },
+  {
+   "id": "w02",
+   "number": 2,
+   "name": "Moorland Hollows",
+   "tone": "muted",
+   "dragons": [
+    "heather_drake",
+    "peat_wyrm",
+    "bogfire_drake",
+    "reedtail_wyvern",
+    "moorhound_drake",
+    "cairn_dragon",
+    "fogwing_drake",
+    "basilisk",
+    "rushwater_wyrm",
+    "moor_sovereign"
+   ]
+  },
+  {
+   "id": "w03",
+   "number": 3,
+   "name": "Riverstone Gorge",
+   "tone": "vivid",
+   "dragons": [
+    "river_drake",
+    "pebblescale_drake",
+    "cascade_serpent",
+    "gorge_wyvern",
+    "otterfin_drake",
+    "shale_drake",
+    "kingfisher_wyvern",
+    "ravine_stalker",
+    "tidepool_wyrm",
+    "stonewater_ancient"
+   ]
+  },
+  {
+   "id": "w04",
+   "number": 4,
+   "name": "Cloud Peaks",
+   "tone": "vivid",
+   "dragons": [
+    "cloud_serpent",
+    "wyvern",
+    "peak_drake",
+    "windrider_drake",
+    "eagle_wyvern",
+    "cirrus_dragon",
+    "summit_drake",
+    "thunderhead_drake",
+    "skyreach_wyrm",
+    "cloud_peaks_monarch"
+   ]
+  },
+  {
+   "id": "w05",
+   "number": 5,
+   "name": "Frostfall Reach",
+   "tone": "jewel",
+   "dragons": [
+    "arctic_drake",
+    "frost_wyvern",
+    "glacier_wyrm",
+    "rime_serpent",
+    "snowmane_drake",
+    "icefang_drake",
+    "tundra_dragon",
+    "hoarfrost_wyvern",
+    "aurora_drake",
+    "frostfall_ancient"
+   ]
+  },
+  {
+   "id": "w06",
+   "number": 6,
+   "name": "Ashen Wastes",
+   "tone": "jewel",
+   "dragons": [
+    "ash_drake",
+    "cinder_wyvern",
+    "dune_wyrm",
+    "scorch_drake",
+    "basalt_dragon",
+    "ember_serpent",
+    "sandstorm_wyvern",
+    "smoke_drake",
+    "phoenix_drake",
+    "ashen_tyrant"
+   ]
+  },
+  {
+   "id": "w07",
+   "number": 7,
+   "name": "Tidewrack Coast",
+   "tone": "jewel",
+   "dragons": [
+    "sea_drake",
+    "kelp_wyrm",
+    "saltspray_wyvern",
+    "reef_dragon",
+    "tide_serpent",
+    "shellback_drake",
+    "stormsurge_wyvern",
+    "abyssal_wyrm",
+    "pearl_drake",
+    "leviathan"
+   ]
+  },
+  {
+   "id": "w08",
+   "number": 8,
+   "name": "Stormcrown Heights",
+   "tone": "legendary",
+   "dragons": [
+    "storm_drake",
+    "lightning_wyvern",
+    "gale_serpent",
+    "thunderclaw_dragon",
+    "tempest_wyrm",
+    "raincloak_drake",
+    "static_drake",
+    "cyclone_wyvern",
+    "squall_dragon",
+    "stormcrown_king"
+   ]
+  },
+  {
+   "id": "w09",
+   "number": 9,
+   "name": "Obsidian Depths",
+   "tone": "legendary",
+   "dragons": [
+    "cave_drake",
+    "crystal_wyrm",
+    "obsidian_dragon",
+    "deepdark_wyvern",
+    "magma_wyrm",
+    "gloom_serpent",
+    "stone_wyrm",
+    "geode_drake",
+    "echo_drake",
+    "depth_warden"
+   ]
+  },
+  {
+   "id": "w10",
+   "number": 10,
+   "name": "Ancient Highlands",
+   "tone": "legendary",
+   "dragons": [
+    "highland_drake",
+    "runeback_dragon",
+    "bone_dragon",
+    "elder_wyvern",
+    "granite_colossus",
+    "twilight_dragon",
+    "starwing_dragon",
+    "crowned_wyrm",
+    "sentinel_dragon",
+    "ancient_dragon"
+   ]
+  }
+ ],
+ "dragons": [
+  {
+   "number": 1,
+   "id": "forest_drake",
+   "name": "Forest Drake",
+   "file": "forest_drake.png",
+   "world": "w01",
+   "description": "a small four-legged forest drake with moss-green and gray scales, short wings folded against its body, patches of lichen on its shoulders, standing calmly in side view"
+  },
+  {
+   "number": 2,
+   "id": "fern_wyrmling",
+   "name": "Fern Wyrmling",
+   "file": "fern_wyrmling.png",
+   "world": "w01",
+   "description": "a slender young wingless wyrm with fern-like frills running along its spine, gray-green skin, walking forward in side view"
+  },
+  {
+   "number": 3,
+   "id": "mossback_drake",
+   "name": "Mossback Drake",
+   "file": "mossback_drake.png",
+   "world": "w01",
+   "description": "a stocky drake with thick armored back plates covered in soft moss, two short curved horns, standing firmly in three-quarter view"
+  },
+  {
+   "number": 4,
+   "id": "thornclaw_whelp",
+   "name": "Thornclaw Whelp",
+   "file": "thornclaw_whelp.png",
+   "world": "w01",
+   "description": "a juvenile dragon with thorn-like spines along its neck and tail, bark-brown scales, crouched low and alert in side view"
+  },
+  {
+   "number": 5,
+   "id": "dewwing_drake",
+   "name": "Dewwing Drake",
+   "file": "dewwing_drake.png",
+   "world": "w01",
+   "description": "a delicate pale-sage drake with thin translucent wings half open, tiny water droplets on its scales, three-quarter view"
+  },
+  {
+   "number": 6,
+   "id": "barkhide_wyvern",
+   "name": "Barkhide Wyvern",
+   "file": "barkhide_wyvern.png",
+   "world": "w01",
+   "description": "a two-legged wyvern whose hide looks like rough tree bark, wings folded, long tail curving behind it, side view"
+  },
+  {
+   "number": 7,
+   "id": "lichen_serpent",
+   "name": "Lichen Serpent",
+   "file": "lichen_serpent.png",
+   "world": "w01",
+   "description": "a wingless serpentine dragon in a graceful S-curve, stone-gray skin speckled with pale green lichen, small head crest, side view"
+  },
+  {
+   "number": 8,
+   "id": "hollow_drake",
+   "name": "Hollow Drake",
+   "file": "hollow_drake.png",
+   "world": "w01",
+   "description": "a lean long-necked drake with soft gray-brown scales and large calm eyes, wings folded, three-quarter view"
+  },
+  {
+   "number": 9,
+   "id": "rootcoil_wyrm",
+   "name": "Rootcoil Wyrm",
+   "file": "rootcoil_wyrm.png",
+   "world": "w01",
+   "description": "a heavy wyrm with its tail coiled around its body and twisting root-like horns on its head, earthy brown and gray tones"
+  },
+  {
+   "number": 10,
+   "id": "mistwood_elder",
+   "name": "Mistwood Elder",
+   "file": "mistwood_elder.png",
+   "world": "w01",
+   "description": "a large ancient forest dragon with antler-like branching horns, wings spread wide, weathered moss-gray scales, majestic three-quarter view"
+  },
+  {
+   "number": 11,
+   "id": "heather_drake",
+   "name": "Heather Drake",
+   "file": "heather_drake.png",
+   "world": "w02",
+   "description": "a medium drake with muted purple-gray scales and small tufts of dry heather caught in its neck spines, side view"
+  },
+  {
+   "number": 12,
+   "id": "peat_wyrm",
+   "name": "Peat Wyrm",
+   "file": "peat_wyrm.png",
+   "world": "w02",
+   "description": "a heavy low-bodied wyrm with dark peat-brown wet-looking scales, short powerful legs, side view"
+  },
+  {
+   "number": 13,
+   "id": "bogfire_drake",
+   "name": "Bogfire Drake",
+   "file": "bogfire_drake.png",
+   "world": "w02",
+   "description": "a dark slate drake with a faint dim amber glow at its throat and chest, wings half raised, three-quarter view"
+  },
+  {
+   "number": 14,
+   "id": "reedtail_wyvern",
+   "name": "Reedtail Wyvern",
+   "file": "reedtail_wyvern.png",
+   "world": "w02",
+   "description": "a slim wyvern with a very long thin tail ending in reed-like fins, wings folded, olive-gray tones, side view"
+  },
+  {
+   "number": 15,
+   "id": "moorhound_drake",
+   "name": "Moorhound Drake",
+   "file": "moorhound_drake.png",
+   "world": "w02",
+   "description": "a wolf-like dragon with a shaggy mane of quills around its neck, lean legs, prowling in side view"
+  },
+  {
+   "number": 16,
+   "id": "cairn_dragon",
+   "name": "Cairn Dragon",
+   "file": "cairn_dragon.png",
+   "world": "w02",
+   "description": "a stone-gray dragon whose back plates look like stacked flat stones, sturdy stance, wings folded, three-quarter view"
+  },
+  {
+   "number": 17,
+   "id": "fogwing_drake",
+   "name": "Fogwing Drake",
+   "file": "fogwing_drake.png",
+   "world": "w02",
+   "description": "a pale gray drake with frayed, wispy wing membranes that look like drifting fog, wings open, three-quarter view"
+  },
+  {
+   "number": 18,
+   "id": "basilisk",
+   "name": "Basilisk",
+   "file": "basilisk.png",
+   "world": "w02",
+   "description": "a serpentine reptile-dragon with a tall bony crest on its head, raised upper body and intense gaze, dark olive and bone tones, side view"
+  },
+  {
+   "number": 19,
+   "id": "rushwater_wyrm",
+   "name": "Rushwater Wyrm",
+   "file": "rushwater_wyrm.png",
+   "world": "w02",
+   "description": "a long wingless wyrm with smooth slate-green scales and fin ridges along its back, body in a wave-like curve"
+  },
+  {
+   "number": 20,
+   "id": "moor_sovereign",
+   "name": "Moor Sovereign",
+   "file": "moor_sovereign.png",
+   "world": "w02",
+   "description": "a large regal heath dragon with broad dark wings spread, a crown of curved horns, muted purple-gray and bone tones, three-quarter view"
+  },
+  {
+   "number": 21,
+   "id": "river_drake",
+   "name": "River Drake",
+   "file": "river_drake.png",
+   "world": "w03",
+   "description": "a sleek drake with deep teal and turquoise scales with a wet sheen, pale aqua fins on its elbows and tail, side view"
+  },
+  {
+   "number": 22,
+   "id": "pebblescale_drake",
+   "name": "Pebblescale Drake",
+   "file": "pebblescale_drake.png",
+   "world": "w03",
+   "description": "a sturdy drake covered in smooth rounded scales like polished river pebbles in warm terracotta, ochre and cream, three-quarter view"
+  },
+  {
+   "number": 23,
+   "id": "cascade_serpent",
+   "name": "Cascade Serpent",
+   "file": "cascade_serpent.png",
+   "world": "w03",
+   "description": "a long aquatic serpent dragon shading from brilliant aquamarine to deep blue, with translucent flowing fin membranes, in an elegant S-curve"
+  },
+  {
+   "number": 24,
+   "id": "gorge_wyvern",
+   "name": "Gorge Wyvern",
+   "file": "gorge_wyvern.png",
+   "world": "w03",
+   "description": "a wyvern gliding with wings fully spread, rust-red and burnt-orange canyon-colored scales with a sand-colored belly, slight low angle, three-quarter view"
+  },
+  {
+   "number": 25,
+   "id": "otterfin_drake",
+   "name": "Otterfin Drake",
+   "file": "otterfin_drake.png",
+   "world": "w03",
+   "description": "a low long-bodied drake with webbed feet and a flat paddle-like tail, rich chocolate-brown scales with a golden-copper belly, side view"
+  },
+  {
+   "number": 26,
+   "id": "shale_drake",
+   "name": "Shale Drake",
+   "file": "shale_drake.png",
+   "world": "w03",
+   "description": "a dragon with flaky layered deep-charcoal plates edged in vivid emerald green, sharp angular head, three-quarter view"
+  },
+  {
+   "number": 27,
+   "id": "kingfisher_wyvern",
+   "name": "Kingfisher Wyvern",
+   "file": "kingfisher_wyvern.png",
+   "world": "w03",
+   "description": "a slender wyvern with a sharp pointed snout, a vivid electric cobalt-blue back and a bright orange chest, wings half open, side view"
+  },
+  {
+   "number": 28,
+   "id": "ravine_stalker",
+   "name": "Ravine Stalker",
+   "file": "ravine_stalker.png",
+   "world": "w03",
+   "description": "a lean predatory dragon with long limbs in a low crouched stalking pose, tawny-gold scales with dark tiger-like stripes, side view"
+  },
+  {
+   "number": 29,
+   "id": "tidepool_wyrm",
+   "name": "Tidepool Wyrm",
+   "file": "tidepool_wyrm.png",
+   "world": "w03",
+   "description": "a coiled wyrm with coral-pink and sea-green scales dotted with tiny barnacle-like textures, head raised, three-quarter view"
+  },
+  {
+   "number": 30,
+   "id": "stonewater_ancient",
+   "name": "Stonewater Ancient",
+   "file": "stonewater_ancient.png",
+   "world": "w03",
+   "description": "a massive old river dragon with eroded stone-like armor in deep sapphire blue and moss green with turquoise water-worn edges, wings spread, majestic three-quarter view"
+  },
+  {
+   "number": 31,
+   "id": "cloud_serpent",
+   "name": "Cloud Serpent",
+   "file": "cloud_serpent.png",
+   "world": "w04",
+   "description": "a long wingless sky serpent dragon with pearl-white scales shimmering with soft sky-blue and lavender iridescence, long flowing silver whisker barbels, body in graceful floating curves"
+  },
+  {
+   "number": 32,
+   "id": "wyvern",
+   "name": "Wyvern",
+   "file": "wyvern.png",
+   "world": "w04",
+   "description": "a classic two-legged wyvern with deep crimson-red scales and a black ridge along its spine, unfolding large leathery wings, horned head raised, three-quarter view"
+  },
+  {
+   "number": 33,
+   "id": "peak_drake",
+   "name": "Peak Drake",
+   "file": "peak_drake.png",
+   "world": "w04",
+   "description": "a powerful four-legged mountain drake with thick golden-amber horns and granite scales banded with bright ochre-gold, standing proudly in side view"
+  },
+  {
+   "number": 34,
+   "id": "windrider_drake",
+   "name": "Windrider Drake",
+   "file": "windrider_drake.png",
+   "world": "w04",
+   "description": "a light agile drake whose wings are edged with feather-like plumes in white and vivid sky blue, wings open mid-takeoff, three-quarter view"
+  },
+  {
+   "number": 35,
+   "id": "eagle_wyvern",
+   "name": "Eagle Wyvern",
+   "file": "eagle_wyvern.png",
+   "world": "w04",
+   "description": "a wyvern with a chestnut-brown body, a bright white feathered crest on its head and neck, golden eyes and a golden-yellow beak-like snout, wings half open, side view"
+  },
+  {
+   "number": 36,
+   "id": "cirrus_dragon",
+   "name": "Cirrus Dragon",
+   "file": "cirrus_dragon.png",
+   "world": "w04",
+   "description": "a thin elegant dragon with shimmering silver and pale violet scales, long narrow wings and a very long tail, three-quarter view"
+  },
+  {
+   "number": 37,
+   "id": "summit_drake",
+   "name": "Summit Drake",
+   "file": "summit_drake.png",
+   "world": "w04",
+   "description": "a muscular drake with deep forest-green scales and snow-white spines, rearing slightly with wings half raised, three-quarter view"
+  },
+  {
+   "number": 38,
+   "id": "thunderhead_drake",
+   "name": "Thunderhead Drake",
+   "file": "thunderhead_drake.png",
+   "world": "w04",
+   "description": "a drake with an indigo-violet body and storm-dark wing membranes veined with pale electric blue, wings spread, three-quarter view"
+  },
+  {
+   "number": 39,
+   "id": "skyreach_wyrm",
+   "name": "Skyreach Wyrm",
+   "file": "skyreach_wyrm.png",
+   "world": "w04",
+   "description": "a long-necked wyrm with bright sky-blue and white scales stretching its head upward, slim body, side view"
+  },
+  {
+   "number": 40,
+   "id": "cloud_peaks_monarch",
+   "name": "Cloud Peaks Monarch",
+   "file": "cloud_peaks_monarch.png",
+   "world": "w04",
+   "description": "a huge majestic sky dragon with brilliant white-gold scales and sky-blue accents, enormous wings fully spread, a crown of swept-back horns, three-quarter view"
+  },
+  {
+   "number": 41,
+   "id": "arctic_drake",
+   "name": "Arctic Drake",
+   "file": "arctic_drake.png",
+   "world": "w05",
+   "description": "a drake with glacier-blue scales and iridescent white highlights, exhaling a thin wisp of frosty breath, frost crystals on its spines, three-quarter view"
+  },
+  {
+   "number": 42,
+   "id": "frost_wyvern",
+   "name": "Frost Wyvern",
+   "file": "frost_wyvern.png",
+   "world": "w05",
+   "description": "a wyvern with vivid icy-cyan scales and translucent sapphire icicle-like spikes along its wings, wings half open, side view"
+  },
+  {
+   "number": 43,
+   "id": "glacier_wyrm",
+   "name": "Glacier Wyrm",
+   "file": "glacier_wyrm.png",
+   "world": "w05",
+   "description": "a massive heavy wyrm with thick deep-blue translucent ice-like armor plates glowing faintly turquoise from within, side view"
+  },
+  {
+   "number": 44,
+   "id": "rime_serpent",
+   "name": "Rime Serpent",
+   "file": "rime_serpent.png",
+   "world": "w05",
+   "description": "a wingless serpent dragon with white scales covered in iridescent mother-of-pearl frost, body coiled with head raised"
+  },
+  {
+   "number": 45,
+   "id": "snowmane_drake",
+   "name": "Snowmane Drake",
+   "file": "snowmane_drake.png",
+   "world": "w05",
+   "description": "a drake with a deep royal-blue body and a long snow-white mane of thin quills on its neck, standing in side view"
+  },
+  {
+   "number": 46,
+   "id": "icefang_drake",
+   "name": "Icefang Drake",
+   "file": "icefang_drake.png",
+   "world": "w05",
+   "description": "a fierce snarling drake with steel-blue scales and long gleaming translucent aquamarine fangs, three-quarter view"
+  },
+  {
+   "number": 47,
+   "id": "tundra_dragon",
+   "name": "Tundra Dragon",
+   "file": "tundra_dragon.png",
+   "world": "w05",
+   "description": "a broad thick-bodied dragon with rich amber-brown frost-crusted shaggy spines and piercing ice-blue eyes, heavy stance, side view"
+  },
+  {
+   "number": 48,
+   "id": "hoarfrost_wyvern",
+   "name": "Hoarfrost Wyvern",
+   "file": "hoarfrost_wyvern.png",
+   "world": "w05",
+   "description": "a slender wyvern with silver wings covered in feathery frost patterns shimmering with violet iridescence, wings fully open, three-quarter view"
+  },
+  {
+   "number": 49,
+   "id": "aurora_drake",
+   "name": "Aurora Drake",
+   "file": "aurora_drake.png",
+   "world": "w05",
+   "description": "a drake with deep navy scales and vivid green, teal and magenta aurora-like iridescent bands across its wing membranes, wings open, three-quarter view"
+  },
+  {
+   "number": 50,
+   "id": "frostfall_ancient",
+   "name": "Frostfall Ancient",
+   "file": "frostfall_ancient.png",
+   "world": "w05",
+   "description": "a colossal ancient ice dragon with sapphire and diamond-white scales and jagged crystal horns glowing faint blue, wings spread, majestic three-quarter view"
+  },
+  {
+   "number": 51,
+   "id": "ash_drake",
+   "name": "Ash Drake",
+   "file": "ash_drake.png",
+   "world": "w06",
+   "description": "a charcoal-black drake with glowing ember-orange speckles scattered across its matte scales, side view"
+  },
+  {
+   "number": 52,
+   "id": "cinder_wyvern",
+   "name": "Cinder Wyvern",
+   "file": "cinder_wyvern.png",
+   "world": "w06",
+   "description": "a black wyvern with bright glowing orange-red ember cracks between its scales, wings half open, three-quarter view"
+  },
+  {
+   "number": 53,
+   "id": "dune_wyrm",
+   "name": "Dune Wyrm",
+   "file": "dune_wyrm.png",
+   "world": "w06",
+   "description": "a long wyrm with rich golden-sand scales and copper bands along its ridged back, body curving low, side view"
+  },
+  {
+   "number": 54,
+   "id": "scorch_drake",
+   "name": "Scorch Drake",
+   "file": "scorch_drake.png",
+   "world": "w06",
+   "description": "a lean drake with deep crimson-black scales and heat-glowing orange horns, three-quarter view"
+  },
+  {
+   "number": 55,
+   "id": "basalt_dragon",
+   "name": "Basalt Dragon",
+   "file": "basalt_dragon.png",
+   "world": "w06",
+   "description": "a heavy dragon with glossy black hexagonal basalt-like plates joined by molten gold seams, wings folded, side view"
+  },
+  {
+   "number": 56,
+   "id": "ember_serpent",
+   "name": "Ember Serpent",
+   "file": "ember_serpent.png",
+   "world": "w06",
+   "description": "a wingless serpent dragon with dark scales and a vivid glowing ember-orange belly, coiled pose"
+  },
+  {
+   "number": 57,
+   "id": "sandstorm_wyvern",
+   "name": "Sandstorm Wyvern",
+   "file": "sandstorm_wyvern.png",
+   "world": "w06",
+   "description": "a wyvern with ochre and burnt-sienna scales and a striking turquoise throat and eyes, wings spread as if bracing against wind, three-quarter view"
+  },
+  {
+   "number": 58,
+   "id": "smoke_drake",
+   "name": "Smoke Drake",
+   "file": "smoke_drake.png",
+   "world": "w06",
+   "description": "a dark graphite drake with wispy smoke-like membranes trailing from its wings and tail, lit from within in deep orange, three-quarter view"
+  },
+  {
+   "number": 59,
+   "id": "phoenix_drake",
+   "name": "Phoenix Drake",
+   "file": "phoenix_drake.png",
+   "world": "w06",
+   "description": "a dragon with flame-colored feather-edged wings in vivid gold, orange and scarlet, wings open, a few glowing embers drifting around it, three-quarter view"
+  },
+  {
+   "number": 60,
+   "id": "ashen_tyrant",
+   "name": "Ashen Tyrant",
+   "file": "ashen_tyrant.png",
+   "world": "w06",
+   "description": "a massive menacing volcanic dragon with obsidian-black armor, blazing lava-orange seams and glowing eyes, wings spread wide, majestic three-quarter view"
+  },
+  {
+   "number": 61,
+   "id": "sea_drake",
+   "name": "Sea Drake",
+   "file": "sea_drake.png",
+   "world": "w07",
+   "description": "a sleek drake with deep ocean-blue wet scales and iridescent teal fin crests on its head and tail, side view"
+  },
+  {
+   "number": 62,
+   "id": "kelp_wyrm",
+   "name": "Kelp Wyrm",
+   "file": "kelp_wyrm.png",
+   "world": "w07",
+   "description": "a long wyrm with emerald and golden-olive kelp-like ribbons hanging from its spines, body curving, side view"
+  },
+  {
+   "number": 63,
+   "id": "saltspray_wyvern",
+   "name": "Saltspray Wyvern",
+   "file": "saltspray_wyvern.png",
+   "world": "w07",
+   "description": "a wyvern with turquoise and sea-foam white scales with a pearly sheen, wings open, three-quarter view"
+  },
+  {
+   "number": 64,
+   "id": "reef_dragon",
+   "name": "Reef Dragon",
+   "file": "reef_dragon.png",
+   "world": "w07",
+   "description": "a dragon with textured coral-like ridges in vivid coral orange, pink and violet, wings folded, side view"
+  },
+  {
+   "number": 65,
+   "id": "tide_serpent",
+   "name": "Tide Serpent",
+   "file": "tide_serpent.png",
+   "world": "w07",
+   "description": "a long sea serpent dragon with shimmering sapphire scales, a silver belly and webbed fin frills, in a rolling wave-like curve"
+  },
+  {
+   "number": 66,
+   "id": "shellback_drake",
+   "name": "Shellback Drake",
+   "file": "shellback_drake.png",
+   "world": "w07",
+   "description": "a stocky drake with a sand-gold body and a large spiral shell-like back plate gleaming with mother-of-pearl iridescence, side view"
+  },
+  {
+   "number": 67,
+   "id": "stormsurge_wyvern",
+   "name": "Stormsurge Wyvern",
+   "file": "stormsurge_wyvern.png",
+   "world": "w07",
+   "description": "a powerful wyvern with deep navy scales and torn wing edges glowing electric teal, wings spread wide, three-quarter view"
+  },
+  {
+   "number": 68,
+   "id": "abyssal_wyrm",
+   "name": "Abyssal Wyrm",
+   "file": "abyssal_wyrm.png",
+   "world": "w07",
+   "description": "a deep-sea wyrm with midnight-black scales and glowing bioluminescent cyan and violet spots, coiled pose"
+  },
+  {
+   "number": 69,
+   "id": "pearl_drake",
+   "name": "Pearl Drake",
+   "file": "pearl_drake.png",
+   "world": "w07",
+   "description": "an elegant drake with pearl-white scales shimmering with rainbow iridescence, wings folded, three-quarter view"
+  },
+  {
+   "number": 70,
+   "id": "leviathan",
+   "name": "Leviathan",
+   "file": "leviathan.png",
+   "world": "w07",
+   "description": "an enormous serpentine sea dragon with deep teal and royal-blue scales and glowing aquamarine fin crests, rising in a huge curve, majestic view"
+  },
+  {
+   "number": 71,
+   "id": "storm_drake",
+   "name": "Storm Drake",
+   "file": "storm_drake.png",
+   "world": "w08",
+   "description": "a sleek midnight-blue drake with glowing electric-blue eyes and markings, sharp swept-back horns, wings half raised, three-quarter view"
+  },
+  {
+   "number": 72,
+   "id": "lightning_wyvern",
+   "name": "Lightning Wyvern",
+   "file": "lightning_wyvern.png",
+   "world": "w08",
+   "description": "a black wyvern with bright glowing white-blue lightning patterns across its wings, wings spread, three-quarter view"
+  },
+  {
+   "number": 73,
+   "id": "gale_serpent",
+   "name": "Gale Serpent",
+   "file": "gale_serpent.png",
+   "world": "w08",
+   "description": "a wingless serpent dragon with silver-white scales and long streaming fin ribbons glowing soft violet, flowing curves"
+  },
+  {
+   "number": 74,
+   "id": "thunderclaw_dragon",
+   "name": "Thunderclaw Dragon",
+   "file": "thunderclaw_dragon.png",
+   "world": "w08",
+   "description": "a muscular dragon with deep purple scales, oversized gold claws and glowing yellow eyes, wings folded, side view"
+  },
+  {
+   "number": 75,
+   "id": "tempest_wyrm",
+   "name": "Tempest Wyrm",
+   "file": "tempest_wyrm.png",
+   "world": "w08",
+   "description": "a long wyrm with dark teal scales and swirling glowing cyan patterns on its back, coiled and alert"
+  },
+  {
+   "number": 76,
+   "id": "raincloak_drake",
+   "name": "Raincloak Drake",
+   "file": "raincloak_drake.png",
+   "world": "w08",
+   "description": "a drake with deep indigo wings wrapped around it like a cloak, raindrops glinting on its scales, glowing silver eyes, three-quarter view"
+  },
+  {
+   "number": 77,
+   "id": "static_drake",
+   "name": "Static Drake",
+   "file": "static_drake.png",
+   "world": "w08",
+   "description": "a lean graphite drake with raised needle-like spines crackling with bright violet-blue electric light, side view"
+  },
+  {
+   "number": 78,
+   "id": "cyclone_wyvern",
+   "name": "Cyclone Wyvern",
+   "file": "cyclone_wyvern.png",
+   "world": "w08",
+   "description": "a wyvern banking in flight with wings fully spread and tail curled, storm-gray and electric-blue scales, dynamic three-quarter view"
+  },
+  {
+   "number": 79,
+   "id": "squall_dragon",
+   "name": "Squall Dragon",
+   "file": "squall_dragon.png",
+   "world": "w08",
+   "description": "a broad-winged dragon with dark slate and stormy violet scales, roaring with head raised and a glowing white throat, three-quarter view"
+  },
+  {
+   "number": 80,
+   "id": "stormcrown_king",
+   "name": "Stormcrown King",
+   "file": "stormcrown_king.png",
+   "world": "w08",
+   "description": "a colossal storm dragon with black and royal-purple scales, a crown of jagged gold horns and glowing electric-blue lightning veins, huge wings spread, majestic three-quarter view"
+  },
+  {
+   "number": 81,
+   "id": "cave_drake",
+   "name": "Cave Drake",
+   "file": "cave_drake.png",
+   "world": "w09",
+   "description": "a cave drake with pale ivory translucent skin, softly glowing blue veins and milky glowing eyes, low stance, side view"
+  },
+  {
+   "number": 82,
+   "id": "crystal_wyrm",
+   "name": "Crystal Wyrm",
+   "file": "crystal_wyrm.png",
+   "world": "w09",
+   "description": "a dark wyrm with clusters of glowing amethyst and clear quartz crystals growing along its spine, side view"
+  },
+  {
+   "number": 83,
+   "id": "obsidian_dragon",
+   "name": "Obsidian Dragon",
+   "file": "obsidian_dragon.png",
+   "world": "w09",
+   "description": "a dragon with glossy black volcanic-glass scales reflecting iridescent purple and green, wings folded, three-quarter view"
+  },
+  {
+   "number": 84,
+   "id": "deepdark_wyvern",
+   "name": "Deepdark Wyvern",
+   "file": "deepdark_wyvern.png",
+   "world": "w09",
+   "description": "a charcoal wyvern with glowing teal eyes and bioluminescent veins across its wide thin wings, wings spread, three-quarter view"
+  },
+  {
+   "number": 85,
+   "id": "magma_wyrm",
+   "name": "Magma Wyrm",
+   "file": "magma_wyrm.png",
+   "world": "w09",
+   "description": "a heavy wyrm with dark rock armor split by bright glowing molten orange-gold cracks, side view"
+  },
+  {
+   "number": 86,
+   "id": "gloom_serpent",
+   "name": "Gloom Serpent",
+   "file": "gloom_serpent.png",
+   "world": "w09",
+   "description": "a wingless serpent dragon with dark violet scales and glowing pale-green markings, coiled with head lowered"
+  },
+  {
+   "number": 87,
+   "id": "stone_wyrm",
+   "name": "Stone Wyrm",
+   "file": "stone_wyrm.png",
+   "world": "w09",
+   "description": "a massive wyrm whose weathered granite body is veined with glowing gold ore and patches of green moss, side view"
+  },
+  {
+   "number": 88,
+   "id": "geode_drake",
+   "name": "Geode Drake",
+   "file": "geode_drake.png",
+   "world": "w09",
+   "description": "a drake with rough gray outer scales cracked open on its shoulders to reveal vivid glowing amethyst and citrine crystals, three-quarter view"
+  },
+  {
+   "number": 89,
+   "id": "echo_drake",
+   "name": "Echo Drake",
+   "file": "echo_drake.png",
+   "world": "w09",
+   "description": "a drake with deep blue-black scales and large fan-shaped ear frills glowing faint cyan at the edges, side view"
+  },
+  {
+   "number": 90,
+   "id": "depth_warden",
+   "name": "Depth Warden",
+   "file": "depth_warden.png",
+   "world": "w09",
+   "description": "a huge ancient underground dragon with obsidian armor, glowing emerald crystal-tipped horns and glowing eyes, wings spread, majestic three-quarter view"
+  },
+  {
+   "number": 91,
+   "id": "highland_drake",
+   "name": "Highland Drake",
+   "file": "highland_drake.png",
+   "world": "w10",
+   "description": "a proud highland drake with copper-bronze scales and long golden ram-like horns, standing in side view"
+  },
+  {
+   "number": 92,
+   "id": "runeback_dragon",
+   "name": "Runeback Dragon",
+   "file": "runeback_dragon.png",
+   "world": "w10",
+   "description": "a deep-teal dragon with ancient rune-like patterns glowing gold on its back plates, wings folded, three-quarter view"
+  },
+  {
+   "number": 93,
+   "id": "bone_dragon",
+   "name": "Bone Dragon",
+   "file": "bone_dragon.png",
+   "world": "w10",
+   "description": "a noble dragon with pale bone-white armored plates, gold-tipped ridged horns and glowing amber eyes, wings half open, three-quarter view"
+  },
+  {
+   "number": 94,
+   "id": "elder_wyvern",
+   "name": "Elder Wyvern",
+   "file": "elder_wyvern.png",
+   "world": "w10",
+   "description": "an old scarred wyvern with deep crimson and gold scales, tattered wing edges and wise glowing eyes, side view"
+  },
+  {
+   "number": 95,
+   "id": "granite_colossus",
+   "name": "Granite Colossus",
+   "file": "granite_colossus.png",
+   "world": "w10",
+   "description": "an enormous heavy dragon with massive granite armor veined with glowing turquoise, short thick horns, standing firmly, side view"
+  },
+  {
+   "number": 96,
+   "id": "twilight_dragon",
+   "name": "Twilight Dragon",
+   "file": "twilight_dragon.png",
+   "world": "w10",
+   "description": "a graceful dragon whose scales shift from deep violet to sunset orange, wings spread, three-quarter view"
+  },
+  {
+   "number": 97,
+   "id": "starwing_dragon",
+   "name": "Starwing Dragon",
+   "file": "starwing_dragon.png",
+   "world": "w10",
+   "description": "a dragon with midnight-blue wings filled with glowing star-like freckles and soft nebula colors, wings fully spread, three-quarter view"
+  },
+  {
+   "number": 98,
+   "id": "crowned_wyrm",
+   "name": "Crowned Wyrm",
+   "file": "crowned_wyrm.png",
+   "world": "w10",
+   "description": "a long ancient emerald-green wyrm with a natural crown of tall golden horns, coiled in a regal pose"
+  },
+  {
+   "number": 99,
+   "id": "sentinel_dragon",
+   "name": "Sentinel Dragon",
+   "file": "sentinel_dragon.png",
+   "world": "w10",
+   "description": "a tall vigilant dragon with silver and royal-blue scales and glowing blue eyes, sitting upright with wings folded like a cloak, side view"
+  },
+  {
+   "number": 100,
+   "id": "ancient_dragon",
+   "name": "Ancient Dragon",
+   "file": "ancient_dragon.png",
+   "world": "w10",
+   "description": "the oldest and largest dragon, immense wings fully spread, massive horned head raised, battle-scarred scales of deep gold, bronze and crimson, glowing ember eyes, epic majestic three-quarter view"
+  }
+ ]
+}

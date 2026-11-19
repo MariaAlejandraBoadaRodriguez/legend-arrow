@@ -106,6 +106,13 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   check "targetSdk >= 35 (Play requirement)" '[[ -n "$target" && "$target" -ge 35 ]]'
   check "release build is not debuggable" '! grep -q "android:debuggable=\"true\"" <<<"$manifest"'
   check "no AD_ID / Privacy Sandbox ad permissions" '! grep -qE "permission.AD_ID|ACCESS_ADSERVICES" <<<"$manifest"'
+  # Merged-manifest permission audit: nothing beyond the v0.1 baseline.
+  perms="$(grep -oE '<uses-permission[^>]*android:name="[^"]+"' <<<"$manifest" | sed -E 's/.*android:name="([^"]+)".*/\1/' | sort -u)"
+  echo "permissions:"; sed 's/^/  /' <<<"$perms"
+  allowed="$(grep -v '^#' "$ROOT/tools/permissions_allowlist.txt" | sed "s/{pkg}/$pkg/" | sort -u)"
+  extra="$(comm -23 <(echo "$perms") <(echo "$allowed") | grep . || true)"
+  [[ -z "$extra" ]] || echo "  not in tools/permissions_allowlist.txt: $extra"
+  check "no permissions beyond the v0.1 baseline" '[[ -z "$extra" ]]'
   files="$(unzip -l "$AAB" | awk '{print $4}')"
   check "arm64-v8a native libs" 'grep -q "^base/lib/arm64-v8a/.*\.so$" <<<"$files"'
   check "armeabi-v7a native libs (32-bit phones)" 'grep -q "^base/lib/armeabi-v7a/.*\.so$" <<<"$files"'
@@ -129,7 +136,13 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   check "arm64 phone download <= 120 MB (spec §14)" '[[ "$max_arm64" =~ ^[0-9]+$ ]] && (( max_arm64 <= 125829120 ))'
   # Public certificate fingerprint of the signing key: compare it with the
   # upload key certificate shown in Play Console (App integrity).
-  echo "signing certificate:"; "$JAVA_HOME/bin/keytool" -printcert -jarfile "$AAB" 2>/dev/null | grep -E "Owner:|SHA256:" | sed 's/^/  /' || true
+  # (Before: `keytool -printcert -jarfile` via $JAVA_HOME printed nothing on CI,
+  # run 44462316343; read the certificate from the signing keystore instead.)
+  KEYTOOL="$( [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/keytool" ]] && echo "$JAVA_HOME/bin/keytool" || command -v keytool || true)"
+  cert="$("$KEYTOOL" -list -v -keystore "$GODOT_ANDROID_KEYSTORE_RELEASE_PATH" -alias "$GODOT_ANDROID_KEYSTORE_RELEASE_USER" \
+          -storepass "$GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD" 2>/dev/null | grep -E "Owner:|SHA256:" || true)"
+  echo "signing certificate:"; sed 's/^/  /' <<<"$cert"
+  check "signing certificate SHA-256 printed" 'grep -qE "SHA256: ([0-9A-F]{2}:){31}[0-9A-F]{2}" <<<"$cert"'
   echo "REPORT COMPLETE"
 } | tee "$REPORT"
 # The block runs in a pipeline subshell: trust only a complete report.

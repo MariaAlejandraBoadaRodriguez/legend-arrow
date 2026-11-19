@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "starwing_dragon",
+ "world": "w10",
+ "number": 97,
+ "name_key": "CREATURE_STARWING_DRAGON",
+ "lore_key": "CREATURE_STARWING_DRAGON_LORE",
+ "source_image": "assets/creatures/raw/starwing_dragon.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "storm_drake",
+ "world": "w08",
+ "number": 71,
+ "name_key": "CREATURE_STORM_DRAKE",
+ "lore_key": "CREATURE_STORM_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/storm_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

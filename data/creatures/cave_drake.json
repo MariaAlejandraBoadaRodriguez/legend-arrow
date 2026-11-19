@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cave_drake",
+ "world": "w09",
+ "number": 81,
+ "name_key": "CREATURE_CAVE_DRAKE",
+ "lore_key": "CREATURE_CAVE_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/cave_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

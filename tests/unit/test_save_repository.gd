@@ -142,7 +142,8 @@ func test_migrates_v1_save() -> void:
 	assert_eq(res.source, SaveRepository.Source.MAIN)
 	var d: Dictionary = res.data
 	assert_eq(d.schema_version, SaveSchema.VERSION)
-	assert_true(d.levels.forest_drake_2.completed)
+	assert_true(d.levels.forest_drake.completed, "v0.1 levels map to the roster dragon's level")
+	assert_false(d.levels.has("forest_drake_2"))
 	assert_true(d.creatures.forest_drake.unlocked)
 	assert_true(d.transactions.has("unlock:forest_drake"), "migrated unlock cannot be granted again")
 	assert_true(d.tutorial_done)
@@ -161,11 +162,11 @@ func test_sanitize_repairs_settings_and_fills_missing_keys() -> void:
 	var d := SaveSchema.defaults()
 	d.erase("hints")
 	d.settings.music_volume = 7.0
-	d.settings.language = 3
+	d.settings.language = "es"  # written by v0.1; obsolete since D-41
 	assert_eq(SaveSchema.sanitize(d), [] as Array[String])
 	assert_eq(d.hints, {"free_used": {}, "ad_entitlements": 0})
 	assert_eq(d.settings.music_volume, 1.0)
-	assert_eq(d.settings.language, "")
+	assert_false(d.settings.has("language"), "obsolete language setting dropped")
 	var bad := SaveSchema.defaults()
 	bad.levels = []
 	assert_false(SaveSchema.sanitize(bad).is_empty(), "wrong top-level type is corrupt")

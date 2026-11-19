@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "cloud_peaks_monarch",
+ "world": "w04",
+ "number": 40,
+ "name_key": "CREATURE_CLOUD_PEAKS_MONARCH",
+ "lore_key": "CREATURE_CLOUD_PEAKS_MONARCH_LORE",
+ "source_image": "assets/creatures/raw/cloud_peaks_monarch.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

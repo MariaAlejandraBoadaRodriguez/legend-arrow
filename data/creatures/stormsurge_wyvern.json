@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "stormsurge_wyvern",
+ "world": "w07",
+ "number": 67,
+ "name_key": "CREATURE_STORMSURGE_WYVERN",
+ "lore_key": "CREATURE_STORMSURGE_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/stormsurge_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

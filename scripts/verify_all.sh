@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Single verification entry point (spec §19). Exits nonzero if any check fails.
+#   0. English-only gate (tools/check_english_only.py, self-test first)
 #   1. import the project headlessly and fail on script/parse errors
 #   2. compile every project script
 #   3. run every GUT test (unit, property, content, integration)
@@ -23,6 +24,13 @@ fail_on_errors() {  # $1 = log file, $2 = step name
     exit 1
   fi
 }
+
+echo "== [0/4] English-only check"
+python3 "$ROOT/tools/check_english_only.py" --self-test | tee "$REPORTS/english_only.log"
+python3 "$ROOT/tools/check_english_only.py" | tee -a "$REPORTS/english_only.log"
+[[ ${PIPESTATUS[0]} -eq 0 ]] || { echo "!! English-only check failed" >&2; exit 1; }
+python3 "$ROOT/tools/roster.py" --check | tee "$REPORTS/roster.log"
+python3 "$ROOT/tools/check_strings.py" | tee "$REPORTS/strings.log"
 
 echo "== [1/4] Import project"
 "$GODOT" --headless --path "$ROOT" --import >"$REPORTS/import.log" 2>&1 || { cat "$REPORTS/import.log"; exit 1; }

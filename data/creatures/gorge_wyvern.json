@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "gorge_wyvern",
+ "world": "w03",
+ "number": 24,
+ "name_key": "CREATURE_GORGE_WYVERN",
+ "lore_key": "CREATURE_GORGE_WYVERN_LORE",
+ "source_image": "assets/creatures/raw/gorge_wyvern.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

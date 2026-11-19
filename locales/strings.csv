@@ -1,117 +1,314 @@
-keys,en,es
-APP_NAME,Legend Arrow,Legend Arrow
-APP_TAGLINE,Awaken legendary creatures,Flechas · Despierta criaturas legendarias
-HOME_PLAY,Play,Jugar
-HOME_BESTIARY,Bestiary,Bestiario
-HOME_SETTINGS,Settings,Ajustes
-LOADING,Loading…,Cargando…
-TUTORIAL_TITLE,How to play,Cómo jugar
-TUTORIAL_STEP_OF,Step %d of 3,Paso %d de 3
-TUTORIAL_STEP_1,Tap an arrow with a clear way out.,Toca una flecha con la salida despejada.
-TUTORIAL_STEP_2,Clear other arrows to open a path.,Despeja otras flechas para abrir camino.
-TUTORIAL_STEP_3,Release every arrow to awaken the creature.,Libera todas las flechas para despertar a la criatura.
-TUTORIAL_NEXT,Next,Siguiente
-TUTORIAL_SKIP,Skip,Omitir
-TUTORIAL_START,Start playing,Empezar a jugar
-TUTORIAL_WELL_DONE,Well done.,Bien hecho.
-BLOCKED_MESSAGE,Clear another arrow first.,Despeja otra flecha primero.
-LEVEL_SELECT_SUBTITLE,Choose a challenge.,Elige un desafío.
-PLAY_PUZZLE,Play puzzle %d,Jugar puzle %d
-PUZZLE_N_OF_2,Puzzle %d of 2,Puzle %d de 2
-DIFFICULTY_TUTORIAL,Gentle,Suave
-DIFFICULTY_EASY,Easy,Fácil
-DIFFICULTY_MEDIUM,Medium,Media
-DIFFICULTY_HARD,Hard,Difícil
-DIFFICULTY_EXPERT,Expert,Experto
-LOCKED,Locked,Bloqueada
-COMING_SOON,More creatures are on their way.,Más criaturas están en camino.
-ALL_AWAKENED,Every creature here is awake.,Todas las criaturas aquí están despiertas.
-UNDO,Undo,Deshacer
-HINT,Hint,Pista
-HINT_FREE,Hint · %d free,Pista · %d gratis
-HINT_AD_READY,Hint · %d earned,Pista · %d ganadas
-RESTART,Restart,Reiniciar
-PAUSE,Pause,Pausa
-PAUSED,Paused,En pausa
-PAUSED_SAVED,Your progress is saved.,Tu progreso está guardado.
-RESUME,Resume,Continuar
-RESTART_PUZZLE,Restart puzzle,Reiniciar puzle
-LEVEL_SELECTION,Level selection,Selección de nivel
-BACK,Back,Atrás
-PUZZLE_COMPLETE,Puzzle complete,Puzle completado
-TWO_PUZZLES,Two puzzles to awaken,Dos puzles para despertar
-N_OF_2_COMPLETE,%d of 2 complete,%d de 2 completados
-CONTINUE_TO_PUZZLE_2,Continue to puzzle 2,Continuar al puzle 2
-CREATURE_AWAKENED,Creature awakened,Criatura despertada
-CONTINUE,Continue,Continuar
-SKIP,Skip,Omitir
-OPEN_BESTIARY,Open bestiary,Abrir bestiario
-REPLAY_AWAKENING,Replay awakening,Repetir despertar
-BESTIARY_TITLE,Bestiary,Bestiario
-N_AWAKENED,%d of %d awakened,%d de %d despertadas
-CONTINUE_ADVENTURE,Continue adventure,Continuar aventura
-NEW_BADGE,New,Nueva
-HINT_SHEET_TITLE,Need a hint?,¿Necesitas una pista?
-HINT_SHEET_USED,Your 3 free hints for this puzzle have been used.,Ya usaste tus 3 pistas gratis de este puzle.
-HINT_SHEET_FREE_PATH,Undo and restart are always free.,Deshacer y reiniciar siempre son gratis.
-KEEP_PLAYING,Keep playing,Seguir jugando
-HINT_SHEET_AD,Watch a short ad to highlight one free arrow.,Mira un anuncio corto para resaltar una flecha libre.
-WATCH_AD_HINT,Watch ad · Get 1 hint,Ver anuncio · 1 pista
-LOADING_AD,Loading ad…,Cargando anuncio…
-NO_AD_TITLE,No ad available,No hay anuncios disponibles
-NO_AD_BODY,You can keep playing.,Puedes seguir jugando.
-RETURN_TO_PUZZLE,Return to puzzle,Volver al puzle
-TRY_AGAIN,Try again,Intentar de nuevo
-SAVE_RESTORED_TITLE,Progress restored,Progreso restaurado
-SAVE_RESTORED_BODY,We restored your last saved progress.,Restauramos tu último progreso guardado.
-SETTINGS_TITLE,Settings,Ajustes
-SETTINGS_AUDIO,Audio,Audio
-SETTINGS_MUSIC,Music,Música
-SETTINGS_SFX,Sound effects,Efectos de sonido
-SETTINGS_CREATURE,Creature audio,Sonido de criaturas
-SETTINGS_ACCESSIBILITY,Accessibility,Accesibilidad
-SETTINGS_REDUCE_MOTION,Reduce motion,Reducir movimiento
-SETTINGS_REDUCE_MOTION_DESC,Minimize animations and screen movement,Minimiza animaciones y movimiento de pantalla
-SETTINGS_HAPTICS,Haptics,Vibración
-SETTINGS_HAPTICS_DESC,Vibration feedback for interactions,Vibración al interactuar
-SETTINGS_LANGUAGE,Language,Idioma
-LANGUAGE_SYSTEM,Device language,Idioma del dispositivo
-LANGUAGE_EN,English,English
-LANGUAGE_ES,Español,Español
-SETTINGS_REPLAY_TUTORIAL,Replay tutorial,Repetir tutorial
-SETTINGS_PRIVACY_OPTIONS,Privacy options,Opciones de privacidad
-SETTINGS_PRIVACY_POLICY,Privacy policy,Política de privacidad
-SETTINGS_CREDITS,Credits,Créditos
-PRIVACY_TITLE,Privacy,Privacidad
-PRIVACY_SUBTITLE,Play without an account.,Juega sin cuenta.
-PRIVACY_OFFLINE,Your game stays playable offline.,Tu juego funciona sin conexión.
-PRIVACY_NO_ACCOUNT,No email or account required.,No se necesita correo ni cuenta.
-PRIVACY_ADS,Ads are optional and only give extra hints.,Los anuncios son opcionales y solo dan pistas extra.
-CREDITS_BODY,"Legend Arrow. Game, art, sound and code made for this project. Typeface: Inter (SIL Open Font License). Engine: Godot (MIT).","Legend Arrow. Juego, arte, sonido y código hechos para este proyecto. Tipografía: Inter (SIL Open Font License). Motor: Godot (MIT)."
-REALM_MISTWOOD,Mistwood,Bosque de Niebla
-REALM_CLOUD_PEAKS,Cloud Peaks,Picos Nublados
-REALM_ANCIENT_HIGHLANDS,Ancient Highlands,Altiplanos Antiguos
-CREATURE_FOREST_DRAKE,Forest Drake,Draco del Bosque
-CREATURE_FOREST_DRAKE_LORE,A quiet sentinel of the old Mistwood.,Un centinela silencioso del viejo Bosque de Niebla.
-CREATURE_MOON_OWL,Moon Owl,Búho Lunar
-CREATURE_MOON_OWL_LORE,It keeps watch where the mist meets the moonlight.,Vigila donde la niebla se encuentra con la luz de la luna.
-CREATURE_ANTLER_FOX,Antler Fox,Zorro Astado
-CREATURE_ANTLER_FOX_LORE,"Quick, quiet, and crowned like a stag.","Rápido, silencioso y coronado como un ciervo."
-CREATURE_BASILISK,Basilisk,Basilisco
-CREATURE_BASILISK_LORE,"Its gaze is slow, patient and impossible to ignore.","Su mirada es lenta, paciente e imposible de ignorar."
-CREATURE_WYVERN,Wyvern,Guiverno
-CREATURE_WYVERN_LORE,A silent guardian of the misty cliffs.,Un guardián silencioso de los acantilados brumosos.
-CREATURE_ARCTIC_DRAKE,Arctic Drake,Draco Ártico
-CREATURE_ARCTIC_DRAKE_LORE,Its breath leaves frost on the highest stones.,Su aliento deja escarcha en las piedras más altas.
-CREATURE_GRIFFIN,Griffin,Grifo
-CREATURE_GRIFFIN_LORE,"Half eagle, half lion, wholly unafraid of storms.","Mitad águila, mitad león, sin miedo a las tormentas."
-CREATURE_CLOUD_SERPENT,Cloud Serpent,Serpiente de Nubes
-CREATURE_CLOUD_SERPENT_LORE,It swims through cloud as if it were water.,Nada entre las nubes como si fueran agua.
-CREATURE_STONE_WYRM,Stone Wyrm,Sierpe de Piedra
-CREATURE_STONE_WYRM_LORE,It sleeps for centuries and wakes the mountains with it.,Duerme durante siglos y despierta a las montañas con ella.
-CREATURE_UNICORN,Unicorn,Unicornio
-CREATURE_UNICORN_LORE,"Seen once in a lifetime, remembered forever.",Se ve una vez en la vida y se recuerda para siempre.
-CREATURE_PHOENIX,Phoenix,Fénix
-CREATURE_PHOENIX_LORE,Every ember it sheds becomes a new beginning.,Cada brasa que suelta es un nuevo comienzo.
-CREATURE_ANCIENT_DRAGON,Ancient Dragon,Dragón Ancestral
-CREATURE_ANCIENT_DRAGON_LORE,"The oldest legend, waiting for the last arrow.","La leyenda más antigua, esperando la última flecha."
+keys,en
+APP_NAME,Legend Arrow
+APP_TAGLINE,Awaken legendary creatures
+HOME_PLAY,Play
+HOME_BESTIARY,Bestiary
+HOME_SETTINGS,Settings
+LOADING,Loading…
+TUTORIAL_TITLE,How to play
+TUTORIAL_STEP_OF,Step %d of 3
+TUTORIAL_STEP_1,Tap an arrow with a clear way out.
+TUTORIAL_STEP_2,Clear other arrows to open a path.
+TUTORIAL_STEP_3,Release every arrow to awaken the creature.
+TUTORIAL_NEXT,Next
+TUTORIAL_SKIP,Skip
+TUTORIAL_START,Start playing
+TUTORIAL_WELL_DONE,Well done.
+BLOCKED_MESSAGE,Clear another arrow first.
+LEVEL_SELECT_SUBTITLE,Choose a challenge.
+PLAY_PUZZLE,Play puzzle %d
+PUZZLE_N_OF_2,Puzzle %d of 2
+DIFFICULTY_TUTORIAL,Gentle
+DIFFICULTY_EASY,Easy
+DIFFICULTY_MEDIUM,Medium
+DIFFICULTY_HARD,Hard
+DIFFICULTY_EXPERT,Expert
+LOCKED,Locked
+COMING_SOON,More creatures are on their way.
+ALL_AWAKENED,Every creature here is awake.
+UNDO,Undo
+HINT,Hint
+HINT_FREE,Hint · %d free
+HINT_AD_READY,Hint · %d earned
+RESTART,Restart
+PAUSE,Pause
+PAUSED,Paused
+PAUSED_SAVED,Your progress is saved.
+RESUME,Resume
+RESTART_PUZZLE,Restart puzzle
+LEVEL_SELECTION,Level selection
+BACK,Back
+PUZZLE_COMPLETE,Puzzle complete
+TWO_PUZZLES,Two puzzles to awaken
+N_OF_2_COMPLETE,%d of 2 complete
+CONTINUE_TO_PUZZLE_2,Continue to puzzle 2
+CONTINUE,Continue
+SKIP,Skip
+OPEN_BESTIARY,Open bestiary
+REPLAY_AWAKENING,Replay awakening
+BESTIARY_TITLE,Bestiary
+N_AWAKENED,%d of %d awakened
+CONTINUE_ADVENTURE,Continue adventure
+NEW_BADGE,New
+HINT_SHEET_TITLE,Need a hint?
+HINT_SHEET_USED,Your 3 free hints for this puzzle have been used.
+HINT_SHEET_FREE_PATH,Undo and restart are always free.
+KEEP_PLAYING,Keep playing
+HINT_SHEET_AD,Watch a short ad to highlight one free arrow.
+WATCH_AD_HINT,Watch ad · Get 1 hint
+LOADING_AD,Loading ad…
+NO_AD_TITLE,No ad available
+NO_AD_BODY,You can keep playing.
+RETURN_TO_PUZZLE,Return to puzzle
+TRY_AGAIN,Try again
+SAVE_RESTORED_TITLE,Progress restored
+SAVE_RESTORED_BODY,We restored your last saved progress.
+SETTINGS_TITLE,Settings
+SETTINGS_AUDIO,Audio
+SETTINGS_MUSIC,Music
+SETTINGS_SFX,Sound effects
+SETTINGS_CREATURE,Creature audio
+SETTINGS_ACCESSIBILITY,Accessibility
+SETTINGS_REDUCE_MOTION,Reduce motion
+SETTINGS_REDUCE_MOTION_DESC,Minimize animations and screen movement
+SETTINGS_HAPTICS,Haptics
+SETTINGS_HAPTICS_DESC,Vibration feedback for interactions
+SETTINGS_REPLAY_TUTORIAL,Replay tutorial
+SETTINGS_PRIVACY_OPTIONS,Privacy options
+SETTINGS_PRIVACY_POLICY,Privacy policy
+SETTINGS_CREDITS,Credits
+PRIVACY_TITLE,Privacy
+PRIVACY_SUBTITLE,Play without an account.
+PRIVACY_OFFLINE,Your game stays playable offline.
+PRIVACY_NO_ACCOUNT,No email or account required.
+PRIVACY_ADS,Ads are optional and only give extra hints.
+CREDITS_BODY,"Legend Arrow. Game, art, sound and code made for this project. Typeface: Inter (SIL Open Font License). Engine: Godot (MIT)."
+RETRY,Retry
+NEXT,Next
+PAR_TIME,Par %s
+NEW_RECORD,New record!
+FIRST_CLEAR,First clear
+PERSONAL_BEST,Personal best %s
+STARS_HINT_NOTE,Three stars need a run without hints
+BEST_TIME_STARS,Best %s
+TOTAL_STARS,%d of %d stars
+WORLDS_TITLE,Worlds
+WORLD_N_NAME,World %d · %s
+WORLD_PROGRESS,%d of %d awakened · %d of %d stars
+WORLD_LOCKED_HINT,Awaken every dragon of %s to open this world
+PLAY_DRAGON,Play · %s
+REPLAY_DRAGON,Replay · %s
+PUZZLE_SUBTITLE,World %d · %s
+SETTINGS_LARGE_TEXT,Larger text
+SETTINGS_LARGE_TEXT_DESC,Makes every text 30% larger
+CREATURE_AWAKENED,Creature awakened
+WORLD_W01,Mistwood
+WORLD_W02,Moorland Hollows
+WORLD_W03,Riverstone Gorge
+WORLD_W04,Cloud Peaks
+WORLD_W05,Frostfall Reach
+WORLD_W06,Ashen Wastes
+WORLD_W07,Tidewrack Coast
+WORLD_W08,Stormcrown Heights
+WORLD_W09,Obsidian Depths
+WORLD_W10,Ancient Highlands
+CREATURE_FOREST_DRAKE,Forest Drake
+CREATURE_FOREST_DRAKE_LORE,"A small four-legged forest drake with moss-green and gray scales, short wings folded against its body, patches of lichen on its shoulders, standing calmly."
+CREATURE_FERN_WYRMLING,Fern Wyrmling
+CREATURE_FERN_WYRMLING_LORE,"A slender young wingless wyrm with fern-like frills running along its spine, gray-green skin, walking forward."
+CREATURE_MOSSBACK_DRAKE,Mossback Drake
+CREATURE_MOSSBACK_DRAKE_LORE,"A stocky drake with thick armored back plates covered in soft moss, two short curved horns, standing firmly."
+CREATURE_THORNCLAW_WHELP,Thornclaw Whelp
+CREATURE_THORNCLAW_WHELP_LORE,"A juvenile dragon with thorn-like spines along its neck and tail, bark-brown scales, crouched low and alert."
+CREATURE_DEWWING_DRAKE,Dewwing Drake
+CREATURE_DEWWING_DRAKE_LORE,"A delicate pale-sage drake with thin translucent wings half open, tiny water droplets on its scales."
+CREATURE_BARKHIDE_WYVERN,Barkhide Wyvern
+CREATURE_BARKHIDE_WYVERN_LORE,"A two-legged wyvern whose hide looks like rough tree bark, wings folded, long tail curving behind it."
+CREATURE_LICHEN_SERPENT,Lichen Serpent
+CREATURE_LICHEN_SERPENT_LORE,"A wingless serpentine dragon in a graceful S-curve, stone-gray skin speckled with pale green lichen, small head crest."
+CREATURE_HOLLOW_DRAKE,Hollow Drake
+CREATURE_HOLLOW_DRAKE_LORE,"A lean long-necked drake with soft gray-brown scales and large calm eyes, wings folded."
+CREATURE_ROOTCOIL_WYRM,Rootcoil Wyrm
+CREATURE_ROOTCOIL_WYRM_LORE,"A heavy wyrm with its tail coiled around its body and twisting root-like horns on its head, earthy brown and gray tones."
+CREATURE_MISTWOOD_ELDER,Mistwood Elder
+CREATURE_MISTWOOD_ELDER_LORE,"A large ancient forest dragon with antler-like branching horns, wings spread wide, weathered moss-gray scales."
+CREATURE_HEATHER_DRAKE,Heather Drake
+CREATURE_HEATHER_DRAKE_LORE,A medium drake with muted purple-gray scales and small tufts of dry heather caught in its neck spines.
+CREATURE_PEAT_WYRM,Peat Wyrm
+CREATURE_PEAT_WYRM_LORE,"A heavy low-bodied wyrm with dark peat-brown wet-looking scales, short powerful legs."
+CREATURE_BOGFIRE_DRAKE,Bogfire Drake
+CREATURE_BOGFIRE_DRAKE_LORE,"A dark slate drake with a faint dim amber glow at its throat and chest, wings half raised."
+CREATURE_REEDTAIL_WYVERN,Reedtail Wyvern
+CREATURE_REEDTAIL_WYVERN_LORE,"A slim wyvern with a very long thin tail ending in reed-like fins, wings folded, olive-gray tones."
+CREATURE_MOORHOUND_DRAKE,Moorhound Drake
+CREATURE_MOORHOUND_DRAKE_LORE,"A wolf-like dragon with a shaggy mane of quills around its neck, lean legs, prowling."
+CREATURE_CAIRN_DRAGON,Cairn Dragon
+CREATURE_CAIRN_DRAGON_LORE,"A stone-gray dragon whose back plates look like stacked flat stones, sturdy stance, wings folded."
+CREATURE_FOGWING_DRAKE,Fogwing Drake
+CREATURE_FOGWING_DRAKE_LORE,"A pale gray drake with frayed, wispy wing membranes that look like drifting fog, wings open."
+CREATURE_BASILISK,Basilisk
+CREATURE_BASILISK_LORE,"A serpentine reptile-dragon with a tall bony crest on its head, raised upper body and intense gaze, dark olive and bone tones."
+CREATURE_RUSHWATER_WYRM,Rushwater Wyrm
+CREATURE_RUSHWATER_WYRM_LORE,"A long wingless wyrm with smooth slate-green scales and fin ridges along its back, body in a wave-like curve."
+CREATURE_MOOR_SOVEREIGN,Moor Sovereign
+CREATURE_MOOR_SOVEREIGN_LORE,"A large regal heath dragon with broad dark wings spread, a crown of curved horns, muted purple-gray and bone tones."
+CREATURE_RIVER_DRAKE,River Drake
+CREATURE_RIVER_DRAKE_LORE,"A sleek drake with deep teal and turquoise scales with a wet sheen, pale aqua fins on its elbows and tail."
+CREATURE_PEBBLESCALE_DRAKE,Pebblescale Drake
+CREATURE_PEBBLESCALE_DRAKE_LORE,"A sturdy drake covered in smooth rounded scales like polished river pebbles in warm terracotta, ochre and cream."
+CREATURE_CASCADE_SERPENT,Cascade Serpent
+CREATURE_CASCADE_SERPENT_LORE,"A long aquatic serpent dragon shading from brilliant aquamarine to deep blue, with translucent flowing fin membranes, in an elegant S-curve."
+CREATURE_GORGE_WYVERN,Gorge Wyvern
+CREATURE_GORGE_WYVERN_LORE,"A wyvern gliding with wings fully spread, rust-red and burnt-orange canyon-colored scales with a sand-colored belly."
+CREATURE_OTTERFIN_DRAKE,Otterfin Drake
+CREATURE_OTTERFIN_DRAKE_LORE,"A low long-bodied drake with webbed feet and a flat paddle-like tail, rich chocolate-brown scales with a golden-copper belly."
+CREATURE_SHALE_DRAKE,Shale Drake
+CREATURE_SHALE_DRAKE_LORE,"A dragon with flaky layered deep-charcoal plates edged in vivid emerald green, sharp angular head."
+CREATURE_KINGFISHER_WYVERN,Kingfisher Wyvern
+CREATURE_KINGFISHER_WYVERN_LORE,"A slender wyvern with a sharp pointed snout, a vivid electric cobalt-blue back and a bright orange chest, wings half open."
+CREATURE_RAVINE_STALKER,Ravine Stalker
+CREATURE_RAVINE_STALKER_LORE,"A lean predatory dragon with long limbs in a low crouched stalking pose, tawny-gold scales with dark tiger-like stripes."
+CREATURE_TIDEPOOL_WYRM,Tidepool Wyrm
+CREATURE_TIDEPOOL_WYRM_LORE,"A coiled wyrm with coral-pink and sea-green scales dotted with tiny barnacle-like textures, head raised."
+CREATURE_STONEWATER_ANCIENT,Stonewater Ancient
+CREATURE_STONEWATER_ANCIENT_LORE,"A massive old river dragon with eroded stone-like armor in deep sapphire blue and moss green with turquoise water-worn edges, wings spread."
+CREATURE_CLOUD_SERPENT,Cloud Serpent
+CREATURE_CLOUD_SERPENT_LORE,"A long wingless sky serpent dragon with pearl-white scales shimmering with soft sky-blue and lavender iridescence, long flowing silver whisker barbels, body in graceful floating curves."
+CREATURE_WYVERN,Wyvern
+CREATURE_WYVERN_LORE,"A classic two-legged wyvern with deep crimson-red scales and a black ridge along its spine, unfolding large leathery wings, horned head raised."
+CREATURE_PEAK_DRAKE,Peak Drake
+CREATURE_PEAK_DRAKE_LORE,"A powerful four-legged mountain drake with thick golden-amber horns and granite scales banded with bright ochre-gold, standing proudly."
+CREATURE_WINDRIDER_DRAKE,Windrider Drake
+CREATURE_WINDRIDER_DRAKE_LORE,"A light agile drake whose wings are edged with feather-like plumes in white and vivid sky blue, wings open mid-takeoff."
+CREATURE_EAGLE_WYVERN,Eagle Wyvern
+CREATURE_EAGLE_WYVERN_LORE,"A wyvern with a chestnut-brown body, a bright white feathered crest on its head and neck, golden eyes and a golden-yellow beak-like snout, wings half open."
+CREATURE_CIRRUS_DRAGON,Cirrus Dragon
+CREATURE_CIRRUS_DRAGON_LORE,"A thin elegant dragon with shimmering silver and pale violet scales, long narrow wings and a very long tail."
+CREATURE_SUMMIT_DRAKE,Summit Drake
+CREATURE_SUMMIT_DRAKE_LORE,"A muscular drake with deep forest-green scales and snow-white spines, rearing slightly with wings half raised."
+CREATURE_THUNDERHEAD_DRAKE,Thunderhead Drake
+CREATURE_THUNDERHEAD_DRAKE_LORE,"A drake with an indigo-violet body and storm-dark wing membranes veined with pale electric blue, wings spread."
+CREATURE_SKYREACH_WYRM,Skyreach Wyrm
+CREATURE_SKYREACH_WYRM_LORE,"A long-necked wyrm with bright sky-blue and white scales stretching its head upward, slim body."
+CREATURE_CLOUD_PEAKS_MONARCH,Cloud Peaks Monarch
+CREATURE_CLOUD_PEAKS_MONARCH_LORE,"A huge majestic sky dragon with brilliant white-gold scales and sky-blue accents, enormous wings fully spread, a crown of swept-back horns."
+CREATURE_ARCTIC_DRAKE,Arctic Drake
+CREATURE_ARCTIC_DRAKE_LORE,"A drake with glacier-blue scales and iridescent white highlights, exhaling a thin wisp of frosty breath, frost crystals on its spines."
+CREATURE_FROST_WYVERN,Frost Wyvern
+CREATURE_FROST_WYVERN_LORE,"A wyvern with vivid icy-cyan scales and translucent sapphire icicle-like spikes along its wings, wings half open."
+CREATURE_GLACIER_WYRM,Glacier Wyrm
+CREATURE_GLACIER_WYRM_LORE,A massive heavy wyrm with thick deep-blue translucent ice-like armor plates glowing faintly turquoise from within.
+CREATURE_RIME_SERPENT,Rime Serpent
+CREATURE_RIME_SERPENT_LORE,"A wingless serpent dragon with white scales covered in iridescent mother-of-pearl frost, body coiled with head raised."
+CREATURE_SNOWMANE_DRAKE,Snowmane Drake
+CREATURE_SNOWMANE_DRAKE_LORE,"A drake with a deep royal-blue body and a long snow-white mane of thin quills on its neck, standing."
+CREATURE_ICEFANG_DRAKE,Icefang Drake
+CREATURE_ICEFANG_DRAKE_LORE,A fierce snarling drake with steel-blue scales and long gleaming translucent aquamarine fangs.
+CREATURE_TUNDRA_DRAGON,Tundra Dragon
+CREATURE_TUNDRA_DRAGON_LORE,"A broad thick-bodied dragon with rich amber-brown frost-crusted shaggy spines and piercing ice-blue eyes, heavy stance."
+CREATURE_HOARFROST_WYVERN,Hoarfrost Wyvern
+CREATURE_HOARFROST_WYVERN_LORE,"A slender wyvern with silver wings covered in feathery frost patterns shimmering with violet iridescence, wings fully open."
+CREATURE_AURORA_DRAKE,Aurora Drake
+CREATURE_AURORA_DRAKE_LORE,"A drake with deep navy scales and vivid green, teal and magenta aurora-like iridescent bands across its wing membranes, wings open."
+CREATURE_FROSTFALL_ANCIENT,Frostfall Ancient
+CREATURE_FROSTFALL_ANCIENT_LORE,"A colossal ancient ice dragon with sapphire and diamond-white scales and jagged crystal horns glowing faint blue, wings spread."
+CREATURE_ASH_DRAKE,Ash Drake
+CREATURE_ASH_DRAKE_LORE,A charcoal-black drake with glowing ember-orange speckles scattered across its matte scales.
+CREATURE_CINDER_WYVERN,Cinder Wyvern
+CREATURE_CINDER_WYVERN_LORE,"A black wyvern with bright glowing orange-red ember cracks between its scales, wings half open."
+CREATURE_DUNE_WYRM,Dune Wyrm
+CREATURE_DUNE_WYRM_LORE,"A long wyrm with rich golden-sand scales and copper bands along its ridged back, body curving low."
+CREATURE_SCORCH_DRAKE,Scorch Drake
+CREATURE_SCORCH_DRAKE_LORE,A lean drake with deep crimson-black scales and heat-glowing orange horns.
+CREATURE_BASALT_DRAGON,Basalt Dragon
+CREATURE_BASALT_DRAGON_LORE,"A heavy dragon with glossy black hexagonal basalt-like plates joined by molten gold seams, wings folded."
+CREATURE_EMBER_SERPENT,Ember Serpent
+CREATURE_EMBER_SERPENT_LORE,"A wingless serpent dragon with dark scales and a vivid glowing ember-orange belly, coiled pose."
+CREATURE_SANDSTORM_WYVERN,Sandstorm Wyvern
+CREATURE_SANDSTORM_WYVERN_LORE,"A wyvern with ochre and burnt-sienna scales and a striking turquoise throat and eyes, wings spread as if bracing against wind."
+CREATURE_SMOKE_DRAKE,Smoke Drake
+CREATURE_SMOKE_DRAKE_LORE,"A dark graphite drake with wispy smoke-like membranes trailing from its wings and tail, lit from within in deep orange."
+CREATURE_PHOENIX_DRAKE,Phoenix Drake
+CREATURE_PHOENIX_DRAKE_LORE,"A dragon with flame-colored feather-edged wings in vivid gold, orange and scarlet, wings open, a few glowing embers drifting around it."
+CREATURE_ASHEN_TYRANT,Ashen Tyrant
+CREATURE_ASHEN_TYRANT_LORE,"A massive menacing volcanic dragon with obsidian-black armor, blazing lava-orange seams and glowing eyes, wings spread wide."
+CREATURE_SEA_DRAKE,Sea Drake
+CREATURE_SEA_DRAKE_LORE,A sleek drake with deep ocean-blue wet scales and iridescent teal fin crests on its head and tail.
+CREATURE_KELP_WYRM,Kelp Wyrm
+CREATURE_KELP_WYRM_LORE,"A long wyrm with emerald and golden-olive kelp-like ribbons hanging from its spines, body curving."
+CREATURE_SALTSPRAY_WYVERN,Saltspray Wyvern
+CREATURE_SALTSPRAY_WYVERN_LORE,"A wyvern with turquoise and sea-foam white scales with a pearly sheen, wings open."
+CREATURE_REEF_DRAGON,Reef Dragon
+CREATURE_REEF_DRAGON_LORE,"A dragon with textured coral-like ridges in vivid coral orange, pink and violet, wings folded."
+CREATURE_TIDE_SERPENT,Tide Serpent
+CREATURE_TIDE_SERPENT_LORE,"A long sea serpent dragon with shimmering sapphire scales, a silver belly and webbed fin frills, in a rolling wave-like curve."
+CREATURE_SHELLBACK_DRAKE,Shellback Drake
+CREATURE_SHELLBACK_DRAKE_LORE,A stocky drake with a sand-gold body and a large spiral shell-like back plate gleaming with mother-of-pearl iridescence.
+CREATURE_STORMSURGE_WYVERN,Stormsurge Wyvern
+CREATURE_STORMSURGE_WYVERN_LORE,"A powerful wyvern with deep navy scales and torn wing edges glowing electric teal, wings spread wide."
+CREATURE_ABYSSAL_WYRM,Abyssal Wyrm
+CREATURE_ABYSSAL_WYRM_LORE,"A deep-sea wyrm with midnight-black scales and glowing bioluminescent cyan and violet spots, coiled pose."
+CREATURE_PEARL_DRAKE,Pearl Drake
+CREATURE_PEARL_DRAKE_LORE,"An elegant drake with pearl-white scales shimmering with rainbow iridescence, wings folded."
+CREATURE_LEVIATHAN,Leviathan
+CREATURE_LEVIATHAN_LORE,"An enormous serpentine sea dragon with deep teal and royal-blue scales and glowing aquamarine fin crests, rising in a huge curve."
+CREATURE_STORM_DRAKE,Storm Drake
+CREATURE_STORM_DRAKE_LORE,"A sleek midnight-blue drake with glowing electric-blue eyes and markings, sharp swept-back horns, wings half raised."
+CREATURE_LIGHTNING_WYVERN,Lightning Wyvern
+CREATURE_LIGHTNING_WYVERN_LORE,"A black wyvern with bright glowing white-blue lightning patterns across its wings, wings spread."
+CREATURE_GALE_SERPENT,Gale Serpent
+CREATURE_GALE_SERPENT_LORE,"A wingless serpent dragon with silver-white scales and long streaming fin ribbons glowing soft violet, flowing curves."
+CREATURE_THUNDERCLAW_DRAGON,Thunderclaw Dragon
+CREATURE_THUNDERCLAW_DRAGON_LORE,"A muscular dragon with deep purple scales, oversized gold claws and glowing yellow eyes, wings folded."
+CREATURE_TEMPEST_WYRM,Tempest Wyrm
+CREATURE_TEMPEST_WYRM_LORE,"A long wyrm with dark teal scales and swirling glowing cyan patterns on its back, coiled and alert."
+CREATURE_RAINCLOAK_DRAKE,Raincloak Drake
+CREATURE_RAINCLOAK_DRAKE_LORE,"A drake with deep indigo wings wrapped around it like a cloak, raindrops glinting on its scales, glowing silver eyes."
+CREATURE_STATIC_DRAKE,Static Drake
+CREATURE_STATIC_DRAKE_LORE,A lean graphite drake with raised needle-like spines crackling with bright violet-blue electric light.
+CREATURE_CYCLONE_WYVERN,Cyclone Wyvern
+CREATURE_CYCLONE_WYVERN_LORE,"A wyvern banking in flight with wings fully spread and tail curled, storm-gray and electric-blue scales, dynamic."
+CREATURE_SQUALL_DRAGON,Squall Dragon
+CREATURE_SQUALL_DRAGON_LORE,"A broad-winged dragon with dark slate and stormy violet scales, roaring with head raised and a glowing white throat."
+CREATURE_STORMCROWN_KING,Stormcrown King
+CREATURE_STORMCROWN_KING_LORE,"A colossal storm dragon with black and royal-purple scales, a crown of jagged gold horns and glowing electric-blue lightning veins, huge wings spread."
+CREATURE_CAVE_DRAKE,Cave Drake
+CREATURE_CAVE_DRAKE_LORE,"A cave drake with pale ivory translucent skin, softly glowing blue veins and milky glowing eyes, low stance."
+CREATURE_CRYSTAL_WYRM,Crystal Wyrm
+CREATURE_CRYSTAL_WYRM_LORE,A dark wyrm with clusters of glowing amethyst and clear quartz crystals growing along its spine.
+CREATURE_OBSIDIAN_DRAGON,Obsidian Dragon
+CREATURE_OBSIDIAN_DRAGON_LORE,"A dragon with glossy black volcanic-glass scales reflecting iridescent purple and green, wings folded."
+CREATURE_DEEPDARK_WYVERN,Deepdark Wyvern
+CREATURE_DEEPDARK_WYVERN_LORE,"A charcoal wyvern with glowing teal eyes and bioluminescent veins across its wide thin wings, wings spread."
+CREATURE_MAGMA_WYRM,Magma Wyrm
+CREATURE_MAGMA_WYRM_LORE,A heavy wyrm with dark rock armor split by bright glowing molten orange-gold cracks.
+CREATURE_GLOOM_SERPENT,Gloom Serpent
+CREATURE_GLOOM_SERPENT_LORE,"A wingless serpent dragon with dark violet scales and glowing pale-green markings, coiled with head lowered."
+CREATURE_STONE_WYRM,Stone Wyrm
+CREATURE_STONE_WYRM_LORE,A massive wyrm whose weathered granite body is veined with glowing gold ore and patches of green moss.
+CREATURE_GEODE_DRAKE,Geode Drake
+CREATURE_GEODE_DRAKE_LORE,A drake with rough gray outer scales cracked open on its shoulders to reveal vivid glowing amethyst and citrine crystals.
+CREATURE_ECHO_DRAKE,Echo Drake
+CREATURE_ECHO_DRAKE_LORE,A drake with deep blue-black scales and large fan-shaped ear frills glowing faint cyan at the edges.
+CREATURE_DEPTH_WARDEN,Depth Warden
+CREATURE_DEPTH_WARDEN_LORE,"A huge ancient underground dragon with obsidian armor, glowing emerald crystal-tipped horns and glowing eyes, wings spread."
+CREATURE_HIGHLAND_DRAKE,Highland Drake
+CREATURE_HIGHLAND_DRAKE_LORE,"A proud highland drake with copper-bronze scales and long golden ram-like horns, standing."
+CREATURE_RUNEBACK_DRAGON,Runeback Dragon
+CREATURE_RUNEBACK_DRAGON_LORE,"A deep-teal dragon with ancient rune-like patterns glowing gold on its back plates, wings folded."
+CREATURE_BONE_DRAGON,Bone Dragon
+CREATURE_BONE_DRAGON_LORE,"A noble dragon with pale bone-white armored plates, gold-tipped ridged horns and glowing amber eyes, wings half open."
+CREATURE_ELDER_WYVERN,Elder Wyvern
+CREATURE_ELDER_WYVERN_LORE,"An old scarred wyvern with deep crimson and gold scales, tattered wing edges and wise glowing eyes."
+CREATURE_GRANITE_COLOSSUS,Granite Colossus
+CREATURE_GRANITE_COLOSSUS_LORE,"An enormous heavy dragon with massive granite armor veined with glowing turquoise, short thick horns, standing firmly."
+CREATURE_TWILIGHT_DRAGON,Twilight Dragon
+CREATURE_TWILIGHT_DRAGON_LORE,"A graceful dragon whose scales shift from deep violet to sunset orange, wings spread."
+CREATURE_STARWING_DRAGON,Starwing Dragon
+CREATURE_STARWING_DRAGON_LORE,"A dragon with midnight-blue wings filled with glowing star-like freckles and soft nebula colors, wings fully spread."
+CREATURE_CROWNED_WYRM,Crowned Wyrm
+CREATURE_CROWNED_WYRM_LORE,"A long ancient emerald-green wyrm with a natural crown of tall golden horns, coiled in a regal pose."
+CREATURE_SENTINEL_DRAGON,Sentinel Dragon
+CREATURE_SENTINEL_DRAGON_LORE,"A tall vigilant dragon with silver and royal-blue scales and glowing blue eyes, sitting upright with wings folded like a cloak."
+CREATURE_ANCIENT_DRAGON,Ancient Dragon
+CREATURE_ANCIENT_DRAGON_LORE,"The oldest and largest dragon, immense wings fully spread, massive horned head raised, battle-scarred scales of deep gold, bronze and crimson, glowing ember eyes."

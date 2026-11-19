@@ -1,0 +1,10 @@
+{
+ "schema_version": 2,
+ "id": "icefang_drake",
+ "world": "w05",
+ "number": 46,
+ "name_key": "CREATURE_ICEFANG_DRAKE",
+ "lore_key": "CREATURE_ICEFANG_DRAKE_LORE",
+ "source_image": "assets/creatures/raw/icefang_drake.png",
+ "credits": "ChatGPT image generation, owner-generated, commercial use."
+}

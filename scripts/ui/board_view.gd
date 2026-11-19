@@ -21,6 +21,11 @@ const LINE_WIDTH := 0.13         # in cells
 const HEAD_LEN := 0.42
 const HEAD_HALF_W := 0.27
 const MAX_ZOOM := 3.0
+## v0.2 §2/§8: arrows never shrink below a 48 dp touch target. A tap hits an
+## arrow within HIT_RADIUS (0.6) cells of its path, i.e. a band 1.2 cells
+## wide, so a cell must be at least 40 dp. Larger boards open zoomed to that
+## size (pan to explore) and cannot be pinched smaller.
+const MIN_CELL_DP := 40.0
 
 var session: PuzzleSession
 var reduce_motion := false
@@ -29,6 +34,8 @@ var clock: Callable = func() -> float: return Time.get_ticks_msec() / 1000.0
 var input_enabled := true
 
 var zoom := 1.0
+var min_zoom := 1.0           # zoom that keeps a cell >= MIN_CELL_DP
+var _auto_zoom := true        # follow min_zoom until the player zooms
 var pan := Vector2.ZERO
 var _fit_cell := 64.0
 var _cell := 64.0
@@ -59,6 +66,7 @@ func bind(p_session: PuzzleSession) -> void:
 	_focus_id = ""
 	zoom = 1.0
 	pan = Vector2.ZERO
+	_auto_zoom = true
 	_layout()
 	queue_redraw()
 
@@ -76,11 +84,15 @@ func cell_size() -> float:
 func _layout() -> void:
 	if session == null:
 		return
+	if size.x <= 0.0 or size.y <= 0.0:
+		return  # not laid out yet: a zero size would ask for an absurd zoom
 	var b := session.board
 	# Leave one cell of room around the grid for arrowheads and exits.
 	var cw := size.x / float(b.width + 1)
 	var ch := size.y / float(b.height + 1)
 	_fit_cell = minf(minf(cw, ch), MAX_CELL)
+	min_zoom = maxf(1.0, Ui.dp(MIN_CELL_DP, self) / maxf(_fit_cell, 1.0))
+	zoom = min_zoom if _auto_zoom else clampf(zoom, min_zoom, min_zoom * MAX_ZOOM)
 	_cell = _fit_cell * zoom
 	var grid := Vector2(b.width, b.height) * _cell
 	pan = _clamp_pan(pan, grid)
@@ -100,7 +112,8 @@ func zoom_at(factor: float, focus: Vector2) -> void:
 	if session == null:
 		return
 	var anchor := to_board(focus)
-	zoom = clampf(zoom * factor, 1.0, MAX_ZOOM)
+	_auto_zoom = false
+	zoom = clampf(zoom * factor, min_zoom, min_zoom * MAX_ZOOM)
 	if is_equal_approx(zoom, 1.0):
 		pan = Vector2.ZERO
 		_layout()
@@ -109,6 +122,19 @@ func zoom_at(factor: float, focus: Vector2) -> void:
 		pan += focus - cell_center_f(anchor)
 		_layout()
 	queue_redraw()
+
+
+## Pans so the arrow's middle cell is as central as the pan limits allow
+## (what a player does on a zoomed board before tapping). No-op when unzoomed.
+func reveal(id: String) -> void:
+	if session == null or not session.board.has_arrow(id):
+		return
+	var cells: Array = session.board.arrow(id).cells
+	pan_by(size / 2.0 - cell_center(cells[cells.size() / 2]))
+
+
+func is_cell_visible(c: Vector2i) -> bool:
+	return Rect2(Vector2.ZERO, size).has_point(cell_center(c))
 
 
 func pan_by(delta: Vector2) -> void:
