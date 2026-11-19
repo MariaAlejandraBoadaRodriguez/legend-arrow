@@ -241,9 +241,19 @@ jobs:
           key: desktop-debs-${{ runner.os }}-ubuntu-24.04-v1
 
       - name: Install Xvfb, Mesa and ffmpeg
+        id: deps
         timeout-minutes: 12
         run: |
           PKGS="xvfb libgl1-mesa-dri ffmpeg"
+          # The journeys need only Xvfb + Mesa's software GL. When the runner
+          # image already has both, never touch the (flaky) mirror for them;
+          # ffmpeg is only for the gameplay video, which is skipped (and
+          # reported) if ffmpeg cannot be installed.
+          have_gl() { command -v Xvfb >/dev/null && compgen -G "/usr/lib/x86_64-linux-gnu/dri/*swrast*" >/dev/null; }
+          if have_gl; then
+            if command -v ffmpeg >/dev/null; then echo "Xvfb, Mesa and ffmpeg already present"; exit 0; fi
+            PKGS="ffmpeg"
+          fi
           DEBS="$GITHUB_WORKSPACE/.cache/desktop-debs"
           if dpkg -s $PKGS >/dev/null 2>&1; then
             echo "already installed: $PKGS"; exit 0
@@ -269,6 +279,11 @@ jobs:
             echo "apt attempt $attempt failed; retrying" >&2
             sleep 10
           done
+          if have_gl; then
+            echo "::warning::ffmpeg could not be installed (mirror down); journeys run, the gameplay video is skipped"
+            echo "no_ffmpeg=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           exit 1
 
       - name: Run journeys
@@ -278,7 +293,7 @@ jobs:
           GODOT="$GODOT" E2E_RES=${{ matrix.res }} scripts/desktop_e2e.sh build/e2e-desktop-${{ matrix.form }}
 
       - name: Record gameplay + awakening video (Movie Maker)
-        if: matrix.form == 'phone'
+        if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
         run: GODOT="$(scripts/install_godot.sh)" scripts/record_video.sh build/e2e-desktop-${{ matrix.form }}/legend_arrow_gameplay.mp4
 
       - name: Upload screenshots and logs
