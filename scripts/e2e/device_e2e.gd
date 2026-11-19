@@ -194,7 +194,16 @@ func hint_ad() -> void:
 		var h: String = pz.board.hint_id()
 		if not check(h != "" and pz.session.board.is_removable(h), "free hint %d points at a free arrow" % (i + 1)): return
 		if not await tap_arrow(pz.board, h): return
+		# The hint only clears once its arrow has left; on a zoomed board a
+		# missed touch would leave it showing (and Hint does nothing while
+		# a hint is shown), so make sure, retrying the tap once.
+		if not await poll(func(): return not pz.session.board.has_arrow(h), 2.0):
+			_say("hinted arrow %s still on the board after the tap; tapping again" % h)
+			if not await tap_arrow(pz.board, h): return
+			if not await wait_for(func(): return not pz.session.board.has_arrow(h), 3.0, "hinted arrow %s leaves (retry)" % h): return
 		await idle(pz.board)
+	if not check(pz.board.hint_id() == "", "no hint left showing (hint=%s, free=%d, ad=%d)" % [pz.board.hint_id(),
+			Game.progression.free_hints_left(pz.level_id), Game.progression.ad_hints_available()]): return
 	if not await tap("HintButton"): return
 	if not await wait_dialog(pz, "HintSheet"): return
 	await shot("hint_sheet")
@@ -317,6 +326,16 @@ func frames(n: int) -> void:
 
 func seconds(s: float) -> void:
 	await get_tree().create_timer(s).timeout
+
+
+## Like wait_for, but a timeout is not a failure (for retries).
+func poll(cond: Callable, timeout: float) -> bool:
+	var end := Time.get_ticks_msec() + int(timeout * 1000)
+	while Time.get_ticks_msec() < end:
+		if Game.current_screen() != null and cond.call():
+			return true
+		await get_tree().process_frame
+	return false
 
 
 func wait_for(cond: Callable, timeout: float, what: String) -> bool:
