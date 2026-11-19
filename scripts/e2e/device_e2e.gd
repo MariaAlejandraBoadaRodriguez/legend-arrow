@@ -17,7 +17,9 @@ extends Node
 const TRIGGER := "user://e2e_journey.txt"
 const OUT_DIR := "user://e2e"
 const JOURNEYS := ["fresh_install", "partial_a", "partial_b", "blocked_undo", "hint_ad",
-	"awakening_replay", "settings_a", "settings_b"]
+	"awakening_replay", "settings_a", "settings_b", "replay_times", "background_resume", "rotate",
+	"world_unlock"]
+const ACTION_DONE := "user://e2e_action_done"
 
 var journey := ""
 var mock: MockAdProvider
@@ -283,6 +285,123 @@ func settings_b() -> void:
 	await shot("home_after_restart")
 
 
+## 7. (v0.2 §9.3-3) Play a level slowly, replay it faster: best time and
+## stars improve; replay slowly again: they do not drop.
+func replay_times() -> void:
+	if not await open_next_puzzle("dewwing_drake"): return
+	var pz: Control = Game.current_screen()
+	var par: int = pz.session.par_ms
+	if not await solve_paced("dewwing_drake", par * 1.15 / 1000.0): return  # over par: not 3 stars
+	if not await wait_screen("level_complete"): return
+	var first: Dictionary = Game.current_screen().params
+	if not check(int(first.stars) <= 2, "slow first run earns < 3 stars (got %d, %d ms, par %d)" % [int(first.stars), int(first.time_ms), par]): return
+	var best1 := Game.progression.best_time_ms("dewwing_drake")
+	if not await tap("RetryButton"): return
+	if not await solve_current("dewwing_drake"): return
+	if not await wait_screen("level_complete"): return
+	var fast: Dictionary = Game.current_screen().params
+	await seconds(1.2)
+	await shot("results_new_record")
+	if not check(bool(fast.new_record) and int(fast.stars) == 3, "fast replay: new record and 3 stars (%s)" % str(fast)): return
+	var best2 := Game.progression.best_time_ms("dewwing_drake")
+	if not check(best2 < best1 and Game.progression.best_stars("dewwing_drake") == 3, "best improved %d -> %d ms" % [best1, best2]): return
+	if not await tap("RetryButton"): return
+	if not await solve_paced("dewwing_drake", par * 1.15 / 1000.0): return
+	if not await wait_screen("level_complete"): return
+	if not check(not bool(Game.current_screen().params.new_record), "slow replay is not a record"): return
+	if not check(Game.progression.best_time_ms("dewwing_drake") == best2 and Game.progression.best_stars("dewwing_drake") == 3,
+			"slow replay lowers nothing"): return
+	var saved: Dictionary = _saved().levels.dewwing_drake
+	if not check(int(saved.best_time_ms) == best2 and int(saved.best_stars) == 3, "bests on disk"): return
+	if not await collect_awakening(): return
+
+
+## 8. (v0.2 §9.3-4) Mid-puzzle -> Home button -> back: the clock held while
+## in the background and the board is intact. (Kill + relaunch: partial_a/b.)
+func background_resume() -> void:
+	if not await open_next_puzzle("barkhide_wyvern"): return
+	var pz: Control = Game.current_screen()
+	if not await tap_arrow(pz.board, pz.level.solution[0]): return
+	await seconds(1.5)
+	var key: String = pz.session.board.state_key()
+	var before: int = pz.session.elapsed_ms()
+	if not await host_action("home"): return     # script: HOME, wait 8 s, relaunch
+	if not await wait_screen("puzzle"): return
+	pz = Game.current_screen()
+	var after: int = pz.session.elapsed_ms()
+	if not check(after - before < 2500, "timer held in background (%d -> %d ms over ~8 s away)" % [before, after]): return
+	if not check(pz.session.board.state_key() == key, "board intact after resume"): return
+	await shot("resumed")
+
+
+## 9. (v0.2 §9.3-9) Rotate mid-puzzle: the game stays portrait, state intact.
+func rotate() -> void:
+	if not await open_next_puzzle("barkhide_wyvern"): return
+	var pz: Control = Game.current_screen()
+	var key: String = pz.session.board.state_key()
+	var size_before := get_viewport().get_visible_rect().size
+	if not await host_action("rotate"): return   # script: landscape for 4 s, back
+	await seconds(1.0)
+	var size_after := get_viewport().get_visible_rect().size
+	if not check(size_after.y > size_after.x and size_after == size_before, "still portrait (%s -> %s)" % [size_before, size_after]): return
+	if not check(Game.current_screen_name() == "puzzle" and Game.current_screen().session.board.state_key() == key, "state intact"): return
+	if not await solve_current("barkhide_wyvern"): return
+	if not await wait_screen("level_complete"): return
+	if not await collect_awakening(): return
+
+
+## 10. (v0.2 §9.3-2) Complete world 1 -> world 2 unlocks. Dragons 1-6 were
+## played by taps in earlier journeys (1-4 on desktop); the rest except the
+## last are recorded through the real progression rules (to keep the
+## emulator run short) and the world's last dragon is solved by taps.
+func world_unlock() -> void:
+	if not await wait_screen("home"): return
+	for l in Game.campaign.levels_in_world("w01"):
+		if l != "mistwood_elder" and not Game.progression.is_level_completed(l):
+			Game.progression.complete_level(l)
+			Game.progression.mark_awakening_seen(l)
+	Game.persist()
+	if not check(not Game.progression.is_world_unlocked("w02"), "world 2 locked before the last dragon"): return
+	if not await open_next_puzzle("mistwood_elder"): return
+	if not await solve_current("mistwood_elder"): return
+	if not await wait_screen("level_complete"): return
+	if not check(Game.progression.is_world_unlocked("w02"), "completing world 1 unlocks world 2"): return
+	if not check(_saved().levels.has("mistwood_elder"), "on disk"): return
+	if not await collect_awakening(): return
+	Game.go("world_select")
+	if not await wait_screen("world_select"): return
+	await shot("world_select_w02_open")
+	if not await tap("World_w02"): return
+	if not await wait_screen("level_select"): return
+	if not check(Game.current_screen().world_id == "w02", "world 2 opens"): return
+	if not check(not (find("Card_heather_drake") as Button).disabled, "its first dragon is playable"): return
+
+
+## Asks the CI script for a device action ("home", "rotate") and waits until
+## the script reports it done (it creates ACTION_DONE inside the app's files).
+func host_action(action: String) -> bool:
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ACTION_DONE))
+	_say("ACTION %s" % action)
+	var ok := await poll(func(): return FileAccess.file_exists(ACTION_DONE), 90.0)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ACTION_DONE))
+	return check(ok, "host action %s done" % action)
+
+
+## Solves the current puzzle waiting `pause_s` seconds after the first tap.
+func solve_paced(level_id: String, pause_s: float) -> bool:
+	if not await wait_screen("puzzle"): return false
+	var pz: Control = Game.current_screen()
+	if not check(pz.level_id == level_id, "puzzle %s" % level_id): return false
+	var first := true
+	for id in pz.level.solution:
+		if pz.session.board.remaining_ids().has(id):
+			if not await tap_arrow(pz.board, id): return false
+			if first:
+				first = false
+				await seconds(pause_s)
+	return check(pz.session.is_complete(), "%s solved by taps" % level_id)
+
+
 # --- helpers ------------------------------------------------------------------
 
 func _process(delta: float) -> void:
@@ -479,7 +598,9 @@ func collect_awakening() -> bool:
 	if not await tap("NextButton"): return false
 	if not await wait_screen("awakening"): return false
 	await seconds(1.2)
-	if not await tap("SkipButton"): return false
+	if Game.current_screen().get("finished") != true:   # reduced motion may already be done
+		if not await tap("SkipButton"): return false
+	if not await wait_for(func(): return Game.current_screen().get("finished") == true, 3.0, "awakening finished"): return false
 	if not await tap("ContinueButton"): return false
 	return await wait_screen("creature_detail")
 

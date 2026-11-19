@@ -307,10 +307,17 @@ jobs:
           if-no-files-found: error
 
   android-emulator-e2e:
-    name: Android emulator E2E (API 34)
+    name: Android emulator E2E (API ${{ matrix.api }}, ${{ matrix.profile_name }})
     needs: [android-debug-apk]
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:   # v0.2 §9.3: API 26 + P1, API 34 + P3 (cutout), API 36 + P6 (tablet)
+          - {api: 26, avd: pixel, profile_name: P1, wm_size: "720x1280", wm_density: "320"}
+          - {api: 34, avd: pixel_6, profile_name: P3, wm_size: "", wm_density: ""}
+          - {api: 36, avd: pixel_tablet, profile_name: P6, wm_size: "1600x2560", wm_density: "320"}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -328,11 +335,14 @@ jobs:
 
       - name: Run E2E on emulator
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          E2E_WM_SIZE: ${{ matrix.wm_size }}
+          E2E_WM_DENSITY: ${{ matrix.wm_density }}
         with:
-          api-level: 34
+          api-level: ${{ matrix.api }}
           arch: x86_64
           target: google_apis
-          profile: pixel_6
+          profile: ${{ matrix.avd }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
@@ -341,6 +351,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-android-api34
+          name: e2e-android-api${{ matrix.api }}-${{ matrix.profile_name }}
           path: build/e2e-android/
           if-no-files-found: error

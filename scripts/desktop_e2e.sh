@@ -22,7 +22,8 @@ trap 'kill -9 $XVFB 2>/dev/null || true; rm -rf "$DATA"' EXIT
 export DISPLAY="$DISP"
 sleep 1
 
-JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b})
+# background_resume / rotate need device actions (Android only).
+JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b replay_times world_unlock})
 fail=0
 for j in "${JOURNEYS[@]}"; do
   log="$OUT/$j.log"

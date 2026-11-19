@@ -13,14 +13,18 @@ set -euo pipefail
 APK="${1:?usage: android_e2e.sh <apk> [out_dir]}"
 OUT="${2:-build/e2e-android}"
 PKG="com.mariaalejandraboada.legendarrow"
-JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b})
+JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b replay_times background_resume rotate world_unlock})
 TIMEOUT_S="${E2E_TIMEOUT_S:-300}"
 rm -rf "$OUT"
 mkdir -p "$OUT/app" "$OUT/screencap" "$OUT/logcat"
 
 adb wait-for-device
 adb shell getprop ro.build.version.release | sed 's/^/android: /'
+# Profile override (v0.2 §8/§9.3): exact screen size and density.
+if [[ -n "${E2E_WM_SIZE:-}" ]]; then adb shell wm size "$E2E_WM_SIZE"; fi
+if [[ -n "${E2E_WM_DENSITY:-}" ]]; then adb shell wm density "$E2E_WM_DENSITY"; fi
 adb shell wm size | sed 's/^/display: /'
+adb shell wm density | sed 's/^/density: /'
 adb install -r -g "$APK" >/dev/null
 ACTIVITY="$(adb shell cmd package resolve-activity --brief "$PKG" | tr -d '\r' | tail -1)"
 echo "launch activity: $ACTIVITY"
@@ -54,6 +58,25 @@ clear_data() {
   sleep 2
 }
 
+# Device actions a journey asks for with "LEGEND_E2E ACTION <name>"; the
+# journey waits until files/e2e_action_done exists.
+do_action() {
+  case "$1" in
+    home)     # background the app, wait, bring the same task back
+      adb shell input keyevent KEYCODE_HOME
+      sleep 8
+      adb shell am start -n "$ACTIVITY" >/dev/null ;;
+    rotate)   # force landscape for a few seconds, then portrait again
+      adb shell settings put system accelerometer_rotation 0
+      adb shell settings put system user_rotation 1
+      sleep 4
+      adb shell settings put system user_rotation 0
+      sleep 2 ;;
+  esac
+  adb shell "run-as $PKG sh -c 'touch files/e2e_action_done'"
+  echo "action $1 done"
+}
+
 results=()
 fail=0
 clear_data
@@ -64,7 +87,13 @@ for j in "${JOURNEYS[@]}"; do
   adb logcat -c
   adb shell am start -W -n "$ACTIVITY" >/dev/null
   verdict=""
+  done_actions=0
   while (( $(date +%s) - start < TIMEOUT_S )); do
+    actions=( $(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E ACTION [a-z]+" | awk '{print $3}' | tr -d '\r' || true) )
+    while (( done_actions < ${#actions[@]} )); do
+      do_action "${actions[$done_actions]}"
+      done_actions=$((done_actions + 1))
+    done
     verdict="$(adb logcat -d 2>/dev/null | grep -oE "LEGEND_E2E (PASS|FAIL) $j.*" | head -1 | tr -d '\r' || true)"
     [[ -n "$verdict" ]] && break
     if (( $(date +%s) - start > 60 )) && app_dead; then

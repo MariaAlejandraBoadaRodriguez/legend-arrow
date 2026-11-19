@@ -7,7 +7,7 @@ A release AAB is never produced while any dragon is ART PENDING or REJECTED (CLA
 
 ## Review notes (art review sheet `docs/store/art_review_sheet.png`)
 - Cut-outs: clean on dark and light grounds for all 100 (no halo or leftover backdrop seen; thin whiskers and wing membranes kept); consistent photoreal style. **Rejected: none.**
-- Puzzle silhouettes: built from each cut-out's mask and certified, but they resemble their dragon only **loosely** — long necks, serpents and spread wings read; compact bodies often look like scattered strokes, because arrows cover roughly half of the silhouette (the generator favours dependency depth and fewer free arrows). Owner decision pending: accept, or trade some difficulty for higher coverage in milestone F.
+- Puzzle silhouettes: built from each cut-out's mask and certified, but they resemble their dragon only **loosely** — long necks, serpents and spread wings read; compact bodies often look like scattered strokes, because arrows cover roughly half of the silhouette (the generator favours dependency depth and fewer free arrows). **Owner decision (2026-11-19): accepted as-is for v0.2; coverage unchanged.** Possible future improvement: trade a little difficulty for higher silhouette coverage.
 
 | # | Dragon | World | Status | Notes |
 |---|---|---|---|---|
