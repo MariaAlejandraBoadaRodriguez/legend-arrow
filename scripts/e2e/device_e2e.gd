@@ -18,7 +18,7 @@ const TRIGGER := "user://e2e_journey.txt"
 const OUT_DIR := "user://e2e"
 const JOURNEYS := ["fresh_install", "partial_a", "partial_b", "blocked_undo", "hint_ad",
 	"awakening_replay", "settings_a", "settings_b", "replay_times", "background_resume", "rotate",
-	"world_unlock"]
+	"world_unlock", "memory_transitions"]
 const ACTION_DONE := "user://e2e_action_done"
 
 var journey := ""
@@ -375,6 +375,58 @@ func world_unlock() -> void:
 	if not await wait_screen("level_select"): return
 	if not check(Game.current_screen().world_id == "w02", "world 2 opens"): return
 	if not check(not (find("Card_heather_drake") as Button).disabled, "its first dragon is playable"): return
+
+
+## 11. (v0.2 §9.5) Memory settles over 20 level-list / dragon-detail /
+## bestiary transitions: each cycle opens a different dragon's full image.
+## After a 3-cycle warm-up, static + texture memory stays within 10% of the
+## warmed baseline and the node count does not grow.
+func memory_transitions() -> void:
+	if not await reach_home(): return
+	var ids: Array[String] = []
+	for w in Game.campaign.worlds.slice(0, 3):
+		for l in Game.campaign.levels_in_world(w.id):
+			if not Game.progression.is_level_completed(l):
+				Game.progression.complete_level(l)
+			Game.progression.mark_awakening_seen(Game.campaign.creature_of_level(l))
+			ids.append(Game.campaign.creature_of_level(l))
+	Game.persist()
+	var base := {}
+	var peak := {}
+	for cycle in 23:
+		var world_id: String = Game.campaign.worlds[cycle % 3].id
+		Game.go("level_select", {"world_id": world_id})
+		if not await wait_screen("level_select"): return
+		Game.go("creature_detail", {"creature_id": ids[cycle % ids.size()]})
+		if not await wait_screen("creature_detail"): return
+		await seconds(0.4)
+		Game.go("bestiary")
+		if not await wait_screen("bestiary"): return
+		await seconds(0.3)
+		Game.reset_to("home")
+		if not await wait_screen("home"): return
+		await frames(10)
+		var m := _mem()
+		if cycle == 2:
+			base = m
+			_log.append("memory warmed: %s" % str(m))
+		elif cycle > 2:
+			for k in m:
+				peak[k] = maxf(peak.get(k, 0.0), m[k])
+	_log.append("memory peak after 20 transitions: %s" % str(peak))
+	_say("MEMORY base=%s peak=%s" % [str(base), str(peak)])
+	var total0: float = base.static_mb + base.texture_mb
+	var total1: float = peak.static_mb + peak.texture_mb
+	if not check(total1 <= total0 * 1.10, "memory within 10%% of warmed baseline (%.1f -> %.1f MB)" % [total0, total1]): return
+	if not check(peak.nodes <= base.nodes * 1.10, "no node growth (%d -> %d)" % [base.nodes, peak.nodes]): return
+
+
+func _mem() -> Dictionary:
+	return {
+		"static_mb": OS.get_static_memory_usage() / 1048576.0,
+		"texture_mb": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+		"nodes": Performance.get_monitor(Performance.OBJECT_NODE_COUNT),
+	}
 
 
 ## Asks the CI script for a device action ("home", "rotate") and waits until

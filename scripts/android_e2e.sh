@@ -13,7 +13,7 @@ set -euo pipefail
 APK="${1:?usage: android_e2e.sh <apk> [out_dir]}"
 OUT="${2:-build/e2e-android}"
 PKG="com.mariaalejandraboada.legendarrow"
-JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b replay_times background_resume rotate world_unlock})
+JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b replay_times background_resume rotate world_unlock memory_transitions})
 TIMEOUT_S="${E2E_TIMEOUT_S:-300}"
 rm -rf "$OUT"
 mkdir -p "$OUT/app" "$OUT/screencap" "$OUT/logcat"

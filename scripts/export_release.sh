@@ -106,6 +106,13 @@ check() { if eval "$2"; then echo "PASS  $1"; else echo "FAIL  $1"; fail=1; fi; 
   check "targetSdk >= 35 (Play requirement)" '[[ -n "$target" && "$target" -ge 35 ]]'
   check "release build is not debuggable" '! grep -q "android:debuggable=\"true\"" <<<"$manifest"'
   check "no AD_ID / Privacy Sandbox ad permissions" '! grep -qE "permission.AD_ID|ACCESS_ADSERVICES" <<<"$manifest"'
+  # Merged-manifest permission audit: nothing beyond the v0.1 baseline.
+  perms="$(grep -oE '<uses-permission[^>]*android:name="[^"]+"' <<<"$manifest" | sed -E 's/.*android:name="([^"]+)".*/\1/' | sort -u)"
+  echo "permissions:"; sed 's/^/  /' <<<"$perms"
+  allowed="$(grep -v '^#' "$ROOT/tools/permissions_allowlist.txt" | sed "s/{pkg}/$pkg/" | sort -u)"
+  extra="$(comm -23 <(echo "$perms") <(echo "$allowed") | grep . || true)"
+  [[ -z "$extra" ]] || echo "  not in tools/permissions_allowlist.txt: $extra"
+  check "no permissions beyond the v0.1 baseline" '[[ -z "$extra" ]]'
   files="$(unzip -l "$AAB" | awk '{print $4}')"
   check "arm64-v8a native libs" 'grep -q "^base/lib/arm64-v8a/.*\.so$" <<<"$files"'
   check "armeabi-v7a native libs (32-bit phones)" 'grep -q "^base/lib/armeabi-v7a/.*\.so$" <<<"$files"'
