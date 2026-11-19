@@ -331,7 +331,7 @@ def _wallpaper(w, h, dark):
     return Image.alpha_composite(im.convert("RGBA"), blob)
 
 
-def home_screen(icon_fn, dark, slot=7, w=360, h=720, icon=48):
+def home_screen(icon_fn, dark, slot=7, w=360, h=720, icon=48, ours_fn=None):
     """A 360x720 dp phone home screen at 1 px per dp: 4 columns, icons 48 dp."""
     im = _wallpaper(w, h, dark)
     d = ImageDraw.Draw(im)
@@ -351,8 +351,11 @@ def home_screen(icon_fn, dark, slot=7, w=360, h=720, icon=48):
         r, c = divmod(i, cols)
         cx = x0 + cw * c + cw / 2
         top = y0 + r * rh
-        ic = adaptive(icon_fn, icon) if kind == "ours" else _generic_icon(kind, color, icon)
-        ic = _mask(ic, icon)
+        if kind == "ours" and ours_fn is not None:
+            ic = ours_fn(icon)                      # already the launcher-masked icon
+        else:
+            ic = adaptive(icon_fn, icon) if kind == "ours" else _generic_icon(kind, color, icon)
+            ic = _mask(ic, icon)
         im.alpha_composite(ic, (int(cx - icon / 2), int(top)))
         d.text((cx, top + icon + 12), label, font=font, fill=label_col, anchor="mm")
     # dock

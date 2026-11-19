@@ -80,7 +80,6 @@ def caption_band(width, height, text):
 
 def compose(build):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from make_icons import make
     os.makedirs(OUT, exist_ok=True)
     for name in os.listdir(OUT):
         if name.endswith(".png"):
@@ -88,7 +87,7 @@ def compose(build):
     for name, size, mode, _, source in expected():
         path = os.path.join(OUT, name)
         if source == "icon":
-            make(512).convert("RGBA").save(path)
+            Image.open("assets/icon/icon_512.png").convert("RGBA").save(path)  # tools/make_icons.py
         elif source == "feature":
             Image.open(f"{build}/feature/feature.png").convert("RGB").save(path, optimize=True)
         else:
