@@ -73,7 +73,7 @@ do_action() {
       adb shell settings put system user_rotation 0
       sleep 2 ;;
   esac
-  adb shell "run-as $PKG sh -c 'touch files/e2e_action_done'"
+  retry adb shell "run-as $PKG sh -c 'touch files/e2e_action_done'"
   echo "action $1 done"
 }
 
@@ -82,9 +82,20 @@ do_action() {
 # start time instead of relying on a clear.
 mark_log() {
   adb logcat -c >/dev/null 2>&1 || true
-  SINCE="$(adb shell "date +'%m-%d %H:%M:%S.000'" | tr -d '\r')"
+  SINCE="$(retry adb shell "date +'%m-%d %H:%M:%S.000'" | tr -d '\r')"
 }
 logs() { adb logcat -d -T "$SINCE" 2>/dev/null || true; }
+
+retry() {
+  local n
+  for n in 1 2 3 4; do
+    "$@" && return 0
+    echo "retry $n: $*" >&2
+    adb wait-for-device || true
+    sleep 3
+  done
+  return 1
+}
 
 results=()
 fail=0
@@ -92,9 +103,11 @@ clear_data
 for j in "${JOURNEYS[@]}"; do
   start=$(date +%s)
   # Trigger file in the app's private files dir (debuggable build: run-as).
-  adb shell "run-as $PKG sh -c 'mkdir -p files && echo $j > files/e2e_journey.txt'"
+  # adb drops calls on loaded CI emulators; one failed call must not end the
+  # whole run under `set -e` (run 44466657570 stopped after its first journey).
+  retry adb shell "run-as $PKG sh -c 'mkdir -p files && echo $j > files/e2e_journey.txt'"
   mark_log
-  adb shell am start -W -n "$ACTIVITY" >/dev/null
+  retry adb shell am start -W -n "$ACTIVITY" >/dev/null
   verdict=""
   done_actions=0
   while (( $(date +%s) - start < TIMEOUT_S )); do
@@ -114,7 +127,7 @@ for j in "${JOURNEYS[@]}"; do
   [[ -n "$verdict" ]] || verdict="LEGEND_E2E FAIL $j: no verdict within ${TIMEOUT_S}s"
   adb exec-out screencap -p > "$OUT/screencap/$j.png" || true
   logs > "$OUT/logcat/$j.txt"
-  adb shell am force-stop "$PKG"
+  adb shell am force-stop "$PKG" || true
   secs=$(( $(date +%s) - start ))
   echo "$verdict (${secs}s)"
   results+=("$j|$verdict|$secs")

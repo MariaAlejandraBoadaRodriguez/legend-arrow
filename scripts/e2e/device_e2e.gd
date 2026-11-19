@@ -116,7 +116,7 @@ func fresh_install() -> void:
 	if not await tap("PlayButton"): return
 	if not await solve_current("forest_drake"): return
 	if not await wait_screen("level_complete"): return
-	if not check(results_ok("forest_drake"), "results show time and stars, both saved"): return
+	if not check(await results_settled("forest_drake"), "results show time and stars, both saved"): return
 	await seconds(1.2)  # let the stars appear
 	await shot("results")
 	if not await tap("NextButton"): return
@@ -699,13 +699,39 @@ func collect_awakening() -> bool:
 
 ## The results screen shows this run's time and stars and they match the save.
 func results_ok(level_id: String) -> bool:
+	return results_problem(level_id) == ""
+
+
+## Why the results screen does not (yet) show this run's time and stars, or
+## does not match the save; "" when everything is right.
+func results_problem(level_id: String) -> String:
 	var r: Control = Game.current_screen()
+	if r == null or Game.current_screen_name() != "level_complete":
+		return "not on results (screen=%s)" % Game.current_screen_name()
 	var t := r.find_child("TimeLabel", true, false) as Label
 	var st := r.find_child("Stars", true, false) as StarRow
-	if t == null or st == null or t.text == "":
-		return false
+	if t == null or st == null:
+		return "TimeLabel=%s Stars=%s" % [t, st]
+	if t.text == "":
+		return "empty time label"
 	var rec: Dictionary = _saved().levels.get(level_id, {})
-	return st.earned >= 1 and int(rec.get("best_stars", 0)) >= st.earned and int(rec.get("best_time_ms", -1)) >= 0
+	if st.earned < 1 or int(rec.get("best_stars", 0)) < st.earned or int(rec.get("best_time_ms", -1)) < 0:
+		return "stars shown %d, saved %s" % [st.earned, str(rec)]
+	return ""
+
+
+## Results check that allows a slow device a moment to build the screen, and
+## logs exactly what was wrong if it never becomes right (same conditions).
+func results_settled(level_id: String) -> bool:
+	var end := Time.get_ticks_msec() + 3000
+	var why := results_problem(level_id)
+	while why != "" and Time.get_ticks_msec() < end:
+		await get_tree().process_frame
+		why = results_problem(level_id)
+	if why != "":
+		_log.append("results problem: " + why)
+		_say("RESULTS %s" % why)
+	return why == ""
 
 
 func _saved() -> Dictionary:
