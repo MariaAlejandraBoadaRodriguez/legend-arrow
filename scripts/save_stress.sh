@@ -88,7 +88,7 @@ else
 fi
 
 # --- iterations -----------------------------------------------------------------
-pass=0; fail=0; controls=0; before_shown=0; after_shown=0; late=0; nodata=0
+pass=0; fail=0; committed_unshown=0; controls=0; before_shown=0; after_shown=0; late=0; nodata=0
 : > "$OUT/results.tsv"
 for i in $(seq 1 "$N"); do
   r=$((RANDOM % 100))
@@ -115,11 +115,14 @@ for i in $(seq 1 "$N"); do
   if [[ "$kind" == no_plan ]]; then
     echo -e "$i\t$kill_ms\t$phase\t$kind\tSKIP\tapp never reached the plan (${kverdict:-no verdict})" | tee -a "$OUT/results.tsv"; continue
   fi
-  if [[ -n "$shown" ]]; then t_put e2e_expect.txt "$shown"; fi
+  # Always tell save_verify which level was played; stars/time only if shown.
+  plan_level="$(grep -oE 'PLAN .* level=[a-z_0-9]+' "$OUT/logs/$i-kill.log" | head -1 | grep -oE 'level=[a-z_0-9]+')"
+  if [[ -n "$shown" ]]; then t_put e2e_expect.txt "$shown"; else t_put e2e_expect.txt "$plan_level"; fi
   t_run save_verify 60 "$OUT/logs/$i-verify.log"
   v="$(grep -oE 'LEGEND_E2E (PASS|FAIL) save_verify.*' "$OUT/logs/$i-verify.log" | head -1)"
   detail="$(grep -oE 'VERIFY .*' "$OUT/logs/$i-verify.log" | head -1)"
   if [[ "$v" == *" PASS "* ]]; then pass=$((pass + 1)); st=PASS; else fail=$((fail + 1)); st=FAIL; fi
+  if grep -q "COMMITTED yes" "$OUT/logs/$i-verify.log" && [[ "$kind" == killed_before_shown ]]; then committed_unshown=$((committed_unshown + 1)); fi
   echo -e "$i\t$kill_ms\t$phase\t$kind\t$st\t${shown:--}\t$detail" >> "$OUT/results.tsv"
   [[ "$st" == FAIL ]] && echo "iteration $i FAIL ($kind, kill_ms=$kill_ms): ${v:-no verdict} | $detail"
   if (( i % 10 == 0 )); then echo "after $i: pass=$pass fail=$fail | df: $(t_df)"; fi
@@ -134,6 +137,7 @@ done
   echo "| Verified FAIL (save behind what was shown, or earlier progress lost) | $fail |"
   echo "| Control runs (no kill: plain first launch after a data clear) | $controls |"
   echo "| Killed before the results screen showed | $before_shown |"
+  echo "| ... of which the completion was already committed (killed between save and screen) | $committed_unshown |"
   echo "| Killed after the results screen showed | $after_shown |"
   echo "| Kill planned but the app outlived it (KILL_LATE) | $late |"
   echo "| Skipped (app never reached the plan) | $nodata |"

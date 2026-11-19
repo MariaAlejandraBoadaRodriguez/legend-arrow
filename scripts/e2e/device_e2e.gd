@@ -504,10 +504,14 @@ func save_verify() -> void:
 		str(exp), boot.get("source"), boot.get("recovered"), str(boot.get("problems")), d.tutorial_done,
 		str(rec), str(SaveRepository.envelope_info(Game.repository.path))])
 	if not check(bool(d.tutorial_done), "earlier committed progress survived the kill"): return
-	if lid != "":
+	_say("COMMITTED %s" % ("yes" if bool(rec.get("completed", false)) else "no"))
+	if exp.has("stars"):   # the results screen showed this run
 		if not check(not rec.is_empty(), "level shown as complete is in the save"): return
 		if not check(int(rec.get("best_stars", 0)) == int(exp.stars) and int(rec.get("best_time_ms", -1)) == int(exp.time_ms),
 				"saved stars/time equal what was shown (%s vs %s)" % [str(rec), str(exp)]): return
+	elif not rec.is_empty():   # killed before the screen: a committed record must still be whole
+		if not check(bool(rec.get("completed", false)) and int(rec.get("best_stars", 0)) in [1, 2, 3] and int(rec.get("best_time_ms", -1)) > 0,
+				"a committed record is complete (%s)" % str(rec)): return
 
 
 static func _kv_file(path: String) -> Dictionary:
