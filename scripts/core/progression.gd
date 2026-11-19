@@ -65,7 +65,9 @@ func complete_level(level_id: String) -> Dictionary:
 	var tx := "complete:%s" % level_id
 	if not data.transactions.has(tx):
 		data.transactions[tx] = true
-		data.levels[level_id] = {"completed": true}
+		var rec: Dictionary = data.levels.get(level_id, {})
+		rec.completed = true
+		data.levels[level_id] = rec
 		result.first_completion = true
 	var unlock_tx := "unlock:%s" % cid
 	if creature_progress(cid) == 2 and not data.transactions.has(unlock_tx):
@@ -73,6 +75,54 @@ func complete_level(level_id: String) -> Dictionary:
 		data.creatures[cid] = {"unlocked": true, "awakening_seen": false}
 		result.unlocked_creature = cid
 	return result
+
+
+## Records one finished run's time and stars (v0.2 §3). Bests only improve:
+## a slower or lower-star replay changes nothing. Only completed levels keep a
+## record, so call after complete_level(). Calling twice with the same run is
+## harmless. Result: {stars, best_time_ms, best_stars, new_record,
+## first_record, previous_best_ms}; previous_best_ms is -1 when none existed.
+func record_result(level_id: String, time_ms: int, stars: int) -> Dictionary:
+	var out := {"stars": clampi(stars, 1, 3), "best_time_ms": -1, "best_stars": 0,
+		"new_record": false, "first_record": false, "previous_best_ms": -1}
+	if not is_level_completed(level_id):
+		return out
+	var t := clampi(time_ms, 0, SpeedTimer.MAX_ELAPSED_MS)
+	var rec: Dictionary = data.levels[level_id]
+	var prev := int(rec.get("best_time_ms", -1))
+	out.previous_best_ms = prev
+	if prev < 0:
+		rec.best_time_ms = t
+		out.first_record = true
+	elif t < prev:
+		rec.best_time_ms = t
+		out.new_record = true
+	rec.best_stars = maxi(int(rec.get("best_stars", 0)), out.stars)
+	out.best_time_ms = int(rec.best_time_ms)
+	out.best_stars = int(rec.best_stars)
+	return out
+
+
+func best_time_ms(level_id: String) -> int:
+	return int(data.levels.get(level_id, {}).get("best_time_ms", -1))
+
+
+## 0 = never completed; a v0.1 level migrated without a time counts as 1 star.
+func best_stars(level_id: String) -> int:
+	if not is_level_completed(level_id):
+		return 0
+	return clampi(int(data.levels[level_id].get("best_stars", 1)), 1, 3)
+
+
+func stars_in(level_ids: Array) -> int:
+	var n := 0
+	for l in level_ids:
+		n += best_stars(l)
+	return n
+
+
+func total_stars() -> int:
+	return stars_in(campaign.level_ids())
 
 
 func mark_awakening_seen(cid: String) -> void:

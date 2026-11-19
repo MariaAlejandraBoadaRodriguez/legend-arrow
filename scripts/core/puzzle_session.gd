@@ -8,6 +8,9 @@ enum TapResult { REMOVED, BLOCKED, IGNORED }
 var level_id: String = ""
 var board: PuzzleBoard
 var history: Array[String] = []  # removed ids, oldest first
+var timer := SpeedTimer.new()    # starts on the first tap (v0.2 §3)
+var hints_used := 0              # hints shown in this attempt (3 stars needs 0)
+var par_ms := 0
 var _solution: Array[String] = []
 var _completed := false
 
@@ -19,6 +22,7 @@ func _init(p_level: Dictionary = {}) -> void:
 	level_id = str(p_level.get("id", ""))
 	board = LevelData.to_board(p_level)
 	_solution = LevelData.solution_of(p_level)
+	par_ms = StarRating.par_ms(board.total_count(), PuzzleSolver.dependency_depth(board))
 
 
 ## Result: {result: TapResult, id: String, blocker: String}
@@ -26,6 +30,7 @@ func _init(p_level: Dictionary = {}) -> void:
 func tap(id: String) -> Dictionary:
 	if _completed or not board.has_arrow(id):
 		return {"result": TapResult.IGNORED, "id": id, "blocker": ""}
+	timer.start()  # any tap on an arrow, blocked or not, starts the clock
 	var blocker := board.find_blocker(id)
 	if blocker != "":
 		return {"result": TapResult.BLOCKED, "id": id, "blocker": blocker}
@@ -33,6 +38,7 @@ func tap(id: String) -> Dictionary:
 	history.append(id)
 	if board.is_empty():
 		_completed = true
+		timer.finish()
 	return {"result": TapResult.REMOVED, "id": id, "blocker": ""}
 
 
@@ -60,6 +66,21 @@ func restart() -> void:
 	board.restore_all()
 	history.clear()
 	_completed = false
+	timer.reset()
+	hints_used = 0
+
+
+## Called when a hint is actually shown to the player.
+func note_hint_shown() -> void:
+	hints_used += 1
+
+
+func elapsed_ms() -> int:
+	return timer.elapsed_ms
+
+
+func stars() -> int:
+	return StarRating.stars(timer.elapsed_ms, par_ms, hints_used)
 
 
 ## A currently removable arrow, or "" when none (empty board). Prefers the
@@ -82,7 +103,8 @@ func progress() -> float:
 
 ## Minimal state for saves: which arrows were removed, in order.
 func to_dict() -> Dictionary:
-	return {"level_id": level_id, "removed": history.duplicate(), "completed": _completed}
+	return {"level_id": level_id, "removed": history.duplicate(), "completed": _completed,
+		"elapsed_ms": timer.elapsed_ms, "timer_started": timer.started, "hints_used": hints_used}
 
 
 ## Replays a saved removal history on a fresh session. Every move is re-checked
@@ -99,4 +121,11 @@ func apply_saved(state: Dictionary) -> bool:
 		if typeof(id) != TYPE_STRING or tap(id)["result"] != TapResult.REMOVED:
 			restart()
 			return false
+	# Replaying the moves started the clock; the saved time is the truth.
+	timer.from_dict({"elapsed_ms": state.get("elapsed_ms", 0),
+		"started": bool(state.get("timer_started", false)) or not history.is_empty()})
+	var h = state.get("hints_used", 0)
+	hints_used = clampi(int(h), 0, 1000) if typeof(h) in [TYPE_INT, TYPE_FLOAT] else 0
+	if _completed:
+		timer.finish()
 	return true

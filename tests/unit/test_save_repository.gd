@@ -142,7 +142,8 @@ func test_migrates_v1_save() -> void:
 	assert_eq(res.source, SaveRepository.Source.MAIN)
 	var d: Dictionary = res.data
 	assert_eq(d.schema_version, SaveSchema.VERSION)
-	assert_true(d.levels.forest_drake_2.completed)
+	assert_true(d.levels.forest_drake.completed, "v0.1 levels map to the roster dragon's level")
+	assert_false(d.levels.has("forest_drake_2"))
 	assert_true(d.creatures.forest_drake.unlocked)
 	assert_true(d.transactions.has("unlock:forest_drake"), "migrated unlock cannot be granted again")
 	assert_true(d.tutorial_done)

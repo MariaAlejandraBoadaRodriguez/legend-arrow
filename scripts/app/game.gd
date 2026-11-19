@@ -31,6 +31,7 @@ var audio: AudioDirector
 var tutorial_data: Dictionary = {}
 var boot_result: Dictionary = {}
 var booted := false
+var ad_fullscreen := false    # a full-screen ad is showing (timers hold)
 var force_mock_ads := false   # set by Main for on-device E2E runs (before boot)
 
 var _host: Control            # where screens are mounted (set by main scene)
@@ -87,10 +88,12 @@ func set_ad_provider(provider: AdProvider) -> void:
 
 ## Full-screen ads: silence the game first, restore only if still allowed.
 func _on_ad_fullscreen_started() -> void:
+	ad_fullscreen = true
 	audio.set_muted("ad", true)
 
 
 func _on_ad_fullscreen_ended() -> void:
+	ad_fullscreen = false
 	audio.set_muted("ad", false)
 	apply_settings()
 
@@ -211,6 +214,8 @@ func _notification(what: int) -> void:
 		NOTIFICATION_APPLICATION_FOCUS_IN, NOTIFICATION_APPLICATION_RESUMED:
 			if audio != null:
 				audio.set_muted("background", false)
+			if _current != null and _current.has_method("on_app_resumed"):
+				_current.on_app_resumed()
 		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
 			if audio != null and what != NOTIFICATION_WM_CLOSE_REQUEST:
 				audio.set_muted("background", true)

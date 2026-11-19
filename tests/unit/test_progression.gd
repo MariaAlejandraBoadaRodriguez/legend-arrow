@@ -131,3 +131,71 @@ func test_progress_survives_save_round_trip() -> void:
 	assert_true(q.is_level_unlocked("d2"))
 	assert_eq(q.free_hints_left("d2"), 2)
 	DirAccess.remove_absolute(path)
+
+
+# --- v0.2 best time / stars -----------------------------------------------
+
+func test_record_requires_a_completed_level() -> void:
+	var r := p.record_result("d1", 5000, 3)
+	assert_eq(r.best_time_ms, -1)
+	assert_false(p.data.levels.has("d1"))
+
+
+func test_bests_only_improve_and_replays_never_lower_them() -> void:
+	p.complete_level("d1")
+	var first := p.record_result("d1", 20000, 2)
+	assert_true(first.first_record)
+	assert_false(first.new_record)
+	assert_eq(p.best_time_ms("d1"), 20000)
+	assert_eq(p.best_stars("d1"), 2)
+	var slower := p.record_result("d1", 30000, 1)
+	assert_false(slower.new_record)
+	assert_eq(p.best_time_ms("d1"), 20000, "slower replay keeps the best time")
+	assert_eq(p.best_stars("d1"), 2, "1-star replay keeps 2 stars")
+	var faster := p.record_result("d1", 12000, 3)
+	assert_true(faster.new_record)
+	assert_eq(faster.previous_best_ms, 20000)
+	assert_eq(p.best_time_ms("d1"), 12000)
+	assert_eq(p.best_stars("d1"), 3)
+	var same := p.record_result("d1", 12000, 3)
+	assert_false(same.new_record, "equal time is not a new record")
+	# Independent maxima: a faster 2-star run lowers time but keeps 3 stars.
+	p.record_result("d1", 9000, 2)
+	assert_eq(p.best_time_ms("d1"), 9000)
+	assert_eq(p.best_stars("d1"), 3)
+
+
+func test_replays_grant_nothing_twice() -> void:
+	p.complete_level("d1")
+	p.complete_level("d2")
+	var tx: Dictionary = p.data.transactions.duplicate()
+	for i in 3:
+		p.complete_level("d2")
+		p.record_result("d2", 1000 * (i + 1), 3)
+	assert_eq(p.data.transactions, tx)
+	assert_eq(p.unlocked_count(), 1)
+
+
+func test_star_totals() -> void:
+	assert_eq(p.total_stars(), 0)
+	p.complete_level("d1")
+	assert_eq(p.best_stars("d1"), 1, "completed without a record counts 1 star (v0.1 migration)")
+	p.record_result("d1", 1000, 3)
+	p.complete_level("d2")
+	p.record_result("d2", 1000, 2)
+	assert_eq(p.stars_in(["d1", "d2"]), 5)
+	assert_eq(p.total_stars(), 5)
+
+
+func test_records_survive_sanitize_and_bad_values_are_repaired() -> void:
+	p.complete_level("d1")
+	p.record_result("d1", 4321, 3)
+	var d: Dictionary = JSON.parse_string(JSON.stringify(p.data))
+	d = SaveSchema.ints_from_json(d)
+	assert_eq(SaveSchema.sanitize(d), [] as Array[String])
+	assert_eq(d.levels.d1.best_time_ms, 4321)
+	d.levels.d1.best_time_ms = -7
+	d.levels.d1.best_stars = 9
+	SaveSchema.sanitize(d)
+	assert_false(d.levels.d1.has("best_time_ms"), "negative time dropped")
+	assert_eq(d.levels.d1.best_stars, 3, "stars clamped")

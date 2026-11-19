@@ -246,3 +246,23 @@ func test_full_campaign_completes_and_unlocks_each_creature_once() -> void:
 	assert_eq(unlocked, c.creature_ids(), "unlock order follows the roster, once each")
 	assert_eq(p.unlocked_count(), 12)
 	assert_eq(p.complete_level(c.level_ids()[0]).unlocked_creature, "", "replay unlocks nothing")
+
+
+## v0.2 §9.1: par/star table for every shipped level; 3 stars reachable by
+## replaying the certified solution at a realistic human pace.
+func test_par_times_and_three_stars_reachable_for_every_level() -> void:
+	var c: Campaign = Campaign.load_file().campaign
+	var lines := PackedStringArray(["level | arrows | depth | par | 2-star limit | human replay"])
+	for level_id in c.level_ids():
+		var lvl: Dictionary = LevelData.load_file(c.level_path(level_id)).level
+		var board := LevelData.to_board(lvl)
+		var n := board.total_count()
+		var depth := PuzzleSolver.dependency_depth(board)
+		var par := StarRating.par_for_level(lvl)
+		var human := StarRating.human_replay_ms(n)
+		assert_eq(par, StarRating.par_ms(n, depth))
+		assert_eq(StarRating.stars(human, par, 0), 3, "%s: human replay %d ms vs par %d ms" % [level_id, human, par])
+		assert_eq(PuzzleSession.new(lvl).par_ms, par, "%s: the game uses the same par" % level_id)
+		lines.append("%s | %d | %d | %s | %s | %s" % [level_id, n, depth, SpeedTimer.format_ms(par),
+			SpeedTimer.format_ms(2 * par), SpeedTimer.format_ms(human)])
+	gut.p("\n".join(lines))

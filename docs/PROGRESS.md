@@ -1,11 +1,36 @@
 # Progress
 
-_Last updated: 2026-11-18 (v0.2 milestone A: English only + icon concepts v2)_
+_Last updated: 2026-11-19 (v0.2 milestone B: final icon, timer, stars, results, save migration)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
 
-### Milestone A — DONE, **STOPPED for the owner's icon choice (A, B, C or D)**
+### Milestone B — DONE (CI pending at the time of writing)
+- Final icon = owner artwork (`assets/icon/icon_source.png`, D-44): `tools/make_icons.py` → 512 store icon, 192 legacy, adaptive background (her own gray vignette), cut-out foreground with horns/eye/snout/chin inside the 66 dp safe circle, monochrome; `--check` in CI. Preview `docs/store/icon_final_preview.png` (readable at 48 dp on light and dark).
+- Speed timer `scripts/core/speed_timer.gd`, stars/par `scripts/core/star_rating.gd` (D-45); timer in `PuzzleSession` (saved with the board), discreet `TimerLabel` on the puzzle, holds for dialogs/ads/background.
+- Results screen (`scripts/screens/level_complete.gd`): time, par, New record / First clear / personal best, `StarRow` reveal (fade with reduced motion), Retry / Next / Level selection; shown after every puzzle, Next opens an earned awakening.
+- `Progression.record_result` / `best_time_ms` / `best_stars` / `total_stars`; level select shows stars + best time per level and total stars.
+- Save schema 3 + v0.1 migration (D-46) with a real v0.1.1 fixture (`tests/fixtures/save_v0_1_1.json`).
+- versionCode 3 / 0.2.0 in both presets; CI rehearsals and `release.yml` expect 3.
+- Tests: +34 (timer, stars, records, session timer persistence, migration on the fixture, screen-driven timer holds / kill-relaunch / faster-slower replays / star reveal, par table for every level). E2E journeys updated (results → Next → awakening; timer saved and restored across kill; hints cap stars at 2).
+
+#### Verification (milestone B, local)
+| Check | Result | Evidence |
+|---|---|---|
+| `scripts/verify_all.sh` | **PASS**: 228 discovered / 228 passed / 0 failed / 0 skipped; English-only + self-test pass | `build/reports/junit.xml` |
+| Coverage | **PASS**: puzzle/solver/progression/timer/stars 94.9% (≥ 90); save/reward 95.0% (≥ 80) | `tools/coverage.py build/reports/coverage` |
+| Desktop E2E (Xvfb, 720×1280) | **PASS**: 8/8 journeys | `scripts/desktop_e2e.sh` (local run) |
+| `tools/make_icons.py --check`, `tools/store_assets.py check` | **PASS** | local |
+| Par table (24 v0.1 levels) | printed by `test_par_times_and_three_stars_reachable_for_every_level` (gut.log); every level's human replay earns 3★ | `build/reports/gut.log` |
+| CI | **NOT RUN yet** at time of writing | — |
+| 100-level difficulty/par tables, world unlocks | **NOT RUN**: milestone C | — |
+
+#### Next
+1. Milestone C: 10 worlds × 10 dragons = 100 certified puzzles (level id = dragon id), world/level select, world N+1 unlocks after world N, multi-screen layout P1–P7.
+
+Next command: `scripts/verify_all.sh`
+
+### Milestone A — DONE (owner then supplied her own icon, D-44)
 - English only: `locales/strings.csv` is `keys,en`; Spanish translation, language setting/picker and `LANGUAGE_*` strings removed; locale fixed to `en` (device language ignored); obsolete `language` key dropped from old saves on load; Spanish tests replaced (settings persist + UI stays English; device locale `es` forced back to `en`); E2E settings journey now changes sound + reduced motion (touching the music slider) instead of language.
 - `tools/check_english_only.py` (self-test with 7 planted cases + repo scan: locale columns, translation files, `values-es`, `"es"` locale literals, Spanish characters/words in shipped code, data, scenes, Android plugin, store files and file names, privacy page) runs in `verify_all.sh` step 0 and in the CI `godot-tests` job.
 - Store text English: Play Console files renamed to English field names, store README translated, `GUIA_INICIO.md` → `GETTING_STARTED.md`, Spanish M2 screenshots deleted, Spanish half of `docs/privacy.html` removed.

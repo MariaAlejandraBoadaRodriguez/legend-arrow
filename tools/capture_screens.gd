@@ -78,6 +78,9 @@ func _init() -> void:
 	for id in pz.level.solution:
 		pz._on_tap(id)
 		await _settle(0.45)
+	await _settle(1.2)
+	await shot("05_results_unlock")
+	game.current_screen()._on_next()
 	await _settle(0.2)
 	await shot("06_awakening_early")
 	await _settle(1.6)

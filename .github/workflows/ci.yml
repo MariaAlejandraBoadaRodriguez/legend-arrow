@@ -175,7 +175,7 @@ jobs:
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
 
       - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal
 
       - name: Upload release AAB rehearsal (NOT for Play upload)
         if: always()
@@ -191,7 +191,7 @@ jobs:
           if-no-files-found: error
 
       - name: Release AAB rehearsal without ads (path used by release.yml "without-ads")
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=2 scripts/export_release.sh --rehearsal --no-ads
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal --no-ads
 
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()

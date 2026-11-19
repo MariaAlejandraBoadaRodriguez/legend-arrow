@@ -64,6 +64,8 @@ func _screens(phone: bool) -> void:
 	for id in pz.level.solution:
 		pz._on_tap(id)
 		await _settle(0.45)
+	await _settle(0.8)
+	game.current_screen()._on_next()  # results -> earned awakening
 	await _settle(3.0)
 	await shot("awakening")
 	await _settle(4.0)

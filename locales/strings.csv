@@ -111,3 +111,12 @@ CREATURE_PHOENIX,Phoenix
 CREATURE_PHOENIX_LORE,Every ember it sheds becomes a new beginning.
 CREATURE_ANCIENT_DRAGON,Ancient Dragon
 CREATURE_ANCIENT_DRAGON_LORE,"The oldest legend, waiting for the last arrow."
+RETRY,Retry
+NEXT,Next
+PAR_TIME,Par %s
+NEW_RECORD,New record!
+FIRST_CLEAR,First clear
+PERSONAL_BEST,Personal best %s
+STARS_HINT_NOTE,Three stars need a run without hints
+BEST_TIME_STARS,Best %s
+TOTAL_STARS,%d of %d stars

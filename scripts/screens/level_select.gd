@@ -17,6 +17,9 @@ func build() -> void:
 	var bar := Ui.top_bar("", "LEVEL_SELECT_SUBTITLE", Game.back)
 	_title = bar.find_child("Title", true, false)
 	content.add_child(bar)
+	var total := Ui.label(tr("TOTAL_STARS") % [p.total_stars(), 3 * Game.campaign.level_ids().size()], "CaptionLabel")
+	total.name = "TotalStars"
+	content.add_child(total)
 	_tabs = Ui.hbox(Palette.SPACE)
 	_tabs.name = "RealmTabs"
 	content.add_child(_tabs)
@@ -86,6 +89,21 @@ func _card(cr: Dictionary) -> Control:
 	status.name = "Status"
 	status.text = tr("N_OF_2_COMPLETE") % p.creature_progress(cr.id) if unlocked_to_play else tr("LOCKED")
 	col.add_child(status)
+	for l in cr.levels:  # best stars and time per level (v0.2 §3)
+		if not p.is_level_completed(l):
+			continue
+		var line := Ui.hbox(Palette.SPACE)
+		line.name = "Best_%s" % l
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var st := StarRow.new(p.best_stars(l), 30.0)
+		st.name = "Stars"
+		line.add_child(st)
+		var bt := p.best_time_ms(l)
+		var tl := Ui.label(tr("BEST_TIME_STARS") % SpeedTimer.format_ms(bt) if bt >= 0 else "", "CaptionLabel", HORIZONTAL_ALIGNMENT_LEFT)
+		tl.name = "BestTime"
+		tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.add_child(tl)
+		col.add_child(line)
 	return btn
 
 

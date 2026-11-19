@@ -100,9 +100,14 @@ func fresh_install() -> void:
 	if not await solve_current("forest_drake_1"): return
 	if not await wait_screen("level_complete"): return
 	if not check(not Game.progression.is_creature_unlocked("forest_drake"), "1 of 2 does not unlock"): return
-	await shot("level_complete")
-	if not await tap("ContinueButton"): return
+	if not check(results_ok("forest_drake_1"), "results show time and stars, both saved"): return
+	await seconds(1.2)  # let the stars appear
+	await shot("results")
+	if not await tap("NextButton"): return
 	if not await solve_current("forest_drake_2"): return
+	if not await wait_screen("level_complete"): return
+	if not check(results_ok("forest_drake_2"), "results for puzzle 2"): return
+	if not await tap("NextButton"): return
 	if not await wait_screen("awakening"): return
 	if not check(_saved().creatures.forest_drake.unlocked, "unlock on disk before the awakening ends"): return
 	await seconds(2.5)
@@ -124,6 +129,8 @@ func partial_a() -> void:
 	var saved: Dictionary = _saved().get("in_progress", {})
 	if not check(saved.get("level_id", "") == "moon_owl_1" and saved.get("removed", []).size() == 2,
 			"partial state on disk: %s" % str(saved)): return
+	if not check(bool(saved.get("timer_started", false)) and int(saved.get("elapsed_ms", -1)) > 0,
+			"timer running and saved: %s" % str(saved)): return
 	await shot("partial_before_kill")
 
 
@@ -135,6 +142,9 @@ func partial_b() -> void:
 	var total: int = pz.level.arrows.size()
 	if not check(pz.session.board.remaining_count() == total - 2,
 			"restored %d of %d" % [pz.session.board.remaining_count(), total]): return
+	var saved_ms := int(_saved().in_progress.get("elapsed_ms", -1))
+	if not check(saved_ms > 0 and pz.session.elapsed_ms() >= saved_ms and pz.session.elapsed_ms() < saved_ms + 5000,
+			"timer restored after kill (%d ms saved, %d now)" % [saved_ms, pz.session.elapsed_ms()]): return
 	await shot("partial_restored")
 	for id in pz.level.solution:
 		if pz.session.board.has_arrow(id) and pz.session.board.remaining_ids().has(id):
@@ -170,6 +180,8 @@ func blocked_undo() -> void:
 	if not await tap("RestartButton"): return
 	if not check(board.remaining_count() == total, "restart restores every arrow"): return
 	if not await solve_current("moon_owl_2"): return
+	if not await wait_screen("level_complete"): return
+	if not await tap("NextButton"): return
 	if not await wait_screen("awakening"): return
 	if not check(Game.progression.is_creature_unlocked("moon_owl"), "moon owl unlocked"): return
 	if not await wait_for(func(): return Game.current_screen().get("finished") == true, 30.0, "awakening finishes"): return
@@ -214,6 +226,7 @@ func hint_ad() -> void:
 	if not await wait_for(func(): return Dialog.top(pz) == null, 2.0, "sheet closes"): return
 	if not await solve_current("antler_fox_1"): return
 	if not await wait_screen("level_complete"): return
+	if not check(int(Game.current_screen().params.get("stars", 3)) <= 2, "a run with hints earns at most 2 stars"): return
 
 
 ## 5. Creature awakening -> skip/replay -> bestiary.
@@ -438,6 +451,17 @@ func solve_current(level_id: String) -> bool:
 		if pz.session.board.remaining_ids().has(id):
 			if not await tap_arrow(pz.board, id): return false
 	return check(pz.session.is_complete(), "%s solved by taps" % level_id)
+
+
+## The results screen shows this run's time and stars and they match the save.
+func results_ok(level_id: String) -> bool:
+	var r: Control = Game.current_screen()
+	var t := r.find_child("TimeLabel", true, false) as Label
+	var st := r.find_child("Stars", true, false) as StarRow
+	if t == null or st == null or t.text == "":
+		return false
+	var rec: Dictionary = _saved().levels.get(level_id, {})
+	return st.earned >= 1 and int(rec.get("best_stars", 0)) >= st.earned and int(rec.get("best_time_ms", -1)) >= 0
 
 
 func _saved() -> Dictionary:
