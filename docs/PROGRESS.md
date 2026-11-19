@@ -13,6 +13,15 @@ Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–
 - Fix: the owner's 176 MB of raw art was imported and packed into the APK (main CI run 44413626725 failed, APK artifact 183 MB). `assets/creatures/raw/.gdignore` + preset `exclude_filter` (D-43).
 - Roster check: `docs/ART_PROMPTS.md` has 100 unique ids; `assets/creatures/raw/` has exactly those 100 files, all 1024×1536.
 
+### Verification (milestone A)
+| Check | Result | Evidence |
+|---|---|---|
+| Local `scripts/verify_all.sh` @ `9e59354` | **PASS**: 194 discovered / 194 passed / 0 failed / 0 skipped; English-only check + self-test (7 planted cases) pass | `build/reports/junit.xml`, `english_only.log` |
+| CI push run @ `6fc8c98`, all 7 jobs | **PASS**: tests + English-only + coverage, Kotlin plugin, Play assets, debug APK + both AAB rehearsals, desktop E2E phone + tablet, Android emulator E2E API 34 | [run 44423031551](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44423031551) |
+| CI PR runs, desktop E2E jobs | **FAIL (infrastructure)**: GitHub runner could not install xvfb/mesa/ffmpeg from the Ubuntu mirror; no journey started. Same code passed on the push run above. Re-run once each | runs [44418671778](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44418671778), [44423038351](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44423038351); PR comment |
+| Gate 9.1 items for levels/timer/stars/100 puzzles | **NOT RUN**: built in milestones B–C | — |
+| Physical tablet | **BLOCKED** (owner) | — |
+
 ### Next
 1. Owner: choose icon **A, B, C or D** from `docs/store/icon_concepts_v2.png`.
 2. Milestone B: chosen icon → `tools/make_icons.py` (adaptive fg/bg/monochrome + 512 store icon), timer, stars, results screen, save schema v3 + v0.1 fixture migration (old creature ids → roster ids).
