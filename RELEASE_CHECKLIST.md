@@ -1,6 +1,6 @@
 # Release checklist — Legend Arrow 0.2.0 (versionCode 3)
 
-Final run: [CI 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`, all jobs green.
+Final run: [CI 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`, all jobs green (also [44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`).
 
 Statuses:
 - **PASS**: executed with assertions (see `QA_REPORT.md`).

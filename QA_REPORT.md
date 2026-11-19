@@ -8,7 +8,7 @@ Statuses:
 
 A workflow file is not evidence; every PASS points at an executed run or log. The v0.1.0 report is in git history (`git show 7835016:QA_REPORT.md`).
 
-**Final evidence run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: **all 10 jobs green** (tests + coverage, Kotlin plugin, store assets, screen matrix, debug APK + both AAB rehearsals, desktop E2E phone and tablet, emulators API 26 / 34 / 36). Earlier evidence: [run 44462316343](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44462316343) on `8ebd53f`.
+**Final evidence run:** [CI PR run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`: **all jobs green**, including emulators API 26 / 34 / 36. Also green: [push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`. API 26 emulator history (honest note): it passed on the default ~1.5 GB AVD in two runs, then failed twice. Run 44466657570: `fresh_install` results check. Run 44467837397: low-memory-killer storm, with the app dying together with the launcher and Play services. It now runs with 3 GB RAM, the spec's low-tier device, and passes. Results-check diagnostics and adb retries were added at the same time.
 
 ## 9.1 Content and rules
 | Check | Result | Evidence |
@@ -65,7 +65,7 @@ Journeys:
 
 | Emulator | Result | Evidence |
 |---|---|---|
-| API 26 (Android 8.0) / P1 720×1280 @320 | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615436 (also run 44462316343), artifact `e2e-android-api26-P1` |
+| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **PASS**: 13/13 journeys + smoke (run 44470278817) | run 44464519633 job 135361615436 (also run 44462316343), artifact `e2e-android-api26-P1` |
 | API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615190, artifact `e2e-android-api34-P3` |
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
