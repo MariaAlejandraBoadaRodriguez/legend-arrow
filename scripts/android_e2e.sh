@@ -142,6 +142,8 @@ for j in "${JOURNEYS[@]}"; do
        echo "---- $j: crash / kill / app lines from logcat ----"
        grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|SCRIPT ERROR|USER ERROR|godot" \
          "$OUT/logcat/$j.txt" | grep -v "GodotPluginRegistry: Registering" | tail -80 || true
+       # Storage and memory at the first failure (what filled /data, who uses RAM).
+       if [[ -z "${_space_dumped:-}" ]]; then _space_dumped=1; "$(dirname "$0")/device_space.sh" "at-failure-$j" 0 || true; fi
        echo "---- $j: in-app step log ----"
        adb shell "run-as $PKG cat files/e2e/result_$j.txt" 2>/dev/null | tr -d '\r' | tail -60 || true
        echo "---- end $j ----" ;;

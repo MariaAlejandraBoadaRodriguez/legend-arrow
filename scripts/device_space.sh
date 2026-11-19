@@ -9,6 +9,13 @@ label="${1:-check}"
 min_mb="${2:-1024}"
 echo "---- df -h /data ($label) ----"
 adb shell df -h /data
+# What uses /data and memory (needs the emulator's root shell; skipped on a
+# real device). A healthy run writes about 250 MB; run 44606551795 lost
+# 6 GB on API 26 while lowmemorykiller killed every app, the game included.
+echo "---- largest under /data, /data/data, /data/app (KB) ($label) ----"
+adb shell "su 0 sh -c 'du -s /data/* /data/data/* /data/app/* /data/dalvik-cache/* 2>/dev/null | sort -rn | head -12'" 2>/dev/null | tr -d '\r' || true
+echo "---- memory ($label) ----"
+adb shell "cat /proc/meminfo | head -5; dumpsys meminfo | sed -n '/Total PSS by process/,/^\$/p' | head -12" 2>/dev/null | tr -d '\r' || true
 line="$(adb shell df -k /data | tr -d '\r' | tail -1)"
 avail_kb="$(awk '{print $4}' <<<"$line")"
 if ! [[ "$avail_kb" =~ ^[0-9]+$ ]]; then
