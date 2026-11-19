@@ -101,14 +101,36 @@ func _on_ad_fullscreen_ended() -> void:
 
 ## Result of the last save write (OK or an Error code), for diagnostics.
 var last_persist_error := OK
+## True while the newest progress is only in memory (a write failed); the
+## save is retried once at once and then every SAVE_RETRY_S until it lands.
+var save_pending := false
+var _retry_left := 0.0
+const SAVE_RETRY_S := 2.0
 
 
-func persist() -> void:
-	if booted:
-		var err := repository.write(progression.data)
-		last_persist_error = err
-		if err != OK:
-			push_error("Game: save failed (%d)" % err)
+## Writes progress. Returns the write result; on failure retries once now
+## and keeps retrying in the background, so a transient error (disk briefly
+## full, I/O hiccup) never leaves the save behind what the screen shows.
+func persist() -> int:
+	if not booted:
+		return OK
+	var err := repository.write(progression.data)
+	if err != OK:
+		push_error("Game: save failed (%d), retrying" % err)
+		err = repository.write(progression.data)
+	last_persist_error = err
+	save_pending = err != OK
+	_retry_left = SAVE_RETRY_S
+	if err != OK:
+		push_error("Game: save failed again (%d); kept in memory, retrying every %.0f s" % [err, SAVE_RETRY_S])
+	return err
+
+
+func _process(delta: float) -> void:
+	if save_pending:
+		_retry_left -= delta
+		if _retry_left <= 0.0:
+			persist()
 
 
 func settings() -> Dictionary:

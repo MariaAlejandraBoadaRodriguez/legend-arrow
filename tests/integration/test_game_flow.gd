@@ -525,3 +525,36 @@ func test_detail_releases_its_full_image_and_grid_uses_thumbnails() -> void:
 	Game.back()   # leave the detail screen
 	await wait_process_frames(4)
 	assert_null(ref.get_ref(), "the full image is released after leaving the detail screen")
+
+
+## v0.2 API 26 investigation: the results screen shows the in-memory run; if
+## the save write fails at that moment, the save must still catch up (retry
+## now, then in the background) and must never fall behind what was shown.
+func test_completion_saved_even_if_the_first_write_fails() -> void:
+	Game.progression.data.tutorial_done = true
+	Game.persist()
+	Game.go("puzzle", {"level_id": "forest_drake"})
+	await _layout()
+	var pz: Control = app.screen()
+	Game.repository.simulate_bad_tmp = "truncate"   # every write fails for now
+	await app.solve_current_puzzle()
+	assert_eq(Game.current_screen_name(), "level_complete")
+	assert_true(Game.save_pending, "failure is known, progress kept in memory")
+	assert_ne(Game.last_persist_error, OK)
+	var on_disk: Dictionary = Game.repository.peek().data
+	assert_false(on_disk.levels.has("forest_drake"), "disk still has the previous save")
+	assert_true(on_disk.tutorial_done, "and that previous save is intact")
+	Game.repository.simulate_bad_tmp = ""             # the condition clears
+	await wait_seconds(Game.SAVE_RETRY_S + 0.5)
+	assert_false(Game.save_pending, "background retry landed")
+	var rec: Dictionary = Game.repository.peek().data.levels.get("forest_drake", {})
+	var shown: Dictionary = app.screen().params
+	assert_eq(int(rec.get("best_stars", 0)), int(shown.stars), "saved stars = shown stars")
+	assert_eq(int(rec.get("best_time_ms", -1)), int(shown.time_ms), "saved time = shown time")
+	# The failed writes were reported (push_error), as they must be.
+	var reported := 0
+	for e in get_errors():
+		if not e.handled and "save failed" in e.to_s():
+			e.handled = true
+			reported += 1
+	assert_gt(reported, 0, "save failures are reported")

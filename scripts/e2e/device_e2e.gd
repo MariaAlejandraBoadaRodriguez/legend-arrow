@@ -18,7 +18,7 @@ const TRIGGER := "user://e2e_journey.txt"
 const OUT_DIR := "user://e2e"
 const JOURNEYS := ["fresh_install", "partial_a", "partial_b", "blocked_undo", "hint_ad",
 	"awakening_replay", "settings_a", "settings_b", "replay_times", "background_resume", "rotate",
-	"world_unlock", "memory_transitions"]
+	"world_unlock", "memory_transitions", "save_kill", "save_verify"]
 const ACTION_DONE := "user://e2e_action_done"
 
 var journey := ""
@@ -449,6 +449,78 @@ func _mem() -> Dictionary:
 	}
 
 
+## --- Save stress (v0.2 API 26 investigation, scripts/save_stress.sh) -------
+## save_kill: finish the next level; a thread SIGKILLs this process after
+## kill_ms (from user://e2e_param.txt, -1 = no kill), starting either right
+## before the last tap ("last": the commit and just after it) or before the
+## first tap ("play": the in-progress saves). Logs SHOWN with what the results
+## screen displayed, if it got that far. save_verify (next launch) compares
+## the save with user://e2e_expect.txt, written by the script from SHOWN.
+var _killer: Thread
+
+
+func save_kill() -> void:
+	var prm := _kv_file("user://e2e_param.txt")
+	var kill_ms := int(prm.get("kill_ms", "-1"))
+	var phase: String = prm.get("phase", "last")
+	if not await reach_home(): return
+	Game.progression.data.tutorial_done = true
+	if not check(Game.persist() == OK, "baseline save (tutorial done) written"): return
+	var lid := Game.progression.next_level()
+	if not await open_next_puzzle(lid): return
+	var pz: Control = Game.current_screen()
+	var sol: Array = pz.level.solution
+	_say("PLAN i=%s kill_ms=%d phase=%s level=%s arrows=%d" % [prm.get("i", "?"), kill_ms, phase, lid, sol.size()])
+	if phase == "play":
+		_arm_killer(kill_ms)
+	for k in sol.size():
+		if k == sol.size() - 1 and phase == "last":
+			_arm_killer(kill_ms)
+		if not await tap_arrow(pz.board, sol[k]): return
+	if not await wait_screen("level_complete", 10.0): return
+	var r: Dictionary = Game.current_screen().params
+	_say("SHOWN level=%s stars=%d time_ms=%d" % [lid, int(r.stars), int(r.time_ms)])
+	if kill_ms >= 0:
+		await seconds(4.0)
+		_say("KILL_LATE kill_ms=%d" % kill_ms)   # alive after the planned kill: counted by the script
+
+
+func _arm_killer(kill_ms: int) -> void:
+	if kill_ms < 0 or _killer != null:
+		return
+	_killer = Thread.new()
+	_killer.start(func():
+		OS.delay_msec(kill_ms)
+		OS.kill(OS.get_process_id()))
+
+
+func save_verify() -> void:
+	var exp := _kv_file("user://e2e_expect.txt")
+	var boot: Dictionary = Game.boot_result
+	var d: Dictionary = Game.progression.data
+	var lid: String = exp.get("level", "")
+	var rec: Dictionary = d.levels.get(lid, {}) if lid != "" else {}
+	_say("VERIFY expect=%s boot_source=%s recovered=%s problems=%s tutorial_done=%s record=%s main_env=%s" % [
+		str(exp), boot.get("source"), boot.get("recovered"), str(boot.get("problems")), d.tutorial_done,
+		str(rec), str(SaveRepository.envelope_info(Game.repository.path))])
+	if not check(bool(d.tutorial_done), "earlier committed progress survived the kill"): return
+	if lid != "":
+		if not check(not rec.is_empty(), "level shown as complete is in the save"): return
+		if not check(int(rec.get("best_stars", 0)) == int(exp.stars) and int(rec.get("best_time_ms", -1)) == int(exp.time_ms),
+				"saved stars/time equal what was shown (%s vs %s)" % [str(rec), str(exp)]): return
+
+
+static func _kv_file(path: String) -> Dictionary:
+	var out := {}
+	if not FileAccess.file_exists(path):
+		return out
+	for tok in FileAccess.get_file_as_string(path).strip_edges().split(" ", false):
+		var kv := tok.split("=", true, 1)
+		if kv.size() == 2:
+			out[kv[0]] = kv[1]
+	return out
+
+
 ## Asks the CI script for a device action ("home", "rotate") and waits until
 ## the script reports it done (it creates ACTION_DONE inside the app's files).
 func host_action(action: String) -> bool:
@@ -724,7 +796,7 @@ func results_problem(level_id: String) -> String:
 ## between the screen and the file).
 func _save_forensics(level_id: String) -> String:
 	var path: String = Game.repository.path
-	var loaded := SaveRepository.new(path).load_save()
+	var loaded := SaveRepository.new(path).peek()
 	var files: Array[String] = []
 	var dir := DirAccess.open(path.get_base_dir())
 	if dir != null:
@@ -732,9 +804,10 @@ func _save_forensics(level_id: String) -> String:
 			if f.begins_with(path.get_file()):
 				var fa := FileAccess.open(path.get_base_dir().path_join(f), FileAccess.READ)
 				files.append("%s=%d" % [f, fa.get_length() if fa != null else -1])
-	return "source=%s problems=%s files=%s last_persist_error=%d in_memory=%s" % [
+	return "source=%s problems=%s files=%s main_env=%s my_pid=%d my_seq=%d last_persist_error=%d save_pending=%s in_memory=%s" % [
 		loaded.get("source"), str(loaded.get("problems")), ",".join(files),
-		Game.last_persist_error, str(Game.progression.data.levels.get(level_id, {}))]
+		str(SaveRepository.envelope_info(path)), OS.get_process_id(), Game.repository.write_seq,
+		Game.last_persist_error, Game.save_pending, str(Game.progression.data.levels.get(level_id, {}))]
 
 
 ## Results check that allows a slow device a moment to build the screen, and
@@ -751,8 +824,10 @@ func results_settled(level_id: String) -> bool:
 	return why == ""
 
 
+## What is on disk now, read without side effects (load_save() would
+## quarantine and repair files and so change what it is checking).
 func _saved() -> Dictionary:
-	return SaveRepository.new(Game.repository.path).load_save().data
+	return SaveRepository.new(Game.repository.path).peek().data
 
 
 func shot(label: String) -> void:

@@ -348,6 +348,66 @@ jobs:
             docs/qa/screens/
           if-no-files-found: error
 
+  save-stress:
+    # v0.2 API 26 investigation (docs/qa/SAVE_INVESTIGATION.md): a level
+    # shown as complete was once missing from the save on Android 8 right
+    # after a data clear. 120 iterations each: wipe data, finish a level while
+    # the app SIGKILLs itself at a random moment around the save, relaunch,
+    # compare. Both RAM sizes the failure was seen on.
+    name: Save stress (API 26, RAM ${{ matrix.ram_label }})
+    needs: [android-debug-apk]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {ram: "3072M", ram_label: "3 GB", seed: "26003"}
+          - {ram: "", ram_label: "default", seed: "26001"}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Get debug APK
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: legend-arrow-debug-apk
+          path: build/android
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Kill-and-relaunch save stress (120 iterations)
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          E2E_WM_SIZE: "720x1280"
+          E2E_WM_DENSITY: "320"
+          TARGET: android
+          SEED: ${{ matrix.seed }}
+        with:
+          api-level: 26
+          arch: x86_64
+          target: google_apis
+          profile: pixel
+          ram-size: ${{ matrix.ram }}
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: scripts/save_stress.sh build/android/legend-arrow-debug.apk build/save-stress 120
+
+      - name: Summary
+        if: always()
+        run: cat build/save-stress/summary.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Upload stress evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: save-stress-api26-${{ matrix.ram == '' && 'default' || 'ram3g' }}
+          path: build/save-stress/
+          if-no-files-found: error
+
   android-emulator-e2e:
     name: Android emulator E2E (API ${{ matrix.api }}, ${{ matrix.profile_name }})
     needs: [android-debug-apk]
