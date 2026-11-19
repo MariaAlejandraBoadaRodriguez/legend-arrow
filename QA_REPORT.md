@@ -1,5 +1,7 @@
 # QA report — Legend Arrow 0.2.0 (versionCode 3)
 
+> **Release status: Ready for Play upload.** Every gate is PASS, except the optional on-device measurement (`measure_device.sh`, Part B of `docs/DEVICE_TEST.md`), which stays BLOCKED on the owner. The owner's Lenovo tablet test passed every checklist item. The API 26 save item is closed as a test-environment issue (`docs/qa/SAVE_INVESTIGATION.md`). Remaining owner actions: `RELEASE_CHECKLIST.md`.
+
 Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
 - **FAIL**
@@ -65,7 +67,7 @@ Journeys:
 
 | Emulator | Result | Evidence |
 |---|---|---|
-| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **OPEN (intermittent, rare)**: all 13 journeys + smoke pass in every run since the 3 GB change (44470278817, 44472596603, 44475068401, 44477513014, 44477522588). The open item is a first launch right after `pm clear`, where the results screen once showed 3 stars while the save file had **no record** for the level ("stars shown 3, saved { }"). That happened once in run 44472596603 and once more on the old 1.5 GB AVD (44466657570). A dedicated step now repeats it 6× per API 26 job: **0 mismatches in 16 more samples** (runs 44477513014, 44477522588), so about 1 in 22 on 3 GB. The cause is unexplained; the save write and sanitize code were reviewed and show no fault. The journey now logs save forensics (load source, files, last write result) if it recurs | runs above, artifacts `e2e-android-api26-P1` (incl. `repro-fresh-after-clear/`) |
+| API 26 (Android 8.0) / P1 720×1280 @320, 3 GB RAM | **PASS**: 13/13 journeys + smoke (runs 44470278817, 44554390772). The intermittent save mismatch seen on this emulator is closed as a **test-environment issue** (owner decision). The original save code passed 240/240 API 26 kill iterations, 150/150 on desktop and the owner's tablet test, including item 15 (force-close and reopen keeps progress). See `docs/qa/SAVE_INVESTIGATION.md` | run 44554390772, artifact `e2e-android-api26-P1` |
 | API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615190, artifact `e2e-android-api34-P3` |
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
@@ -89,15 +91,15 @@ Emulator numbers are **indicative only**: x86_64 emulators with the SwiftShader 
 | Memory settles over 20 level-list / dragon-detail / bestiary transitions (≤ 10% over warmed baseline, no node growth) | PASS | `memory_transitions` on desktop (55.1 → 55.1 MB, nodes flat), API 26/P1 and API 34/P3 |
 | Cold start to first frame (budget 5 s) | indicative PASS | API 26: 581–701 ms; API 34: 891–1102 ms; API 36 tablet: 1066–1205 ms (`am start` TotalTime) |
 | Peak PSS (budget 300 MB puzzle / 400 MB awakening) | indicative | API 26: 149 MB; API 34: 185 MB; API 36 tablet: 192 MB |
-| Frame time p95 (budgets 16.7 ms puzzle, 33.3 ms awakening) | **BLOCKED** (device) | Software GPU: API 26 puzzle 66.9 / awakening 36.0 ms; API 34 123.5 / 64.9 ms. These say little about a real GPU; needs the Lenovo run. |
+| Frame time p95 (budgets 16.7 ms puzzle, 33.3 ms awakening) | **BLOCKED** (numbers need the optional Part B run) | Real device: no lag over a 15-minute session on the owner's tablet (item 13, PASS). The software-GPU emulator figures (API 26 puzzle 66.9 / awakening 36.0 ms) say little about a real GPU |
 | arm64 download ≤ 120 MB with all 100 images | PASS | bundletool `get-size`: arm64-v8a **48.8 MB** (with ads), 45.6 MB (without ads); armeabi-v7a 50.2 / 47.0 MB; x86_64 50.2 / 47.0 MB |
 | Debug APK (all test ABIs incl. x86_64) | info | 177 MB; SHA-256 `548c88f2…07389b3` |
 
 ## 9.6 Physical device (owner's Lenovo tablet)
 | Check | Result |
 |---|---|
-| Install via Google Drive, manual checklist (3 worlds, timer and stars, results, photoreal awakening, bestiary, pause/background/resume, sound, 15-minute session, battery/heat) | **BLOCKED**: waiting for the owner (`docs/DEVICE_TEST.md`) |
-| `scripts/measure_device.sh` on the tablet (frame time, memory, start-up) | **BLOCKED**: optional USB run, `docs/DEVICE_TEST.md` Part B |
+| Install via Google Drive and the manual checklist (`docs/DEVICE_TEST.md` items 1–15: three worlds, timer and stars, results, photoreal awakening, bestiary, pause/background/resume, sound, larger text, rotation, 15-minute session, battery/heat, progress kept after force-close) | **PASS**: all 15 items, owner-reported on her Lenovo Android tablet |
+| `scripts/measure_device.sh` on the tablet (frame time, memory, start-up) | **BLOCKED** (optional Part B, not run). The 15-minute session on the tablet showed no lag and no crash (checklist item 13, PASS) |
 
 ## 9.7 Release build checks
 Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (the `release.yml` "without-ads" path). Results from `aab_report.txt` (run 44462316343 job 135352925998; confirmed in run 44464519633 job 135359988799).
@@ -126,7 +128,7 @@ Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (
 | 20 English files named by Play Console field: icon 512, feature 1024×500, 8 phone 1080×1920, 5 × 7" 1200×2133, 5 × 10" 1440×2560 | PASS | `tools/store_assets.py`: 20 expected, 20 present; sizes, format, no alpha, limits. CI artifact **play-store-assets** |
 
 ## Known limitations
-- **Open:** intermittent screen/save mismatch on the API 26 emulator right after a data clear (see 9.3). It is not explained yet, and it blocks "Ready for Play upload" until it is understood.
+- API 26 emulator save mismatch: closed as a test-environment issue (`docs/qa/SAVE_INVESTIGATION.md`). An experimental save hardening is kept on branch `save-hardening-experimental` as a possible v0.2.x item; it is not in 0.2.0.
 - Frame-time budgets are unverified on real hardware (software-GPU emulators only) until the Lenovo run.
 - Puzzle silhouettes resemble their dragon only loosely; accepted for v0.2 (D-50, `docs/ART_STATUS.md`).
 - The live UMP consent form and live ads have never been shown or clicked in CI (test IDs, nothing clicked). Check manually before a with-ads release.

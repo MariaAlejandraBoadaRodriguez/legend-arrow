@@ -1,5 +1,7 @@
 # Release checklist — Legend Arrow 0.2.0 (versionCode 3)
 
+> **Status: Ready for Play upload.** Every item is PASS, except the owner's release-time actions below and the optional on-device measurement (BLOCKED on the owner, not required).
+
 Final run: [CI 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`, all jobs green (also [44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`).
 
 Statuses:
@@ -19,16 +21,16 @@ Statuses:
 | 8 | Content: 100 certified puzzles, rising difficulty, English only | PASS | `QA_REPORT.md` 9.1 |
 | 9 | All 100 dragons imported (no ART PENDING) | PASS | `docs/ART_STATUS.md`: 100/100 |
 | 10 | Save migration from v0.1 (real save) | PASS | fixture test |
-| 11 | Emulator E2E on API 26 / 34 / 36 | **OPEN** / PASS / PASS | API 26: intermittent results-screen vs save-file mismatch after `pm clear` (QA_REPORT 9.3) |
+| 11 | Emulator E2E on API 26 / 34 / 36 | PASS | 13/13 each (runs 44554390772, 44464519633). The API 26 save mismatch is a test-environment issue (`docs/qa/SAVE_INVESTIGATION.md`) |
 | 12 | Screen matrix P1–P7 reviewed | PASS | `docs/qa/VISUAL_QA.md` |
 | 13 | Memory settles; download ≤ 120 MB | PASS | 48.8 MB arm64 (with ads) |
-| 14 | Frame time and feel on a real device | BLOCKED | owner's Lenovo tablet, `docs/DEVICE_TEST.md` |
+| 14 | Feel and stability on a real device | PASS | owner's Lenovo tablet: all 15 `docs/DEVICE_TEST.md` checklist items PASS (15-minute session without lag, progress kept after force-close). Optional frame-time numbers (Part B): not run |
 | 15 | Privacy policy and Data Safety current | PASS (docs) / OWNER (publish) | `docs/privacy.html` updated for 0.2.0; no Data Safety answer changes |
 | 16 | Store graphics (English, 20 files) | PASS | CI artifact `play-store-assets` |
 | 17 | APK/AAB checksums | PASS | `.sha256` files in CI artifacts |
 
 ## Owner actions before uploading 0.2.0
-1. Run `docs/DEVICE_TEST.md` on the Lenovo tablet. Send the checklist (a photo is fine) and, if you can, the `build/device-lenovo` folder.
+1. ~~Run `docs/DEVICE_TEST.md` on the Lenovo tablet.~~ Done: all 15 items PASS.
 2. Replace the hosted privacy policy page with the new `docs/privacy.html`. No Data Safety changes are needed in Play Console.
 3. Upload the new store graphics from the `play-store-assets` artifact (Main store listing → Graphics). Upload them in number order.
 4. Build the signed AAB with your upload key: `release.yml` (or `scripts/export_release.sh`). Check that the printed certificate SHA-256 matches Play Console → App integrity. Upload to internal testing first.

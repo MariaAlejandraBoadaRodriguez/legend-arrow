@@ -1,6 +1,6 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2 milestone F done: CI all green; only the owner's tablet checks remain BLOCKED)_
+_Last updated: 2026-11-19 (v0.2.0 Ready for Play upload: owner tablet test PASS; API 26 save item closed as test-environment)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
@@ -15,7 +15,8 @@ Full results: `QA_REPORT.md`, `RELEASE_CHECKLIST.md`. Evidence run [44462316343]
 - `docs/DEVICE_TEST.md` for the Lenovo tablet; physical checks BLOCKED until the owner sends results.
 - **Final run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: all 10 jobs green; emulators API 26/34/36 13/13 each; certificate SHA-256 printed and checked.
 - API 26 emulator: two later failures on the ~1.5 GB default AVD (results check; low-memory-killer storm). It now runs with 3 GB (spec low tier), plus results diagnostics and adb retries; green in [run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`.
-- API 26 open item: one results-vs-save mismatch on a first launch right after `pm clear` (run 44472596603); the repro step (6× per job) found 0 in 16 more samples (runs 44477513014, 44477522588). Cause unexplained; save forensics are logged if it recurs. Stays OPEN in QA_REPORT/RELEASE_CHECKLIST.
+- API 26 save mismatch: **closed as a test-environment issue** (owner decision). The original save code passed 240/240 API 26 kill iterations, 150/150 on desktop and the owner's tablet test (all 15 items, incl. force-close/reopen). See `docs/qa/SAVE_INVESTIGATION.md`. Experimental save hardening is parked on branch `save-hardening-experimental` (possible v0.2.x).
+- **Owner tablet test: PASS** (all 15 `docs/DEVICE_TEST.md` items). **0.2.0: Ready for Play upload** (`QA_REPORT.md`, `RELEASE_CHECKLIST.md`).
 - **Next (owner):** Lenovo tablet run (`docs/DEVICE_TEST.md`), then the upload steps in `RELEASE_CHECKLIST.md`.
 
 ### Milestone D — DONE (CI pending at the time of writing); milestone E folded in
