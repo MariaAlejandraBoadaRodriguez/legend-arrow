@@ -35,6 +35,16 @@ STORE = "docs/store/play_console/01_Graphics__App_icon__512x512.png"
 # Key points of the head in source pixels (horn tips, snout tip, chin, eye),
 # read off the 1254 px artwork. They must all land inside the safe circle.
 KEY_POINTS = [(188, 214), (265, 193), (1060, 600), (1030, 700), (760, 485), (600, 240)]
+# Must stay inside the 66 dp safe circle: horn tips, snout tip, snout
+# underside, eye. The other key points (chin, brow) must stay inside the
+# 72 dp visible area.
+REQUIRED_POINTS = [(188, 214), (265, 193), (1060, 600), (1048, 640), (760, 485)]
+VISIBLE_R = 144                  # 72 dp viewport circle radius at 4x
+# Owner tweak (2026-11-19): head about 15% larger, background a little darker
+# with a soft radial vignette (light behind the head, darker at the edges).
+HEAD_GROWTH = 1.15
+BG_INNER = (166, 164, 162)       # behind the head (source centre was ~181)
+BG_OUTER = (86, 86, 85)          # corners (source corners were ~100-150)
 EYE_BOX = (680, 425, 830, 545)
 
 CANVAS = 432                     # 108 dp at 4x
@@ -61,7 +71,10 @@ def alpha_mask(im):
     ImageDraw.floodfill(filled, (0, 0), 128)
     outside = np.asarray(filled) == 128
     alpha = np.where(~outside, np.maximum(alpha, (np.asarray(hard) == 0) * 1.0), alpha)
-    m = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8))
+    m = Image.fromarray((alpha * 255).astype(np.uint8))
+    # 1 px erosion before the feather: no light-gray backdrop fringe shows
+    # on the darker vignette.
+    m = m.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
     return m
 
 
@@ -89,28 +102,75 @@ def background_field(im, mask, size):
     return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
 
 
-def fit_transform(src_size):
-    """Scale + offset so every key point lies within FIT_R of the canvas centre."""
-    pts = np.array(KEY_POINTS, dtype=np.float64)
-    # minimal enclosing circle (brute force on pairs/triples is overkill: use
-    # bounding-box centre refined by a few iterations of the "move to farthest" rule)
+def _enclosing(points):
+    """Approximate minimal enclosing circle (centre, radius)."""
+    pts = np.array(points, dtype=np.float64)
     c = pts.mean(0)
-    for _ in range(200):
+    for _ in range(4000):
         d = np.hypot(*(pts - c).T)
-        far = pts[d.argmax()]
-        c = c + (far - c) * 0.02
-    rad = np.hypot(*(pts - c).T).max()
-    scale = FIT_R / rad
-    offset = np.array([CANVAS / 2, CANVAS / 2]) - c * scale
+        c = c + (pts[d.argmax()] - c) * 0.005
+    return c, np.hypot(*(pts - c).T).max()
+
+
+def fit_transform(src_size):
+    """Scale + offset for the adaptive foreground: the v0.2 fit (every key
+    point within FIT_R) grown by HEAD_GROWTH, but never so much that a
+    REQUIRED point leaves the safe circle (minus a 2 px margin). Returns
+    (scale, offset); growth_achieved() reports how much it actually grew."""
+    c_all, r_all = _enclosing(KEY_POINTS)
+    base = FIT_R / r_all
+    c_req, r_req = _enclosing(REQUIRED_POINTS)
+    scale = min(base * HEAD_GROWTH, (SAFE_R - 2) / r_req)
+    offset = np.array([CANVAS / 2, CANVAS / 2]) - c_req * scale
     return scale, offset
+
+
+def growth_achieved():
+    c_all, r_all = _enclosing(KEY_POINTS)
+    return fit_transform(0)[0] / (FIT_R / r_all)
+
+
+def head_centre():
+    return _enclosing(REQUIRED_POINTS)[0]
+
+
+def radial_background(size, centre, reach=0.85):
+    """Soft radial vignette: BG_INNER behind the head fading to BG_OUTER at
+    the corners (smoothstep). `centre` is in 0..1 canvas units."""
+    yy, xx = np.mgrid[0:size, 0:size]
+    r = np.hypot((xx + 0.5) / size - centre[0], (yy + 0.5) / size - centre[1]) / reach
+    t = np.clip(r, 0, 1)
+    t = t * t * (3 - 2 * t)
+    inner, outer = np.array(BG_INNER, float), np.array(BG_OUTER, float)
+    out = inner[None, None, :] * (1 - t[..., None]) + outer[None, None, :] * t[..., None]
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8), "RGB")
+
+
+def cutout(im, mask):
+    rgba = im.convert("RGBA")
+    rgba.putalpha(mask)
+    return rgba
+
+
+def store_icon(im, mask, size=512):
+    """Play Store icon: the same artwork, head grown HEAD_GROWTH about its
+    centre (neck still runs off the bottom), on the radial background."""
+    src = im.size[0]
+    base = size / src
+    k = base * HEAD_GROWTH
+    hc = head_centre()
+    bg = radial_background(size, (hc[0] / src, hc[1] / src)).convert("RGBA")
+    n = int(round(src * k))
+    art = cutout(im, mask).resize((n, n), Image.LANCZOS)
+    ox, oy = hc * base - hc * k
+    bg.alpha_composite(art, (int(round(ox)), int(round(oy))))
+    return bg
 
 
 def foreground(im, mask):
     scale, (ox, oy) = fit_transform(im.size[0])
     n = int(round(im.size[0] * scale))
-    rgba = im.convert("RGBA")
-    rgba.putalpha(mask)
-    rgba = rgba.resize((n, n), Image.LANCZOS)
+    rgba = cutout(im, mask).resize((n, n), Image.LANCZOS)
     canvas = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     canvas.alpha_composite(rgba, (int(round(ox)), int(round(oy))))
     return canvas, scale, (ox, oy)
@@ -166,15 +226,19 @@ def adaptive_preview(size, shape="circle"):
 def build():
     im = source()
     mask = alpha_mask(im)
-    store = im.resize((512, 512), Image.LANCZOS).convert("RGBA")
+    store = store_icon(im, mask, 512)
     store.save(os.path.join(OUT, "icon_512.png"))
     store.save(STORE)
-    im.resize((192, 192), Image.LANCZOS).convert("RGBA").save(os.path.join(OUT, "icon_192.png"))
-    background_field(im, mask, CANVAS).convert("RGBA").save(os.path.join(OUT, "adaptive_background_432.png"))
+    store_icon(im, mask, 1024).resize((192, 192), Image.LANCZOS).save(os.path.join(OUT, "icon_192.png"))
     fg, scale, off = foreground(im, mask)
+    hc = head_centre() * scale + np.array(off)
+    # Only the inner 72/108 of the layer is ever visible: fade within it.
+    radial_background(CANVAS, (hc[0] / CANVAS, hc[1] / CANVAS), 0.42).convert("RGBA").save(
+        os.path.join(OUT, "adaptive_background_432.png"))
     fg.save(os.path.join(OUT, "adaptive_foreground_432.png"))
     monochrome(im, mask).save(os.path.join(OUT, "monochrome_432.png"))
-    print(f"make_icons: scale {scale:.4f}, offset ({off[0]:.1f}, {off[1]:.1f})")
+    print(f"make_icons: adaptive scale {scale:.4f} (head +{(growth_achieved() - 1) * 100:.1f}%, capped by the safe zone), "
+          f"store head +{(HEAD_GROWTH - 1) * 100:.0f}%")
     return check()
 
 
@@ -199,10 +263,13 @@ def check():
     if st.size != (512, 512) or st.convert("RGBA").getextrema()[3][0] != 255:
         problems.append("store icon not 512x512 opaque")
     scale, (ox, oy) = fit_transform(source().size[0])
-    for x, y in KEY_POINTS:
-        d = math.hypot(x * scale + ox - CANVAS / 2, y * scale + oy - CANVAS / 2)
-        if d > SAFE_R:
-            problems.append(f"key point {(x, y)} at {d:.1f} px > safe radius {SAFE_R}")
+    for pts, limit, what in ((REQUIRED_POINTS, SAFE_R, "safe"), (KEY_POINTS, VISIBLE_R, "visible")):
+        for x, y in pts:
+            d = math.hypot(x * scale + ox - CANVAS / 2, y * scale + oy - CANVAS / 2)
+            if d > limit:
+                problems.append(f"key point {(x, y)} at {d:.1f} px > {what} radius {limit}")
+    if growth_achieved() < 1.0:
+        problems.append("adaptive head smaller than before")
     fg = np.asarray(Image.open(os.path.join(OUT, "adaptive_foreground_432.png")))[..., 3]
     if fg[CANVAS // 2 - 40:CANVAS // 2 + 40, CANVAS // 2 - 40:CANVAS // 2 + 40].mean() < 100:
         problems.append("foreground centre is mostly transparent")
