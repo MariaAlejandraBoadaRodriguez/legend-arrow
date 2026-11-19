@@ -463,6 +463,7 @@ func save_kill() -> void:
 	var prm := _kv_file("user://e2e_param.txt")
 	var kill_ms := int(prm.get("kill_ms", "-1"))
 	var phase: String = prm.get("phase", "last")
+	Game.repository.legacy_unverified = prm.get("legacy", "0") == "1"   # A/B baseline (debug harness only)
 	if not await reach_home(): return
 	Game.progression.data.tutorial_done = true
 	if not check(Game.persist() == OK, "baseline save (tutorial done) written"): return
@@ -470,7 +471,7 @@ func save_kill() -> void:
 	if not await open_next_puzzle(lid): return
 	var pz: Control = Game.current_screen()
 	var sol: Array = pz.level.solution
-	_say("PLAN i=%s kill_ms=%d phase=%s level=%s arrows=%d" % [prm.get("i", "?"), kill_ms, phase, lid, sol.size()])
+	_say("PLAN i=%s kill_ms=%d phase=%s legacy=%s level=%s arrows=%d" % [prm.get("i", "?"), kill_ms, phase, prm.get("legacy", "0"), lid, sol.size()])
 	if phase == "play":
 		_arm_killer(kill_ms)
 	for k in sol.size():
@@ -808,7 +809,14 @@ func _save_forensics(level_id: String) -> String:
 			if f.begins_with(path.get_file()):
 				var fa := FileAccess.open(path.get_base_dir().path_join(f), FileAccess.READ)
 				files.append("%s=%d" % [f, fa.get_length() if fa != null else -1])
-	return "source=%s problems=%s files=%s main_env=%s my_pid=%d my_seq=%d last_persist_error=%d save_pending=%s in_memory=%s" % [
+	var udir := OS.get_user_data_dir()
+	var probe := FileAccess.open("user://e2e_probe.txt", FileAccess.WRITE)
+	var probe_err := FileAccess.get_open_error() if probe == null else OK
+	if probe != null:
+		probe.store_string("probe")
+		probe.close()
+		DirAccess.remove_absolute("user://e2e_probe.txt")
+	return ("user_dir=%s exists=%s probe_write=%d " % [udir, DirAccess.dir_exists_absolute(udir), probe_err]) + "source=%s problems=%s files=%s main_env=%s my_pid=%d my_seq=%d last_persist_error=%d save_pending=%s in_memory=%s" % [
 		loaded.get("source"), str(loaded.get("problems")), ",".join(files),
 		str(SaveRepository.envelope_info(path)), OS.get_process_id(), Game.repository.write_seq,
 		Game.last_persist_error, Game.save_pending, str(Game.progression.data.levels.get(level_id, {}))]

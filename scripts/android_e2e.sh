@@ -16,6 +16,7 @@ PKG="com.mariaalejandraboada.legendarrow"
 JOURNEYS=(${E2E_JOURNEYS:-fresh_install partial_a partial_b blocked_undo hint_ad awakening_replay settings_a settings_b replay_times background_resume rotate world_unlock memory_transitions})
 TIMEOUT_S="${E2E_TIMEOUT_S:-300}"
 rm -rf "$OUT"
+source "$(dirname "$0")/android_probe.sh"
 mkdir -p "$OUT/app" "$OUT/screencap" "$OUT/logcat"
 
 adb wait-for-device
@@ -87,10 +88,10 @@ mark_log() {
 logs() { adb logcat -d -T "$SINCE" 2>/dev/null || true; }
 
 retry() {
-  local n
+  local n out
   for n in 1 2 3 4; do
-    "$@" && return 0
-    echo "retry $n: $*" >&2
+    out="$("$@" 2>&1)" && { [[ -n "$out" ]] && echo "$out"; return 0; }
+    echo "retry $n: $* -> ${out:-<no output>}" >&2
     adb wait-for-device || true
     sleep 3
   done
@@ -141,6 +142,9 @@ for j in "${JOURNEYS[@]}"; do
        echo "---- $j: crash / kill / app lines from logcat ----"
        grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|SCRIPT ERROR|USER ERROR|godot" \
          "$OUT/logcat/$j.txt" | grep -v "GodotPluginRegistry: Registering" | tail -80 || true
+       echo "---- $j: system lines (package / storage / SELinux) ----"
+       probe_system_lines "$OUT/logcat/$j.txt"
+       probe_data_dir
        echo "---- end $j ----" ;;
   esac
 done

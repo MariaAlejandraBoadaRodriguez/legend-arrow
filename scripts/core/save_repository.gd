@@ -28,6 +28,10 @@ var simulate_crash_after_step := -1
 var simulate_bad_tmp := ""
 ## Writes made through this repository (diagnostics).
 var write_seq := 0
+## A/B baseline for the save stress test only (set by DeviceE2E, debug
+## builds): the pre-fix write path, without the write-error check and the
+## tmp read-back. Never set in the game.
+var legacy_unverified := false
 
 
 func _init(p_path: String = "user://save.json") -> void:
@@ -80,10 +84,18 @@ func write(data: Dictionary) -> int:
 	f.flush()
 	var werr := f.get_error()
 	f.close()
+	_apply_bad_tmp_hook(tmp)
+	if legacy_unverified:   # pre-fix behaviour (stress A/B only)
+		if simulate_crash_after_step == 1:
+			return OK
+		if FileAccess.file_exists(path) and read_file(path).ok:
+			var lerr := DirAccess.rename_absolute(path, path + ".bak")
+			if lerr != OK:
+				return lerr
+		return DirAccess.rename_absolute(tmp, path)
 	if werr != OK:
 		DirAccess.remove_absolute(tmp)
 		return ERR_FILE_CANT_WRITE
-	_apply_bad_tmp_hook(tmp)
 	# Never promote a tmp that is not exactly what we meant to write.
 	var check := read_file(tmp)
 	if not check.ok or FileAccess.get_file_as_string(tmp) != envelope:

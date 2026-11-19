@@ -115,6 +115,11 @@ func persist() -> int:
 	if not booted:
 		return OK
 	var err := repository.write(progression.data)
+	if repository.legacy_unverified:   # pre-fix behaviour (stress A/B only): one try, no retry
+		last_persist_error = err
+		if err != OK:
+			push_error("Game: save failed (%d)" % err)
+		return err
 	if err != OK:
 		push_error("Game: save failed (%d), retrying" % err)
 		err = repository.write(progression.data)

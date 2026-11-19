@@ -223,3 +223,17 @@ func test_envelope_records_writer() -> void:
 	assert_eq(int(info.pid), OS.get_process_id())
 	assert_eq(int(info.seq), 2)
 	assert_gt(int(info.unix_ms), 0)
+
+
+func test_legacy_baseline_still_has_the_old_defect() -> void:
+	# The save stress A/B baseline must really be the pre-fix path: a short
+	# write is promoted over the good main and the next load falls back.
+	var repo := SaveRepository.new(_path)
+	repo.write(_data(1))
+	repo.legacy_unverified = true
+	repo.simulate_bad_tmp = "truncate"
+	assert_eq(repo.write(_data(2)), OK, "old path reports success")
+	assert_false(SaveRepository.read_file(_path).ok, "old path promoted the broken tmp")
+	var res := SaveRepository.new(_path).load_save()
+	assert_eq(res.source, SaveRepository.Source.BACKUP, "and the next load restores the older backup")
+	assert_true(res.data.levels.has("level_1"))

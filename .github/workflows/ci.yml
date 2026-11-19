@@ -354,7 +354,7 @@ jobs:
     # after a data clear. 120 iterations each: wipe data, finish a level while
     # the app SIGKILLs itself at a random moment around the save, relaunch,
     # compare. Both RAM sizes the failure was seen on.
-    name: Save stress (API 26, RAM ${{ matrix.ram_label }})
+    name: Save stress (API 26, RAM ${{ matrix.ram_label }}, ${{ matrix.code }} save code)
     needs: [android-debug-apk]
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -362,8 +362,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {ram: "3072M", ram_label: "3 GB", seed: "26003"}
-          - {ram: "", ram_label: "default", seed: "26001"}
+          # Same seeds for old and new code: identical kill plans (A/B).
+          - {ram: "3072M", ram_label: "3 GB", seed: "26003", code: "new", legacy: "0"}
+          - {ram: "", ram_label: "default", seed: "26001", code: "new", legacy: "0"}
+          - {ram: "3072M", ram_label: "3 GB", seed: "26003", code: "old", legacy: "1"}
+          - {ram: "", ram_label: "default", seed: "26001", code: "old", legacy: "1"}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -386,6 +389,7 @@ jobs:
           E2E_WM_DENSITY: "320"
           TARGET: android
           SEED: ${{ matrix.seed }}
+          LEGACY: ${{ matrix.legacy }}
         with:
           api-level: 26
           arch: x86_64
@@ -404,7 +408,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: save-stress-api26-${{ matrix.ram == '' && 'default' || 'ram3g' }}
+          name: save-stress-api26-${{ matrix.ram == '' && 'default' || 'ram3g' }}-${{ matrix.code }}
           path: build/save-stress/
           if-no-files-found: error
 

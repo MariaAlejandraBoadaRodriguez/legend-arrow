@@ -28,7 +28,8 @@ rm -rf "$OUT"; mkdir -p "$OUT/logs"
 
 # --- target: android ----------------------------------------------------------
 if [[ "$TARGET" == "android" ]]; then
-  retry() { local n; for n in 1 2 3 4; do "$@" && return 0; adb wait-for-device || true; sleep 3; done; return 1; }
+  source "$(dirname "$0")/android_probe.sh"
+  retry() { local n out; for n in 1 2 3 4; do out="$("$@" 2>&1)" && { [[ -n "$out" ]] && echo "$out"; return 0; }; echo "retry $n: $* -> ${out:-<no output>}" >&2; adb wait-for-device || true; sleep 3; done; return 1; }
   adb wait-for-device
   if [[ -n "${E2E_WM_SIZE:-}" ]]; then adb shell wm size "$E2E_WM_SIZE"; fi
   if [[ -n "${E2E_WM_DENSITY:-}" ]]; then adb shell wm density "$E2E_WM_DENSITY"; fi
@@ -56,7 +57,8 @@ if [[ "$TARGET" == "android" ]]; then
       adb shell pidof "$PKG" >/dev/null 2>&1 || { sleep 1; adb shell pidof "$PKG" >/dev/null 2>&1 || break; }
       sleep 1
     done
-    adb logcat -d -T "$since" 2>/dev/null | grep -E "LEGEND_E2E|Game: save|has died|lowmemorykiller: Kill|SCRIPT ERROR" > "$log" || true
+    adb logcat -d -T "$since" > "$log.full" 2>/dev/null || true
+    grep -E "LEGEND_E2E|Game: save|has died|lowmemorykiller: Kill|SCRIPT ERROR" "$log.full" > "$log" || true
     adb shell am force-stop "$PKG" || true
   }
   t_df() { adb shell df /data 2>/dev/null | tail -1 | tr -s ' '; }
@@ -98,7 +100,7 @@ for i in $(seq 1 "$N"); do
   elif (( r < 82 )); then kill_ms=$((1500 + RANDOM % 2000)); phase=last   # results already on screen
   else kill_ms=$((RANDOM % 2500)); phase=play; fi                          # in-progress saves while playing
   t_clear
-  t_put e2e_param.txt "i=$i kill_ms=$kill_ms phase=$phase"
+  t_put e2e_param.txt "i=$i kill_ms=$kill_ms phase=$phase legacy=${LEGACY:-0}"
   t_rm e2e_expect.txt
   t_run save_kill 90 "$OUT/logs/$i-kill.log"
   shown="$(grep -oE 'SHOWN level=[a-z_0-9]+ stars=[0-9]+ time_ms=[0-9]+' "$OUT/logs/$i-kill.log" | head -1 | sed 's/^SHOWN //')"
@@ -124,12 +126,20 @@ for i in $(seq 1 "$N"); do
   if [[ "$v" == *" PASS "* ]]; then pass=$((pass + 1)); st=PASS; else fail=$((fail + 1)); st=FAIL; fi
   if grep -q "COMMITTED yes" "$OUT/logs/$i-verify.log" && [[ "$kind" == killed_before_shown ]]; then committed_unshown=$((committed_unshown + 1)); fi
   echo -e "$i\t$kill_ms\t$phase\t$kind\t$st\t${shown:--}\t$detail" >> "$OUT/results.tsv"
-  [[ "$st" == FAIL ]] && echo "iteration $i FAIL ($kind, kill_ms=$kill_ms): ${v:-no verdict} | $detail"
+  if [[ "$st" == FAIL ]]; then
+    echo "iteration $i FAIL ($kind, kill_ms=$kill_ms): ${v:-no verdict} | $detail"
+    if [[ "$TARGET" == android ]]; then
+      { echo "== iteration $i: kill run system lines"; probe_system_lines "$OUT/logs/$i-kill.log.full"
+        echo "== verify run system lines"; probe_system_lines "$OUT/logs/$i-verify.log.full"; probe_data_dir; } | tee "$OUT/logs/$i-probe.txt"
+    fi
+  else
+    rm -f "$OUT/logs/$i-kill.log.full" "$OUT/logs/$i-verify.log.full"
+  fi
   if (( i % 10 == 0 )); then echo "after $i: pass=$pass fail=$fail | df: $(t_df)"; fi
 done
 
 {
-  echo "# Save stress — $TARGET, $N iterations, seed $SEED"
+  echo "# Save stress — $TARGET, $N iterations, seed $SEED, save code: $([[ "${LEGACY:-0}" == 1 ]] && echo 'OLD (pre-fix write path)' || echo 'NEW (verified write + retry)')"
   echo
   echo "| Measure | Count |"
   echo "|---|---|"
