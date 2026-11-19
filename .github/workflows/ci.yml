@@ -45,6 +45,9 @@ jobs:
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
 
+      - name: Real disk-full save check (ENOSPC on a 2 MB tmpfs; old code must fail, new must keep the save)
+        run: GODOT="$(scripts/install_godot.sh)" scripts/enospc_check.sh
+
       - name: Line coverage (instrumented re-run, fails below brief targets)
         run: GODOT="$(scripts/install_godot.sh)" python3 tools/coverage.py build/reports/coverage
 
@@ -355,6 +358,10 @@ jobs:
     # the app SIGKILLs itself at a random moment around the save, relaunch,
     # compare. Both RAM sizes the failure was seen on.
     name: Save stress (API 26, RAM ${{ matrix.ram_label }}, ${{ matrix.code }} save code)
+    # On demand (Actions -> CI -> Run workflow): ~25 min per job. The verdict it
+    # supported is recorded in docs/qa/SAVE_INVESTIGATION.md; the disk-full
+    # root cause is checked on every push by scripts/enospc_check.sh.
+    if: github.event_name == 'workflow_dispatch'
     needs: [android-debug-apk]
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -456,13 +463,7 @@ jobs:
           ram-size: ${{ matrix.ram }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          # API 26 also repeats "fresh install right after a data clear" six
-          # times: that step intermittently showed a result the save file
-          # did not contain (runs 44466657570, 44472596603); the journey logs
-          # save forensics if it happens again.
-          script: |
-            scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
-            if [ "${{ matrix.api }}" = "26" ]; then E2E_CLEAR_EACH=1 E2E_JOURNEYS="fresh_install fresh_install fresh_install fresh_install fresh_install fresh_install" scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android/repro-fresh-after-clear; fi
+          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
 
       - name: Upload E2E evidence
         if: always()

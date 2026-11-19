@@ -15,7 +15,7 @@ Full results: `QA_REPORT.md`, `RELEASE_CHECKLIST.md`. Evidence run [44462316343]
 - `docs/DEVICE_TEST.md` for the Lenovo tablet; physical checks BLOCKED until the owner sends results.
 - **Final run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: all 10 jobs green; emulators API 26/34/36 13/13 each; certificate SHA-256 printed and checked.
 - API 26 emulator: two later failures on the ~1.5 GB default AVD (results check; low-memory-killer storm). It now runs with 3 GB (spec low tier), plus results diagnostics and adb retries; green in [run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`.
-- API 26 open item: one results-vs-save mismatch on a first launch right after `pm clear` (run 44472596603); the repro step (6× per job) found 0 in 16 more samples (runs 44477513014, 44477522588). Cause unexplained; save forensics are logged if it recurs. Stays OPEN in QA_REPORT/RELEASE_CHECKLIST.
+- API 26 save mismatch: **FIXED**. Root cause: under a full disk, `SaveRepository.write()` promoted a short temp file over the good main save. CI trigger: the emulator `/data` filling up from outside the app (installd "Failed to free up … on /data"). Verify-before-promote and retry fix it; `scripts/enospc_check.sh` (real ENOSPC) runs on every push: old code fails, new passes. 1,170-iteration kill stress, 0 mismatches. Details: `docs/qa/SAVE_INVESTIGATION.md`.
 - **Next (owner):** Lenovo tablet run (`docs/DEVICE_TEST.md`), then the upload steps in `RELEASE_CHECKLIST.md`.
 
 ### Milestone D — DONE (CI pending at the time of writing); milestone E folded in

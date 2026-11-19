@@ -25,6 +25,9 @@ adb shell getprop ro.build.version.release | sed 's/^/android: /'
 if [[ -n "${E2E_WM_SIZE:-}" ]]; then adb shell wm size "$E2E_WM_SIZE"; fi
 if [[ -n "${E2E_WM_DENSITY:-}" ]]; then adb shell wm density "$E2E_WM_DENSITY"; fi
 adb shell wm size | sed 's/^/display: /'
+# A full /data makes every app write fail (v0.2 save investigation: the API 26
+# emulator's /data filled up from outside the app). Show it up front.
+echo "storage: $(adb shell df /data | tail -1 | tr -s ' ')"
 adb shell wm density | sed 's/^/density: /'
 adb install -r -g "$APK" >/dev/null
 ACTIVITY="$(adb shell cmd package resolve-activity --brief "$PKG" | tr -d '\r' | tail -1)"
@@ -145,6 +148,7 @@ for j in "${JOURNEYS[@]}"; do
        echo "---- $j: system lines (package / storage / SELinux) ----"
        probe_system_lines "$OUT/logcat/$j.txt"
        probe_data_dir
+       probe_storage
        echo "---- end $j ----" ;;
   esac
 done
