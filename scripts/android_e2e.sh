@@ -101,6 +101,9 @@ results=()
 fail=0
 clear_data
 for j in "${JOURNEYS[@]}"; do
+  # E2E_CLEAR_EACH=1: wipe app data before every journey (reproduces
+  # "first launch right after a data clear", e.g. E2E_JOURNEYS repeated).
+  if [[ "${E2E_CLEAR_EACH:-0}" == "1" ]]; then clear_data; fi
   start=$(date +%s)
   # Trigger file in the app's private files dir (debuggable build: run-as).
   # adb drops calls on loaded CI emulators; one failed call must not end the

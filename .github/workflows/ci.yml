@@ -391,7 +391,13 @@ jobs:
           ram-size: ${{ matrix.ram }}
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
+          # API 26 also repeats "fresh install right after a data clear" six
+          # times: that step intermittently showed a result the save file
+          # did not contain (runs 44466657570, 44472596603); the journey logs
+          # save forensics if it happens again.
+          script: |
+            scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android && scripts/measure_device.sh build/android/legend-arrow-debug.apk build/e2e-android/measure-emulator
+            if [ "${{ matrix.api }}" = "26" ]; then E2E_CLEAR_EACH=1 E2E_JOURNEYS="fresh_install fresh_install fresh_install fresh_install fresh_install fresh_install" scripts/android_e2e.sh build/android/legend-arrow-debug.apk build/e2e-android/repro-fresh-after-clear; fi
 
       - name: Upload E2E evidence
         if: always()
