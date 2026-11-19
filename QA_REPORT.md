@@ -4,12 +4,11 @@ Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
 - **FAIL**
 - **BLOCKED**: cannot run without something outside this repository (here, the owner's tablet).
-- **PENDING**: a fix is pushed and its CI run has not finished.
 - **NOT RUN**
 
 A workflow file is not evidence; every PASS points at an executed run or log. The v0.1.0 report is in git history (`git show 7835016:QA_REPORT.md`).
 
-**Evidence run:** [CI run 44462316343](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44462316343) on `8ebd53f` (PR run; it checks out the merge with `main`). Every job passed except *Android emulator E2E (API 36, P6)*; see 9.3. The fixes for that job and for the certificate print (9.7) are in the commit after this report. Their run is listed in `docs/PROGRESS.md`.
+**Final evidence run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: **all 10 jobs green** (tests + coverage, Kotlin plugin, store assets, screen matrix, debug APK + both AAB rehearsals, desktop E2E phone and tablet, emulators API 26 / 34 / 36). Earlier evidence: [run 44462316343](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44462316343) on `8ebd53f`.
 
 ## 9.1 Content and rules
 | Check | Result | Evidence |
@@ -66,9 +65,9 @@ Journeys:
 
 | Emulator | Result | Evidence |
 |---|---|---|
-| API 26 (Android 8.0) / P1 720×1280 @320 | **PASS**: 13/13 journeys + smoke | job 135354143539, artifact `e2e-android-api26-P1` |
-| API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | job 135354143549, artifact `e2e-android-api34-P3` |
-| API 36 / P6 1600×2560 @320 tablet | **PENDING** | 12/13 + smoke passed. `background_resume` failed: the clock moved 2.9 s while away. The journey read the clock when it *asked* for the Home key, and CI presses it up to 2 s later, so the app was correctly timing in the foreground. The journey now reads the clock at the app's own pause and resume notifications and requires ≤ 300 ms drift across ≥ 5 s away, which is stricter than before. |
+| API 26 (Android 8.0) / P1 720×1280 @320 | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615436 (also run 44462316343), artifact `e2e-android-api26-P1` |
+| API 34 (Android 14) / P3 Pixel 6 1080×2400, punch-hole | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615190, artifact `e2e-android-api34-P3` |
+| API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
 Harness issues CI found and fixed in this milestone:
 - `logcat -c` fails on the API 26 image, which ended the run. Logs are now read from a device timestamp.
@@ -88,8 +87,8 @@ Emulator numbers are **indicative only**: x86_64 emulators with the SwiftShader 
 |---|---|---|
 | Only the current dragon's full image in memory; thumbnails cached; freed on leaving detail | PASS | unit test (detail frees its texture) + `memory_transitions` |
 | Memory settles over 20 level-list / dragon-detail / bestiary transitions (≤ 10% over warmed baseline, no node growth) | PASS | `memory_transitions` on desktop (55.1 → 55.1 MB, nodes flat), API 26/P1 and API 34/P3 |
-| Cold start to first frame (budget 5 s) | indicative PASS | API 26: 581–701 ms; API 34: 891–1102 ms; API 36 tablet: 1352 ms (`am start` TotalTime) |
-| Peak PSS (budget 300 MB puzzle / 400 MB awakening) | indicative | API 26: 149 MB; API 34: 185 MB |
+| Cold start to first frame (budget 5 s) | indicative PASS | API 26: 581–701 ms; API 34: 891–1102 ms; API 36 tablet: 1066–1205 ms (`am start` TotalTime) |
+| Peak PSS (budget 300 MB puzzle / 400 MB awakening) | indicative | API 26: 149 MB; API 34: 185 MB; API 36 tablet: 192 MB |
 | Frame time p95 (budgets 16.7 ms puzzle, 33.3 ms awakening) | **BLOCKED** (device) | Software GPU: API 26 puzzle 66.9 / awakening 36.0 ms; API 34 123.5 / 64.9 ms. These say little about a real GPU; needs the Lenovo run. |
 | arm64 download ≤ 120 MB with all 100 images | PASS | bundletool `get-size`: arm64-v8a **48.8 MB** (with ads), 45.6 MB (without ads); armeabi-v7a 50.2 / 47.0 MB; x86_64 50.2 / 47.0 MB |
 | Debug APK (all test ABIs incl. x86_64) | info | 177 MB; SHA-256 `548c88f2…07389b3` |
@@ -101,7 +100,7 @@ Emulator numbers are **indicative only**: x86_64 emulators with the SwiftShader 
 | `scripts/measure_device.sh` on the tablet (frame time, memory, start-up) | **BLOCKED**: optional USB run, `docs/DEVICE_TEST.md` Part B |
 
 ## 9.7 Release build checks
-Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (the `release.yml` "without-ads" path). Results from `aab_report.txt`, job 135352925998.
+Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (the `release.yml` "without-ads" path). Results from `aab_report.txt` (run 44462316343 job 135352925998; confirmed in run 44464519633 job 135359988799).
 
 | Check | With ads | Without ads |
 |---|---|---|
@@ -116,8 +115,8 @@ Both AAB rehearsals: with ads (throwaway key, test ads config) and without ads (
 | No AdMob app id / ads code packaged | n/a | PASS |
 | Release refuses Google test ad IDs | PASS (unit tests + `export_release.sh` guard for real releases; the rehearsal uses test IDs by design) | n/a |
 | No keystores, keys or `ads_release.json` committed | PASS (`check_no_secrets`, CI `godot-tests`) | |
-| Signing-certificate SHA-256 printed | **PENDING**: printed nothing in run 44462316343 (`keytool` via `$JAVA_HOME`). Now read from the signing keystore, and the report fails if the SHA-256 line is missing (checked locally on a throwaway keystore). | same |
-| AAB checksums | `64634c0e…124fc6dcf` (ads), `c7ebc3e5…c1a94143` (no ads); rehearsal keys only, **not for upload** | |
+| Signing-certificate SHA-256 printed (and checked) | PASS: rehearsal key `28:C9:AD:F8:…:F2:AC:1B` | PASS: `22:05:70:67:…:AC:42:67:39` (throwaway keys; your upload key prints its own) |
+| AAB checksums | `28db1588…be055432` (ads), `3a7309e9…72f75416` (no ads), run 44464519633; rehearsal keys only, **not for upload** | |
 
 **Privacy and Data Safety:** v0.2 adds one thing, best times and star ratings. They stay in the local save as personal records, with no leaderboard, account or upload. `docs/privacy.html`, `docs/PRIVACY_POLICY.md` and `docs/DATA_SAFETY.md` are updated. **Play Console: no Data Safety answer changes**, since data kept only on the device is not "collected". Update the policy URL's page with the new `docs/privacy.html` (effective date and the sentence on best times).
 

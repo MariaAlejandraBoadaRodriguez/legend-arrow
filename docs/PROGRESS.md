@@ -1,11 +1,11 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2 milestone F in progress: all gates run; P6 emulator + cert print fixes awaiting CI)_
+_Last updated: 2026-11-19 (v0.2 milestone F done: CI all green; only the owner's tablet checks remain BLOCKED)_
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.
 
-### Milestone F — gates 9.1–9.8 (in progress)
+### Milestone F — gates 9.1–9.8: DONE (device checks BLOCKED on the owner)
 Full results: `QA_REPORT.md`, `RELEASE_CHECKLIST.md`. Evidence run [44462316343](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44462316343) @ `8ebd53f`: everything green except emulator API 36/P6.
 - Emulator matrix API 26/P1, 34/P3, 36/P6 with 13 journeys + first-launch smoke. API 26 and 34: **PASS 13/13**. P6: 12/13. `background_resume` read the clock when it asked for the Home key (CI presses it up to 2 s later); it now reads the clock at the app's pause/resume notifications (≤ 300 ms drift across ≥ 5 s away). Earlier harness fixes: logcat read from a device timestamp (API 26 cannot `logcat -c`), `reach_home` watches out a launch-time awakening.
 - Screen matrix: 19 screens × P1–P7 (`docs/qa/`, CI artifact `screen-matrix`); fixed the Larger-text header overlap.
@@ -13,7 +13,8 @@ Full results: `QA_REPORT.md`, `RELEASE_CHECKLIST.md`. Evidence run [44462316343]
 - Release checks: permission audit vs the v0.1 baseline (PASS); certificate SHA-256 print fixed (printed nothing before).
 - Store graphics regenerated (20 files, photoreal); privacy policy and Data Safety note updated for 0.2.0 (no Play Console Data Safety change).
 - `docs/DEVICE_TEST.md` for the Lenovo tablet; physical checks BLOCKED until the owner sends results.
-- **Next:** confirm P6 + certificate print on the next CI run, update QA_REPORT/RELEASE_CHECKLIST to PASS with that run link, update the PR description.
+- **Final run:** [CI push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`: all 10 jobs green; emulators API 26/34/36 13/13 each; certificate SHA-256 printed and checked.
+- **Next (owner):** Lenovo tablet run (`docs/DEVICE_TEST.md`), then the upload steps in `RELEASE_CHECKLIST.md`.
 
 ### Milestone D — DONE (CI pending at the time of writing); milestone E folded in
 All 100 owner images were already in `assets/creatures/raw/`, so the final art integration (E) ran here; E now only means re-running `scripts/import_art.sh` + `tools/build_campaign.py` when an image is replaced.

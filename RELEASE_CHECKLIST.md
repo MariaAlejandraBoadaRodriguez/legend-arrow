@@ -1,8 +1,9 @@
 # Release checklist — Legend Arrow 0.2.0 (versionCode 3)
 
+Final run: [CI 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`, all jobs green.
+
 Statuses:
 - **PASS**: executed with assertions (see `QA_REPORT.md`).
-- **PENDING**: fix pushed, CI not finished.
 - **BLOCKED**: needs the owner's device.
 - **OWNER**: a release-time action only the owner can take.
 
@@ -14,11 +15,11 @@ Statuses:
 | 4 | No new permissions | PASS | merged-manifest audit against `tools/permissions_allowlist.txt` (v0.1 baseline) |
 | 5 | Test config separate from production | PASS | debug/CI use Google test IDs only; a real release refuses test or missing IDs |
 | 6 | No committed secrets | PASS | `check_no_secrets` in CI |
-| 7 | Signing-certificate SHA-256 printed for comparison with Play Console | PENDING | fixed in `export_release.sh`; confirm in the next run's `aab_report.txt` |
+| 7 | Signing-certificate SHA-256 printed for comparison with Play Console | PASS | `aab_report.txt`, run 44464519633 (check fails if missing) |
 | 8 | Content: 100 certified puzzles, rising difficulty, English only | PASS | `QA_REPORT.md` 9.1 |
 | 9 | All 100 dragons imported (no ART PENDING) | PASS | `docs/ART_STATUS.md`: 100/100 |
 | 10 | Save migration from v0.1 (real save) | PASS | fixture test |
-| 11 | Emulator E2E on API 26 / 34 / 36 | PASS / PASS / PENDING | `QA_REPORT.md` 9.3 |
+| 11 | Emulator E2E on API 26 / 34 / 36 | PASS (13/13 each) | run 44464519633 |
 | 12 | Screen matrix P1–P7 reviewed | PASS | `docs/qa/VISUAL_QA.md` |
 | 13 | Memory settles; download ≤ 120 MB | PASS | 48.8 MB arm64 (with ads) |
 | 14 | Frame time and feel on a real device | BLOCKED | owner's Lenovo tablet, `docs/DEVICE_TEST.md` |
