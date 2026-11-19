@@ -75,17 +75,57 @@ func test_canceled_touch_never_taps() -> void:
 
 
 func test_long_press_is_not_a_tap() -> void:
+	# A real hold: time passes and the game keeps drawing frames (60 fps).
 	var now := [10.0]
+	var frame := [100]
 	board.clock = func() -> float: return now[0]
+	board.frame_clock = func() -> int: return frame[0]
 	var p := _center("c")
 	board._gui_input(AppDriver.touch(p, true))
 	now[0] += BoardView.LONG_PRESS + 0.1
+	frame[0] += 54
 	board._gui_input(AppDriver.touch(p, false))
 	assert_eq(tapped, [])
 	board._gui_input(AppDriver.touch(p, true))
 	now[0] += BoardView.LONG_PRESS - 0.2
+	frame[0] += 36
 	board._gui_input(AppDriver.touch(p, false))
 	assert_eq(tapped, ["c"], "a quick press still taps")
+
+
+func test_long_press_still_counts_at_low_frame_rates() -> void:
+	# 12.5 fps: a 1 s hold spans 12-13 frames and is still a long press.
+	var now := [10.0]
+	var frame := [100]
+	board.clock = func() -> float: return now[0]
+	board.frame_clock = func() -> int: return frame[0]
+	var p := _center("c")
+	board._gui_input(AppDriver.touch(p, true))
+	now[0] += 1.0
+	frame[0] += 12
+	board._gui_input(AppDriver.touch(p, false))
+	assert_eq(tapped, [])
+
+
+func test_quick_tap_across_a_slow_frame_still_taps() -> void:
+	# Regression (CI run 44595886933, API 36 tablet): a quick tap whose press
+	# and release were processed 2 frames apart, but with slow frames in
+	# between (0.7 s seen on the software-GPU emulator, more on a hitch), was
+	# timed as a long press and dropped, so the tutorial step never finished.
+	var now := [10.0]
+	var frame := [100]
+	board.clock = func() -> float: return now[0]
+	board.frame_clock = func() -> int: return frame[0]
+	var p := _center("c")
+	board._gui_input(AppDriver.touch(p, true))
+	now[0] += 1.5    # one long stall (shader compile, GC, software GPU)
+	frame[0] += 2
+	board._gui_input(AppDriver.touch(p, false))
+	assert_eq(tapped, ["c"], "a stall between press and release is not a long press")
+	board._gui_input(AppDriver.touch(p, true))
+	now[0] += 0.0    # press and release delivered in the same frame
+	board._gui_input(AppDriver.touch(p, false))
+	assert_eq(tapped, ["c", "c"])
 
 
 func test_hit_testing_follows_layout_at_any_size() -> void:

@@ -26,6 +26,7 @@ var mock: MockAdProvider
 var _failed := ""
 var _log: Array[String] = []
 var _shots := 0
+var _tap_stats := {"n": 0, "max_held": 0.0}  # board taps: count, longest press->release the board saw
 var _frame_ms := {"puzzle": [], "awakening": []}  # per-frame times by screen (spec §14 budgets)
 
 
@@ -80,6 +81,7 @@ func _run() -> void:
 		if stats.n > 0:
 			_log.append("frametime %s p50=%.1f ms p95=%.1f ms n=%d" % [screen_name, stats.p50, stats.p95, stats.n])
 			_say("FRAMETIME %s p50=%.1f p95=%.1f n=%d" % [screen_name, stats.p50, stats.p95, stats.n])
+	_say("TAPSTATS %s board_taps=%d max_press_to_release=%.3f s (BoardView.LONG_PRESS=%.1f s)" % [journey, _tap_stats.n, _tap_stats.max_held, BoardView.LONG_PRESS])
 	var verdict := "PASS" if _failed == "" else "FAIL"
 	var f := FileAccess.open(OUT_DIR.path_join("result_%s.txt" % journey), FileAccess.WRITE)
 	f.store_string("%s %s\n%s\n" % [verdict, journey, "\n".join(_log)])
@@ -598,8 +600,27 @@ func tap_arrow(board: BoardView, id: String) -> bool:
 		board.reveal(id)  # zoomed board: bring the arrow into view first
 		await frames(2)
 	var local := board.cell_center(cells[cells.size() / 2])
+	# Record what the board itself receives: when it processed the press and
+	# the release, and whether it turned them into a tap. A tap the board
+	# drops fails here, at the tap, instead of later at a disabled button.
+	var seen := {"down": -1.0, "up": -1.0, "down_f": 0, "up_f": 0, "tapped": ""}
+	var on_input := func(e: InputEvent) -> void:
+		if e is InputEventScreenTouch:
+			var k := "down" if e.pressed else "up"
+			seen[k] = Time.get_ticks_usec() / 1000000.0
+			seen[k + "_f"] = Engine.get_process_frames()
+	var on_tap := func(tid: String) -> void: seen.tapped = tid
+	board.gui_input.connect(on_input)
+	board.arrow_tapped.connect(on_tap)
 	await touch(to_window(board, local))
-	return true
+	if is_instance_valid(board):
+		board.gui_input.disconnect(on_input)
+		board.arrow_tapped.disconnect(on_tap)
+	var held: float = seen.up - seen.down if seen.up >= 0.0 and seen.down >= 0.0 else -1.0
+	var held_frames: int = seen.up_f - seen.down_f
+	_tap_stats.n += 1
+	_tap_stats.max_held = maxf(_tap_stats.max_held, held)
+	return check(seen.tapped == id, "tap %s reached the board as a tap (board saw press->release %.3f s over %d frames, emitted '%s')" % [id, held, held_frames, seen.tapped])
 
 
 ## Control-local point -> window pixels (what a finger reports), including the

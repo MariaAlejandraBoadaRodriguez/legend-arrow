@@ -133,14 +133,23 @@ for j in "${JOURNEYS[@]}"; do
   adb shell am force-stop "$PKG" || true
   secs=$(( $(date +%s) - start ))
   echo "$verdict (${secs}s)"
+  grep -oE "LEGEND_E2E TAPSTATS.*" "$OUT/logcat/$j.txt" | tr -d '\r' | head -1 || true
   results+=("$j|$verdict|$secs")
   case "$verdict" in
     *" PASS "*) ;;
     *) fail=1
        # Case-insensitive: native crashes log as "F libc : Fatal signal …".
-       echo "---- $j: crash / kill / app lines from logcat ----"
-       grep -iE "LEGEND_E2E|fatal|crash|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller|Force stopping|SCRIPT ERROR|USER ERROR|godot" \
-         "$OUT/logcat/$j.txt" | grep -v "GodotPluginRegistry: Registering" | tail -80 || true
+       # Two lists, so system log spam cannot push the app's own lines out.
+       echo "---- $j: app lines from logcat (pid of $PKG, godot, LEGEND_E2E) ----"
+       grep -E "LEGEND_E2E| godot |$PKG|SCRIPT ERROR|USER ERROR" "$OUT/logcat/$j.txt" \
+         | grep -vE "GodotPluginRegistry: Registering|GL_MAX_FRAGMENT|Program linking|_display_error_with_code|_compile_specialization" | tail -60 || true
+       echo "---- $j: system crash / kill lines from logcat ----"
+       grep -iE "fatal|tombstone|backtrace|SIGSEGV|SIGABRT|ANR in|has died|am_kill|lowmemorykiller: Kill|lmkd|Killing|Force stopping|installd|PackageManager: (Install|Package|Update)" \
+         "$OUT/logcat/$j.txt" | grep -vE "NamespaceManager|crashrecovery|Scheduling restart" | tail -40 || true
+       # Storage and memory at the first failure (what filled /data, who uses RAM).
+       if [[ -z "${_space_dumped:-}" ]]; then _space_dumped=1; "$(dirname "$0")/device_space.sh" "at-failure-$j" 0 || true; fi
+       echo "---- $j: in-app step log ----"
+       adb shell "run-as $PKG cat files/e2e/result_$j.txt" 2>/dev/null | tr -d '\r' | tail -60 || true
        echo "---- end $j ----" ;;
   esac
 done
