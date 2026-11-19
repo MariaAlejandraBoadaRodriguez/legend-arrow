@@ -43,6 +43,21 @@ static func requested_journey() -> String:
 	return ""
 
 
+var _bg := {}   # background_resume: clock at pause / resume
+
+
+func _notification(what: int) -> void:
+	if journey != "background_resume" or Game.current_screen_name() != "puzzle":
+		return
+	var t: int = Game.current_screen().session.elapsed_ms()
+	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT] and not _bg.has("paused"):
+		_bg.paused = t
+		_bg.paused_at = Time.get_ticks_msec()
+	elif what in [NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_APPLICATION_FOCUS_IN] and _bg.has("paused") and not _bg.has("resumed"):
+		_bg.resumed = t
+		_bg.resumed_at = Time.get_ticks_msec()
+
+
 func _init(p_journey: String) -> void:
 	journey = p_journey
 	name = "DeviceE2E"
@@ -324,12 +339,17 @@ func background_resume() -> void:
 	if not await tap_arrow(pz.board, pz.level.solution[0]): return
 	await seconds(1.5)
 	var key: String = pz.session.board.state_key()
-	var before: int = pz.session.elapsed_ms()
+	_bg = {}
 	if not await host_action("home"): return     # script: HOME, wait 8 s, relaunch
 	if not await wait_screen("puzzle"): return
 	pz = Game.current_screen()
-	var after: int = pz.session.elapsed_ms()
-	if not check(after - before < 2500, "timer held in background (%d -> %d ms over ~8 s away)" % [before, after]): return
+	# The clock is read at the app's own pause and resume notifications (the
+	# CI script polls every 2 s, so the app legitimately keeps timing in the
+	# foreground until HOME is actually pressed).
+	if not check(_bg.has("paused") and _bg.has("resumed"), "pause and resume seen (%s)" % str(_bg)): return
+	var away: int = _bg.resumed_at - _bg.paused_at
+	var drift: int = _bg.resumed - _bg.paused
+	if not check(away >= 5000 and drift <= 300, "timer held in background (%d ms away, clock moved %d ms)" % [away, drift]): return
 	if not check(pz.session.board.state_key() == key, "board intact after resume"): return
 	await shot("resumed")
 
