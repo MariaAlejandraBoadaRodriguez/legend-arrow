@@ -298,6 +298,24 @@ jobs:
         if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
         run: GODOT="$(scripts/install_godot.sh)" scripts/record_video.sh build/e2e-desktop-${{ matrix.form }}/legend_arrow_gameplay.mp4
 
+      # Store promo videos (docs/store/video/README.md): the "promo" journey
+      # plays the real game, Movie Maker records it, make_promo_video.py cuts
+      # the 1920x1080 and 1080x1920 versions.
+      - name: Record store promo videos (Movie Maker)
+        if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
+        run: |
+          GODOT="$(scripts/install_godot.sh)" scripts/record_promo.sh build/promo-work
+          python3 tools/make_promo_video.py build/promo-work build/promo-video
+          cp build/promo-work/marks.txt build/promo-video/marks.txt
+
+      - name: Upload promo-video
+        if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: promo-video
+          path: build/promo-video/
+          if-no-files-found: error
+
       - name: Upload screenshots and logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

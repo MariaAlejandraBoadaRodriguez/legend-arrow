@@ -1,5 +1,6 @@
 # Store graphics
 
+- **[`video/`](video/README.md)** (v0.2): the promo gameplay video, 1920x1080 for Google Play (via a YouTube link) and 1080x1920 for social media, cut from real Movie Maker footage. Rebuild: `scripts/record_promo.sh` + `tools/make_promo_video.py`; CI artifact `promo-video`.
 - **`icon_final_preview.png`** (v0.2, final): the owner's icon (`assets/icon/icon_source.png`) as Play icon, circle and rounded-square launcher masks, real 48 dp on light and dark home screens, 48 px close-up and the themed monochrome icon. Rebuild: `python3 tools/make_icons.py && python3 tools/icon_final_preview.py`.
 - **[`play_console/`](play_console/README.md)**: every Google Play listing asset, named after its English Play Console field (icon, feature graphic, phone and tablet screenshots), with a guide to where each file goes. Rebuild with `tools/make_store_graphics.sh`; check with `python3 tools/store_assets.py check`. These are the v0.1 graphics; they are regenerated for 0.2.0 in milestone F.
 - **`icon_concepts_v2.png`** (v0.2): four bold, high-contrast concepts **A–D** — Play icon, round launcher version, real 48 dp size on light and dark simulated home screens among generic colourful icons, and a 48 px close-up. Rebuild with `python3 tools/icon_concepts_v2.py`. Superseded: the owner chose her own artwork instead (D-44).

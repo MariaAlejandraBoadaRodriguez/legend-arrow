@@ -32,3 +32,4 @@ android/.build_version
 # Python
 __pycache__/
 *.pyc
+override.cfg

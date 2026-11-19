@@ -18,7 +18,7 @@ const TRIGGER := "user://e2e_journey.txt"
 const OUT_DIR := "user://e2e"
 const JOURNEYS := ["fresh_install", "partial_a", "partial_b", "blocked_undo", "hint_ad",
 	"awakening_replay", "settings_a", "settings_b", "replay_times", "background_resume", "rotate",
-	"world_unlock", "memory_transitions"]
+	"world_unlock", "memory_transitions", "promo"]
 const ACTION_DONE := "user://e2e_action_done"
 
 var journey := ""
@@ -87,6 +87,8 @@ func _run() -> void:
 	f.store_string("%s %s\n%s\n" % [verdict, journey, "\n".join(_log)])
 	f.close()
 	_say("%s %s%s" % [verdict, journey, "" if _failed == "" else ": " + _failed])
+	if journey == "promo":
+		get_tree().quit()   # ends the Movie Maker recording cleanly
 
 
 # --- journeys -----------------------------------------------------------------
@@ -462,6 +464,177 @@ func host_action(action: String) -> bool:
 
 
 ## Solves the current puzzle waiting `pause_s` seconds after the first tap.
+## Promo footage (scripts/record_promo.sh, not run by the CI test matrix): the
+## real game played through every scene of the store video with real taps,
+## recorded by Movie Maker. "LEGEND_E2E MARK <name> frame=<n>" lines tell the
+## editor where each scene is. Progress beyond the played levels is
+## fast-forwarded with the same Progression calls world_unlock uses, so later
+## worlds and a fuller bestiary can be shown; every screen is the real one.
+func promo() -> void:
+	Game.progression.data.tutorial_done = true
+	_promo_complete(["forest_drake", "fern_wyrmling"], 1.3)
+	Game.persist()
+	if not await reach_home(): return
+	await seconds(1.5)
+	_mark("home")
+	# (3) How to play: a World 1 board, a few taps, one blocked tap, empty board.
+	if not await tap("PlayButton"): return
+	if not await wait_screen("level_select"): return
+	await seconds(0.8)
+	if not await tap("Card_mossback_drake"): return
+	await seconds(0.5)
+	if not await tap("PlayButton"): return
+	if not await wait_screen("puzzle"): return
+	var pz: Control = Game.current_screen()
+	var board: PuzzleBoard = pz.session.board
+	await seconds(1.0)
+	_mark("play_start")
+	var blocked := ""
+	for id in board.remaining_ids():
+		if not board.is_removable(id):
+			blocked = id
+			break
+	if not check(blocked != "", "World 1 board starts with a blocked arrow"): return
+	var taps := 0
+	for id in pz.level.solution:
+		if not board.remaining_ids().has(id):
+			continue
+		if taps == 2 and board.remaining_ids().has(blocked) and not board.is_removable(blocked):
+			await seconds(0.3)
+			_mark("blocked")
+			if not await tap_arrow(pz.board, blocked): return
+			if not check(board.remaining_ids().has(blocked), "blocked tap moved nothing"): return
+			await seconds(1.2)
+		if not await tap_arrow(pz.board, id): return
+		taps += 1
+		await seconds(0.45)
+	if not check(board.is_empty(), "board emptied by taps"): return
+	_mark("board_empty")
+	if not await wait_screen("level_complete"): return
+	await seconds(2.5)
+	_mark("results_first")
+	# (4) The photoreal awakening of that dragon, played to the end.
+	if not await tap("NextButton"): return
+	if not await wait_screen("awakening"): return
+	_mark("awaken_start")
+	if not await wait_for(func(): return Game.current_screen().get("finished") == true, 40.0, "awakening finishes"): return
+	await seconds(1.5)
+	_mark("awaken_end")
+	if not await tap("ContinueButton"): return
+	if not await wait_screen("creature_detail"): return
+	await seconds(1.5)
+	# (5) Speed and stars: a fast replay, timer running, results with 3 stars
+	# and "New record!".
+	Game.reset_to("home")
+	if not await wait_screen("home"): return
+	if not await tap("PlayButton"): return
+	if not await wait_screen("level_select"): return
+	if not await tap("Card_mossback_drake"): return
+	await seconds(0.5)
+	if not await tap("PlayButton"): return
+	if not await wait_screen("puzzle"): return
+	pz = Game.current_screen()
+	await seconds(0.6)
+	_mark("replay_start")
+	for id in pz.level.solution:
+		if pz.session.board.remaining_ids().has(id):
+			if not await tap_arrow(pz.board, id): return
+	if not await wait_screen("level_complete"): return
+	_mark("results_record")
+	var res: Dictionary = Game.current_screen().params
+	if not check(bool(res.new_record) and int(res.stars) == 3, "replay: new record with 3 stars (%s)" % str(res)): return
+	await seconds(3.5)
+	_mark("results_record_end")
+	# (6) Bestiary filling up, then harder boards from later worlds.
+	Game.reset_to("home")
+	if not await wait_screen("home"): return
+	if not await tap("BestiaryButton"): return
+	if not await wait_screen("bestiary"): return
+	await seconds(1.0)
+	_mark("bestiary_few")
+	await seconds(2.0)
+	Game.reset_to("home")
+	var later: Array[String] = []
+	for w in Game.campaign.world_ids():
+		var ls := Game.campaign.levels_in_world(w)
+		if w == "w10":
+			ls = ls.slice(0, ls.size() - 3)   # leave the last dragons to find
+		later.append_array(ls)
+	_promo_complete(later, 0.9)
+	Game.persist()
+	if not await wait_screen("home"): return
+	if not await tap("BestiaryButton"): return
+	if not await wait_screen("bestiary"): return
+	await seconds(0.8)
+	_mark("bestiary_many")
+	var scroll := find("Scroll") as ScrollContainer
+	if scroll != null:
+		for i in 60:
+			scroll.scroll_vertical += 30
+			await frames(1)
+	await seconds(1.0)
+	_mark("bestiary_many_end")
+	for pick in [["w05", 4], ["w08", 6], ["w10", 7]]:
+		Game.reset_to("home")
+		if not await wait_screen("home"): return
+		Game.go("world_select")
+		if not await wait_screen("world_select"): return
+		if not await tap("World_%s" % pick[0]): return
+		if not await wait_screen("level_select"): return
+		var lid: String = Game.campaign.levels_in_world(pick[0])[pick[1]]
+		if not await tap("Card_%s" % lid): return
+		await seconds(0.5)
+		if not await tap("PlayButton"): return
+		if not await wait_screen("puzzle"): return
+		pz = Game.current_screen()
+		await seconds(0.8)
+		_mark("hard_%s" % pick[0])
+		var n := 0
+		for id in pz.level.solution:
+			if n >= 6:
+				break
+			if pz.session.board.remaining_ids().has(id):
+				if not await tap_arrow(pz.board, id): return
+				n += 1
+				await seconds(0.2)
+		await seconds(0.6)
+		_mark("hard_%s_end" % pick[0])
+	# (1) Hook: a late dragon's awakening replayed from its bestiary page.
+	Game.reset_to("home")
+	if not await wait_screen("home"): return
+	if not await tap("BestiaryButton"): return
+	if not await wait_screen("bestiary"): return
+	var hook_id: String = Game.campaign.levels_in_world("w10")[6]
+	if not await tap("Tile_%s" % Game.campaign.creature_of_level(hook_id)): return
+	if not await wait_screen("creature_detail"): return
+	if not await tap("ReplayAwakening"): return
+	if not await wait_screen("awakening"): return
+	_mark("hook_start")
+	if not await wait_for(func(): return Game.current_screen().get("finished") == true, 40.0, "hook awakening finishes"): return
+	await seconds(1.5)
+	_mark("hook_end")
+	Game.reset_to("home")
+	if not await wait_screen("home"): return
+	await seconds(2.0)
+	_mark("home_end")
+
+
+func _mark(scene: String) -> void:
+	_say("MARK %s frame=%d" % [scene, Engine.get_frames_drawn()])
+
+
+## Completes levels as a played run would (first clear + a 1-3 star time) and
+## marks each earned awakening as seen. `speed` < 1 beats par (more stars).
+func _promo_complete(level_ids: Array, speed: float) -> void:
+	for l in level_ids:
+		if Game.progression.is_level_completed(l):
+			continue
+		var r: Dictionary = Game.progression.complete_level(l)
+		Game.progression.record_result(l, int(30000 * speed), 3 if speed < 1.0 else 2)
+		if r.unlocked_creature != "":
+			Game.progression.mark_awakening_seen(r.unlocked_creature)
+
+
 func solve_paced(level_id: String, pause_s: float) -> bool:
 	if not await wait_screen("puzzle"): return false
 	var pz: Control = Game.current_screen()
