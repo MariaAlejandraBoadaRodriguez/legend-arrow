@@ -396,6 +396,10 @@ jobs:
           ram-size: ${{ matrix.ram }}
           disk-size: ${{ matrix.disk }}
           disable-animations: true
+          # GPU: swiftshader_indirect. The runners have no GPU, so `host` is
+          # not available; `guest` renders in software inside the emulator and
+          # is slower. SwiftShader logs Godot shader-link errors on every run
+          # (also in passing ones); they did not cause the API 36 failure (D-51).
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim ${{ matrix.data_opts }}
           # API 26 also repeats "fresh install right after a data clear" six
           # times: that step intermittently showed a result the save file

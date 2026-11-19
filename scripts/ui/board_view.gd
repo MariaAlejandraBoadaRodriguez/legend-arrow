@@ -15,6 +15,11 @@ signal exit_finished(id: String)
 
 const DRAG_THRESHOLD := 24.0     # px in viewport space
 const LONG_PRESS := 0.8          # seconds
+## A press is timed in processed frames, each counting at most this long, so a
+## slow frame (shader compile, GC, software GPU) between the press and the
+## release cannot turn a quick tap into a long press. A real 0.8 s hold still
+## counts in full down to 12.5 fps.
+const MAX_FRAME_STEP := 0.1      # seconds
 const HIT_RADIUS := 0.6          # in cells
 const MAX_CELL := 120.0
 const LINE_WIDTH := 0.13         # in cells
@@ -31,6 +36,8 @@ var session: PuzzleSession
 var reduce_motion := false
 ## Seconds clock used for long-press detection (tests inject a fake one).
 var clock: Callable = func() -> float: return Time.get_ticks_msec() / 1000.0
+## Processed-frame counter used with `clock` (tests inject a fake one).
+var frame_clock: Callable = func() -> int: return Engine.get_process_frames()
 var input_enabled := true
 
 var zoom := 1.0
@@ -252,7 +259,7 @@ func _on_touch(e: InputEventScreenTouch) -> void:
 	if e.pressed:
 		if not _touches.is_empty():
 			_multi = true
-		_touches[e.index] = {"pos": e.position, "cur": e.position, "time": clock.call(), "dragged": false}
+		_touches[e.index] = {"pos": e.position, "cur": e.position, "time": clock.call(), "frame": frame_clock.call(), "dragged": false}
 		return
 	if not _touches.has(e.index):
 		return
@@ -265,11 +272,18 @@ func _on_touch(e: InputEventScreenTouch) -> void:
 		return
 	if e.position.distance_to(t.pos) > DRAG_THRESHOLD:
 		return
-	if clock.call() - t.time > LONG_PRESS:
+	if held_seconds(t) > LONG_PRESS:
 		return
 	var id := arrow_at(e.position)
 	if id != "":
 		_request_tap(id)
+
+
+## How long a press was held: wall time, but at most MAX_FRAME_STEP per frame
+## the game processed while it was down.
+func held_seconds(t: Dictionary) -> float:
+	var frames: int = frame_clock.call() - int(t.frame)
+	return minf(clock.call() - float(t.time), frames * MAX_FRAME_STEP)
 
 
 func _request_tap(id: String) -> void:

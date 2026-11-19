@@ -72,6 +72,7 @@ Journeys:
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
 Harness issues CI found and fixed in this milestone:
+- **Game bug found by the API 36 tablet emulator (fixed, DECISIONS D-51):** a quick tap could be dropped as a "long press" when a slow frame fell between the press and the release (run 44595886933: the tutorial step never finished, so Next stayed disabled). Press time now counts at most 0.1 s per frame. A real player could hit it on a slow device during a stutter: the arrow would not move and they would have to tap again. Regression test: `tests/integration/test_board_input.gd`. The E2E harness now fails at the dropped tap itself and logs press-to-release timing per journey (`TAPSTATS`).
 - `logcat -c` fails on the API 26 image, which ended the run. Logs are now read from a device timestamp.
 - The emulator save carries over between journeys, so a launch can (correctly) replay an unwatched awakening. Journeys now watch it out first (`reach_home`).
 
