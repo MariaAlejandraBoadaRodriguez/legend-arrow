@@ -471,6 +471,11 @@ func host_action(action: String) -> bool:
 ## fast-forwarded with the same Progression calls world_unlock uses, so later
 ## worlds and a fuller bestiary can be shown; every screen is the real one.
 func promo() -> void:
+	# LEGEND_PROMO_SFX_ONLY=1: same take with the music bus muted, so the
+	# video editor gets the game's sound effects alone (the short cut mixes
+	# the game's own music track back in underneath).
+	if OS.get_environment("LEGEND_PROMO_SFX_ONLY") == "1":
+		AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), true)
 	Game.progression.data.tutorial_done = true
 	_promo_complete(["forest_drake", "fern_wyrmling"], 1.3)
 	Game.persist()

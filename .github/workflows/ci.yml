@@ -307,6 +307,9 @@ jobs:
           GODOT="$(scripts/install_godot.sh)" scripts/record_promo.sh build/promo-work
           python3 tools/make_promo_video.py build/promo-work build/promo-video
           cp build/promo-work/marks.txt build/promo-video/marks.txt
+          # 15 s cut: same take with the music muted, effects processed (ASMR).
+          LEGEND_PROMO_SFX_ONLY=1 GODOT="$(scripts/install_godot.sh)" scripts/record_promo.sh build/promo-work-sfx
+          python3 tools/make_promo_short.py build/promo-work-sfx build/promo-video
 
       - name: Upload promo-video
         if: matrix.form == 'phone' && steps.deps.outputs.no_ffmpeg != '1'
