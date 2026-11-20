@@ -121,7 +121,14 @@ def segment_filter(kind, landscape, cap_file, dur, fades, tmp):
                  f":x=(w-tw)/2:y=(192-th)/2")
         chain.append(f"[{last}]{d}[capd]")
         last = "capd"
-    chain.append(f"[{last}]fade=t=in:st=0:d={FADE},fade=t=out:st={dur - FADE:.3f}:d={FADE},format=yuv420p[v]")
+    # Fades to/from black only where a shot asks for them; other cuts are hard.
+    fx = []
+    if "i" in fades:
+        fx.append(f"fade=t=in:st=0:d={FADE * 2}")
+    if "o" in fades:
+        fx.append(f"fade=t=out:st={dur - FADE * 2:.3f}:d={FADE * 2}")
+    fx.append("format=yuv420p")
+    chain.append(f"[{last}]{','.join(fx)}[v]")
     return ";".join(chain)
 
 

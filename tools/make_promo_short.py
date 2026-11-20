@@ -7,7 +7,8 @@ cuts, the arrow-clearing shots sped up in the edit (the game itself is not
 faster), and the game's own sound effects processed to sound close and crisp
 (ASMR style) over the game's own music track, mixed low.
 
-  python3 tools/make_promo_short.py <sfx_work_dir> <out_dir>
+  python3 tools/make_promo_short.py <sfx_work_dir> <out_dir>        # 15 s, both formats
+  python3 tools/make_promo_short.py <sfx_work_dir> <out_dir> 50     # ~50 s, 1920x1080
 """
 import os
 import subprocess
@@ -42,6 +43,30 @@ def plan(m):
     ]
 
 
+def plan_50(m):
+    """The same style at ~50 s (landscape): every scene of the take."""
+    hook = m["hook_start"]
+    return [
+        ("footage", hook + 15, hook + 105, "", "o", 1.0),                                # arrows gather, dragon appears
+        ("title", m["home"], m["home"] + 135, "", "io", 1.0),
+        ("footage", m["home"] + 10, m["play_start"] - 6, "Pick a dragon\nand play", "", 1.3),
+        ("footage", m["play_start"] - 6, m["blocked"], "Tap an arrow with\na clear way out", "", 1.4),
+        ("footage", m["blocked"], m["blocked"] + 60, "Blocked? Clear its\npath first", "", 1.0),
+        ("footage", m["blocked"] + 60, m["board_empty"] + 8, "Empty the board", "", 1.6),
+        ("footage", m["board_empty"] + 8, m["results_first"], "Every clear\nis timed", "", 1.0),
+        ("footage", m["awaken_start"], m["awaken_end"], "Every board awakens\na dragon", "", 1.0),
+        ("footage", m["replay_start"], m["results_record"], "Beat the clock", "", 1.6),
+        ("footage", m["results_record"], m["results_record_end"], "Beat the clock\nfor 3 stars", "", 1.0),
+        ("footage", m["hard_w05"] + 6, m["hard_w05_end"], "Harder boards in\nlater worlds", "", 1.25),
+        ("footage", m["hard_w08"] + 6, m["hard_w08_end"], "Harder boards in\nlater worlds", "", 1.25),
+        ("footage", m["hard_w10"] + 6, m["hard_w10_end"], "Harder boards in\nlater worlds", "", 1.25),
+        ("footage", m["bestiary_few"], m["bestiary_few"] + 105, "Awaken 100\nlegendary dragons", "", 1.0),
+        ("footage", m["bestiary_many"], m["bestiary_many_end"], "Awaken 100\nlegendary dragons", "", 1.0),
+        ("footage", hook + 105, m["hook_end"], "Each dragon has\nits own awakening", "", 1.0),
+        ("end", hook + 30, hook + 210, "", "o", 1.0),
+    ]
+
+
 def render(i, seg, landscape, work, tmp):
     kind, a, b, cap, fades, sp = seg
     src = (b - a) / base.FPS
@@ -64,14 +89,19 @@ def render(i, seg, landscape, work, tmp):
 
 def main():
     work, out_dir = sys.argv[1], sys.argv[2]
+    long_cut = len(sys.argv) > 3 and sys.argv[3] == "50"
     os.makedirs(out_dir, exist_ok=True)
-    segs = plan(base.marks(work))
+    segs = (plan_50 if long_cut else plan)(base.marks(work))
     total = sum((s[2] - s[1]) / base.FPS / s[5] for s in segs)
     print(f"make_promo_short: {len(segs)} shots, {total:.2f} s")
-    if total > MAX_LEN:
+    if long_cut and not 49.0 <= total <= 51.0:
+        sys.exit(f"make_promo_short: {total:.2f} s is not about 50 s")
+    if not long_cut and total > MAX_LEN:
         sys.exit(f"make_promo_short: {total:.2f} s is longer than {MAX_LEN} s")
+    outputs = ([(True, "legend_arrow_promo_50s_1920x1080.mp4")] if long_cut else
+               [(False, "legend_arrow_promo_15s_1080x1920.mp4"), (True, "legend_arrow_promo_15s_1920x1080.mp4")])
     with tempfile.TemporaryDirectory() as tmp:
-        for landscape, name in [(False, "legend_arrow_promo_15s_1080x1920.mp4"), (True, "legend_arrow_promo_15s_1920x1080.mp4")]:
+        for landscape, name in outputs:
             parts = [render(i, s, landscape, work, tmp) for i, s in enumerate(segs)]
             lst = os.path.join(tmp, "list.txt")
             with open(lst, "w") as f:

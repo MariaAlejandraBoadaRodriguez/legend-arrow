@@ -6,6 +6,9 @@
 | `legend_arrow_promo_1080x1920.mp4` | Social media (vertical) | 1080x1920, same codecs and length |
 | `legend_arrow_promo_15s_1080x1920.mp4` | Short social cut (vertical) | 1080x1920, 30 fps, H.264 + AAC, 14.9 s, -14 LUFS |
 | `legend_arrow_promo_15s_1920x1080.mp4` | Short cut (landscape) | 1920x1080, same |
+| `legend_arrow_promo_50s_1920x1080.mp4` | 50-second cut in the 15 s style (landscape) | 1920x1080, 30 fps, H.264 + AAC, 50.6 s, about -14 LUFS |
+
+**50-second cut:** the same style as the 15 s cut (edit-only speed-ups of 1.25–1.6x on the clearing shots, ASMR-processed game effects over the game music), with every scene: dragon reveal, title card, level select, the World 1 board with the blocked tap, first clear, Mossback Drake's awakening, the fast replay with 3 stars and "New record!", World 5/8/10 boards, the bestiary filling up, the Starwing Dragon's awakening, end card.
 
 **15-second cut:** dragon reveal, the World 1 board cleared (one blocked tap included), Mossback Drake's awakening, a fast replay with 3 stars and "New record!", a World 10 board, end card. Two things differ from the game and are edit-only: the arrow-clearing shots play **1.6–2x faster** than real time (the game is not faster), and the sound is the game's own effects (tap, exit, blocked, complete, dragon motif) from a second, identical take with the music muted, processed to sound close and crisp (EQ, compression, a short room reflection), with the game's own music track mixed low underneath.
 
@@ -34,6 +37,7 @@ GODOT=/path/to/godot scripts/record_promo.sh build/promo-work
 python3 tools/make_promo_video.py build/promo-work docs/store/video
 LEGEND_PROMO_SFX_ONLY=1 GODOT=/path/to/godot scripts/record_promo.sh build/promo-work-sfx
 python3 tools/make_promo_short.py build/promo-work-sfx docs/store/video
+python3 tools/make_promo_short.py build/promo-work-sfx docs/store/video 50
 ```
 
-`scripts/record_promo.sh` runs the `promo` journey (`scripts/e2e/device_e2e.gd`, debug builds only) under Xvfb with Movie Maker and writes `promo.avi` plus `marks.txt` (scene start frames). `tools/make_promo_video.py` cuts the shots from those marks and fails if the result is not 45–60 s long. CI rebuilds all four videos on every push in the "Desktop E2E journeys (phone)" job and uploads them as the artifact **`promo-video`**.
+`scripts/record_promo.sh` runs the `promo` journey (`scripts/e2e/device_e2e.gd`, debug builds only) under Xvfb with Movie Maker and writes `promo.avi` plus `marks.txt` (scene start frames). `tools/make_promo_video.py` cuts the shots from those marks and fails if the result is not 45–60 s long. CI rebuilds all five videos on every push in the "Desktop E2E journeys (phone)" job and uploads them as the artifact **`promo-video`**.
