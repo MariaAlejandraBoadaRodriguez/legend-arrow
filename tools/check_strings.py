@@ -10,7 +10,7 @@ import os
 import re
 import sys
 
-NOT_KEYS = {"FAIL", "PASS", "SFX"}   # literals that are not translation keys
+NOT_KEYS = {"FAIL", "PASS", "SFX", "LEGEND_PROMO_SFX_ONLY"}   # literals that are not translation keys (incl. env var names)
 LIT = re.compile(r'"([A-Z][A-Z0-9_]{2,})"')
 
 
