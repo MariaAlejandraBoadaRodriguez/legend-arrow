@@ -1,6 +1,6 @@
 # QA report — Legend Arrow 0.2.1 (versionCode 4)
 
-> **Release status (0.2.1): PENDING CI.** 0.2.1 ships the save fix that was the 0.2.0 known limitation (RELEASE_CHECKLIST item 18). Item 18 closes only when the real full-storage check (`scripts/enospc_check.sh`) has passed in CI on this version. 0.2.0 went to closed testing only.
+> **Release status (0.2.1): ready for upload; production no longer blocked by the save limitation.** RELEASE_CHECKLIST item 18 is PASS: the real full-storage check (`scripts/enospc_check.sh`) passed in CI ([push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`). 0.2.0 went to closed testing only. Physical-device recheck of 0.2.1 on the owner's tablet: not run yet (optional).
 
 Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
@@ -16,16 +16,16 @@ A workflow file is not evidence; every PASS points at an executed run or log. Th
 
 | Check | Result | Evidence |
 |---|---|---|
-| Save never promotes an empty, short, stale or missing tmp; main stays the previous save | PASS (local) / PENDING CI | `tests/unit/test_save_repository.gd` (truncate, stale, missing; legacy baseline still shows the 0.2.0 defect) |
-| Save retried at once and in the background until it lands; saved stars and time = shown | PASS (local) / PENDING CI | `tests/integration/test_game_flow.gd::test_completion_saved_even_if_the_first_write_fails` |
-| Real full filesystem (tmpfs, ENOSPC): 0.2.0 path still fails, new path keeps the save, reports the error, raises the message and recovers after space is freed | PASS (local) / PENDING CI | `scripts/enospc_check.sh` (CI step "Real disk-full save check") |
-| "Storage full" message: full storage, low storage (< 10 MB), recovery after space is freed, no message with normal storage, never during an awakening, never blocks input | PASS (local) / PENDING CI | `tests/unit/test_storage_status.gd`, `tests/integration/test_game_flow.gd` (storage tests) |
-| Message on every profile | PASS (local) / PENDING CI | screen 20 in `docs/qa/screens/P1..P7`, `docs/qa/VISUAL_QA.md` |
-| `android.hardware.screen.portrait` not required; no feature required unintentionally | PENDING CI | `scripts/check_apk.sh` on the debug APK and on the universal APK of both AAB rehearsals |
-| versionCode 4 / versionName 0.2.1 in APK and both AABs | PENDING CI | `EXPECT_VERSION_CODE=4` in the AAB rehearsals |
+| Save never promotes an empty, short, stale or missing tmp; main stays the previous save | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: 257/257 tests; `tests/unit/test_save_repository.gd` (truncate, stale, missing; legacy baseline still shows the 0.2.0 defect) |
+| Save retried at once and in the background until it lands; saved stars and time = shown | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`; `tests/integration/test_game_flow.gd::test_completion_saved_even_if_the_first_write_fails` |
+| Real full filesystem (tmpfs, ENOSPC): 0.2.0 path still fails, new path keeps the save, reports the error, raises the message and recovers after space is freed | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`, step "Real disk-full save check": baseline `second_write_err=0 main_readable=false load_source=2 recovered=true` (0.2.0 defect reproduced); fixed `second_write_err=13 main_readable=true load_source=0 recovered=false has_forest_drake=true storage_message=true space_left=4096`; recovery `write_err=0 has_big=true storage_message=false` |
+| "Storage full" message: full storage, low storage (< 10 MB), recovery after space is freed, no message with normal storage, never during an awakening, never blocks input | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`; `tests/unit/test_storage_status.gd` (10/10), `tests/integration/test_game_flow.gd` (storage tests) |
+| Message on every profile | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`, job "Screen matrix (20 screens x P1-P7)"; screen 20 in `docs/qa/screens/P1..P7`, `docs/qa/VISUAL_QA.md` |
+| `android.hardware.screen.portrait` not required; no feature required unintentionally | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: debug APK "required features: android.hardware.faketouch", "not-required features: android.hardware.screen.portrait", both checks PASS; the universal APKs of both AAB rehearsals pass `check_apk` |
+| versionCode 4 / versionName 0.2.1 in APK and both AABs | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: `versionCode=4 versionName=0.2.1` in the APK and both AABs, "PASS versionCode is 4" |
 | Release workflow falls back to CI's Gradle cache | PENDING (first manual release run) | `.github/workflows/release.yml` restore-keys (D-54) |
 
-Local runs: `scripts/verify_all.sh` 257/257 tests, coverage gate PASS, `scripts/enospc_check.sh` PASS, `scripts/screen_matrix.sh` 20 screens x 7 profiles.
+CI: all 10 jobs green in both runs. Local runs: `scripts/verify_all.sh` 257/257 tests, coverage gate PASS, `scripts/enospc_check.sh` PASS, `scripts/screen_matrix.sh` 20 screens x 7 profiles.
 
 ## 9.1 Content and rules
 | Check | Result | Evidence |
