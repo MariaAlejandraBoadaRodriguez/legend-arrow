@@ -1,6 +1,6 @@
-# QA report — Legend Arrow 0.2.0 (versionCode 3)
+# QA report — Legend Arrow 0.2.1 (versionCode 4)
 
-> **Release status: Ready for CLOSED TESTING only (not production).** 0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release. Known limitation: when device storage is completely full, the save can report success while writing a 0-byte save, so the latest progress is lost on the next launch (CI run 44577702952; `docs/qa/SAVE_INVESTIGATION.md`). Real players are only affected with a completely full device. All other gates are PASS, except the optional on-device measurement (Part B), which stays BLOCKED on the owner. Production is blocked by `RELEASE_CHECKLIST.md` item 18.
+> **Release status (0.2.1): ready for upload; production no longer blocked by the save limitation.** RELEASE_CHECKLIST item 18 is PASS: the real full-storage check (`scripts/enospc_check.sh`) passed in CI ([push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`). 0.2.0 went to closed testing only. Physical-device recheck of 0.2.1 on the owner's tablet: not run yet (optional).
 
 Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
@@ -11,6 +11,21 @@ Statuses:
 A workflow file is not evidence; every PASS points at an executed run or log. The v0.1.0 report is in git history (`git show 7835016:QA_REPORT.md`).
 
 **Final evidence run:** [CI PR run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`: **all jobs green**, including emulators API 26 / 34 / 36. Also green: [push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`. API 26 emulator history (honest note): it passed on the default ~1.5 GB AVD in two runs, then failed twice. Run 44466657570: `fresh_install` results check. Run 44467837397: low-memory-killer storm, with the app dying together with the launcher and Play services. It now runs with 3 GB RAM, the spec's low-tier device, and passes. Results-check diagnostics and adb retries were added at the same time.
+
+## 0.2.1 changes (scope: save hardening, storage-full message, manifest, release cache)
+
+| Check | Result | Evidence |
+|---|---|---|
+| Save never promotes an empty, short, stale or missing tmp; main stays the previous save | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: 257/257 tests; `tests/unit/test_save_repository.gd` (truncate, stale, missing; legacy baseline still shows the 0.2.0 defect) |
+| Save retried at once and in the background until it lands; saved stars and time = shown | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`; `tests/integration/test_game_flow.gd::test_completion_saved_even_if_the_first_write_fails` |
+| Real full filesystem (tmpfs, ENOSPC): 0.2.0 path still fails, new path keeps the save, reports the error, raises the message and recovers after space is freed | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`, step "Real disk-full save check": baseline `second_write_err=0 main_readable=false load_source=2 recovered=true` (0.2.0 defect reproduced); fixed `second_write_err=13 main_readable=true load_source=0 recovered=false has_forest_drake=true storage_message=true space_left=4096`; recovery `write_err=0 has_big=true storage_message=false` |
+| "Storage full" message: full storage, low storage (< 10 MB), recovery after space is freed, no message with normal storage, never during an awakening, never blocks input | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`; `tests/unit/test_storage_status.gd` (10/10), `tests/integration/test_game_flow.gd` (storage tests) |
+| Message on every profile | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`, job "Screen matrix (20 screens x P1-P7)"; screen 20 in `docs/qa/screens/P1..P7`, `docs/qa/VISUAL_QA.md` |
+| `android.hardware.screen.portrait` not required; no feature required unintentionally | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: debug APK "required features: android.hardware.faketouch", "not-required features: android.hardware.screen.portrait", both checks PASS; the universal APKs of both AAB rehearsals pass `check_apk` |
+| versionCode 4 / versionName 0.2.1 in APK and both AABs | PASS | [push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`: `versionCode=4 versionName=0.2.1` in the APK and both AABs, "PASS versionCode is 4" |
+| Release workflow falls back to CI's Gradle cache | PENDING (first manual release run) | `.github/workflows/release.yml` restore-keys (D-54) |
+
+CI: all 10 jobs green in both runs. Local runs: `scripts/verify_all.sh` 257/257 tests, coverage gate PASS, `scripts/enospc_check.sh` PASS, `scripts/screen_matrix.sh` 20 screens x 7 profiles.
 
 ## 9.1 Content and rules
 | Check | Result | Evidence |
@@ -72,6 +87,7 @@ Journeys:
 | API 36 (Android 16) / P6 1600×2560 @320 tablet | **PASS**: 13/13 journeys + smoke | run 44464519633 job 135361615219, artifact `e2e-android-api36-P6`. Earlier fail (run 44462316343): `background_resume` read the clock when it *asked* for the Home key, which CI presses up to 2 s later. It now reads the clock at the app's own pause and resume and requires ≤ 300 ms drift across ≥ 5 s away (stricter than the old 2.5 s). |
 
 Harness issues CI found and fixed in this milestone:
+- **0.2.1, harness:** `pm clear` took effect up to ~25 s after the command returned on the CI emulators (run 44934453130, API 34: the game was killed and its data wiped 18 s into the first journey; the same shape as the 0.2.0 API 26 "save missing right after install + pm clear"). `scripts/android_e2e.sh` and `scripts/measure_device.sh` now reset app data synchronously: force-stop, wait until the process is gone, delete the app data with `run-as`, check it is empty.
 - **Game bug found by the API 36 tablet emulator (fixed, DECISIONS D-51):** a quick tap could be dropped as a "long press" when a slow frame fell between the press and the release (run 44595886933: the tutorial step never finished, so Next stayed disabled). Press time now counts at most 0.1 s per frame. A real player could hit it on a slow device during a stutter: the arrow would not move and they would have to tap again. Regression test: `tests/integration/test_board_input.gd`. The E2E harness now fails at the dropped tap itself and logs press-to-release timing per journey (`TAPSTATS`).
 - `logcat -c` fails on the API 26 image, which ended the run. Logs are now read from a device timestamp.
 - The emulator save carries over between journeys, so a launch can (correctly) replay an unwatched awakening. Journeys now watch it out first (`reach_home`).
@@ -79,7 +95,7 @@ Harness issues CI found and fixed in this milestone:
 ## 9.4 Screens on every profile
 | Check | Result | Evidence |
 |---|---|---|
-| 19 screens × P1–P7, with simulated status bar, cutout or notch, and nav or gesture bar | PASS (captured and reviewed) | `docs/qa/screens/`, `docs/qa/screen_matrix.png`, CI artifact **screen-matrix** (job 135352925942) |
+| 20 screens × P1–P7 (0.2.1: + "Storage full" message), with simulated status bar, cutout or notch, and nav or gesture bar | PASS (captured and reviewed) | `docs/qa/screens/`, `docs/qa/screen_matrix.png`, CI artifact **screen-matrix** (job 135352925942) |
 | Review: nothing under system bars, no clipping or overlap, Larger text, tablets, tall phones | PASS after one fix | `docs/qa/VISUAL_QA.md`. Fixed: with Larger text, the level-select title ran into the "Worlds" link (`Ui.top_bar`). |
 | Touch targets on the largest boards | PASS (by design) | Cells ≥ 40 dp with a 48 dp touch band; big boards open zoomed with pan on phones (D-48) |
 

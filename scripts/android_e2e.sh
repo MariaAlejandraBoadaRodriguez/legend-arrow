@@ -45,17 +45,26 @@ app_dead() {
   (( misses == 3 ))
 }
 
-# `pm clear` force-stops the package asynchronously; a launch issued right
-# after it can be killed (CI runs 40578441238, 40576384695: first launch after
-# a clear died with no app output). Wait until the clear has settled.
+# Fresh app data before a journey. Not `pm clear`: on CI emulators it took
+# effect up to ~25 s after the command returned (run 44934453130, API 34: the
+# clear killed the app and wiped its data 18 s into the first journey; the
+# 0.2.0 API 26 "save missing right after install + pm clear" had the same
+# shape). Instead: stop the app, wait until its process is gone, delete the
+# app's own data with run-as, and check it is empty. Every step is
+# synchronous, so nothing lands later in the middle of a journey.
 clear_data() {
-  adb shell pm clear "$PKG" >/dev/null
   adb shell am force-stop "$PKG"
-  for _ in $(seq 1 15); do
-    adb shell "run-as $PKG sh -c 'mkdir -p files && test -w files'" >/dev/null 2>&1 && break
+  for _ in $(seq 1 20); do
+    adb shell pidof "$PKG" >/dev/null 2>&1 || break
     sleep 1
   done
-  sleep 2
+  if adb shell pidof "$PKG" >/dev/null 2>&1; then
+    echo "android_e2e: $PKG still running after force-stop" >&2; exit 1
+  fi
+  retry adb shell "run-as $PKG sh -c 'rm -rf files cache code_cache no_backup shared_prefs databases app_* && mkdir files'"
+  local left
+  left="$(adb shell "run-as $PKG sh -c 'ls -A files shared_prefs databases 2>/dev/null'" | tr -d '\r' || true)"
+  [[ -z "$left" ]] || { echo "android_e2e: app data not empty after reset: $left" >&2; exit 1; }
 }
 
 # Device actions a journey asks for with "LEGEND_E2E ACTION <name>"; the

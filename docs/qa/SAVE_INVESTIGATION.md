@@ -1,5 +1,9 @@
 # Save investigation: "results shown, save missing the level" (API 26)
 
+## 0.2.1 status
+
+The fix from `save-hardening-experimental` is in 0.2.1 (DECISIONS D-52): the write is verified before it replaces the save, failures are retried at once and every 2 s while progress is only in memory, and the player sees a non-blocking "Storage full" message. `scripts/enospc_check.sh` runs on every CI push on a real full filesystem. The stress harness and emulator probes stay on that branch (investigation tooling, not shipped).
+
 ## Verdict (owner decision)
 
 **0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release.**

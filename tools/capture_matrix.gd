@@ -128,6 +128,14 @@ func _init() -> void:
 	load("res://scripts/app/main.gd").route_after_boot({"recovered": true})
 	await _settle()
 	await shot("19_save_recovery")
+	# 0.2.1: the non-blocking "Storage full" message over a puzzle (free
+	# space reported as 0, as on a full device).
+	game.reset_to("home")
+	game.go("puzzle", {"level_id": "forest_drake"})
+	game.storage.space_left = func() -> int: return 0
+	game.storage.check_space()
+	await _settle()
+	await shot("20_storage_full")
 	print("capture_matrix: %s done" % out_dir)
 	quit()
 

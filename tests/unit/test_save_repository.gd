@@ -170,3 +170,61 @@ func test_sanitize_repairs_settings_and_fills_missing_keys() -> void:
 	var bad := SaveSchema.defaults()
 	bad.levels = []
 	assert_false(SaveSchema.sanitize(bad).is_empty(), "wrong top-level type is corrupt")
+
+
+# --- 0.2.1 save hardening: a bad tmp must never replace a good main ---------
+
+func _assert_bad_tmp_keeps_previous(kind: String) -> void:
+	var repo := SaveRepository.new(_path)
+	assert_eq(repo.write(_data(1)), OK)
+	repo.simulate_bad_tmp = kind
+	assert_ne(repo.write(_data(2)), OK, "%s: write reports the failure" % kind)
+	assert_true(SaveRepository.read_file(_path).ok, "%s: main still readable" % kind)
+	assert_true(SaveRepository.read_file(_path).data.levels.has("level_1"), "%s: main is the previous save" % kind)
+	assert_false(FileAccess.file_exists(_path + ".bak"), "%s: no rotation happened" % kind)
+	assert_false(FileAccess.file_exists(_path + ".tmp"), "%s: broken tmp removed" % kind)
+	var res := SaveRepository.new(_path).load_save()
+	assert_eq(res.source, SaveRepository.Source.MAIN, kind)
+	assert_false(res.recovered, "%s: nothing to restore, no message" % kind)
+	repo.simulate_bad_tmp = ""
+	assert_eq(repo.write(_data(3)), OK, "%s: the next write lands" % kind)
+	assert_true(SaveRepository.new(_path).load_save().data.levels.has("level_3"), kind)
+
+
+func test_short_write_never_replaces_main() -> void:
+	_assert_bad_tmp_keeps_previous("truncate")
+
+
+func test_stale_tmp_never_replaces_main() -> void:
+	_assert_bad_tmp_keeps_previous("stale")
+
+
+func test_missing_tmp_after_close_never_rotates_main() -> void:
+	_assert_bad_tmp_keeps_previous("missing")
+
+
+func test_peek_reads_without_quarantine_or_repair() -> void:
+	var repo := SaveRepository.new(_path)
+	repo.write(_data(1))
+	repo.write(_data(2))
+	_write_text(_path, "{broken")
+	var res := SaveRepository.new(_path).peek()
+	assert_eq(res.source, SaveRepository.Source.BACKUP)
+	assert_true(res.data.levels.has("level_1"))
+	assert_eq(FileAccess.get_file_as_string(_path), "{broken", "main untouched")
+	assert_false(FileAccess.file_exists(_path + ".corrupt"), "nothing quarantined")
+
+
+func test_legacy_baseline_still_has_the_old_defect() -> void:
+	# scripts/enospc_check.sh runs the 0.2.0 path as its baseline; that path
+	# must really be the old one: a short write is promoted over the good
+	# main and the next load falls back to the older backup.
+	var repo := SaveRepository.new(_path)
+	repo.write(_data(1))
+	repo.legacy_unverified = true
+	repo.simulate_bad_tmp = "truncate"
+	assert_eq(repo.write(_data(2)), OK, "old path reports success")
+	assert_false(SaveRepository.read_file(_path).ok, "old path promoted the broken tmp")
+	var res := SaveRepository.new(_path).load_save()
+	assert_eq(res.source, SaveRepository.Source.BACKUP, "and the next load restores the older backup")
+	assert_true(res.data.levels.has("level_1"))

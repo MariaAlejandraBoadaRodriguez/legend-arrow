@@ -55,6 +55,10 @@ func boot(save_path: String = "user://save.json") -> Dictionary:
 	campaign = c.campaign
 	tutorial_data = JSON.parse_string(FileAccess.get_file_as_string("res://data/tutorial.json"))
 	repository = SaveRepository.new(save_path)
+	save_pending = false
+	storage.space_left = func() -> int: return StorageStatus.space_left_in(save_path.get_base_dir())
+	storage.save_failed = false
+	storage.check_space()
 	boot_result = repository.load_save()
 	progression = Progression.new(campaign, boot_result.data)
 	if boot_result.recovered:
@@ -101,14 +105,54 @@ func _on_ad_fullscreen_ended() -> void:
 
 ## Result of the last save write (OK or an Error code), for diagnostics.
 var last_persist_error := OK
+## True while the newest progress is only in memory (a write failed); the
+## save is retried once at once and then every SAVE_RETRY_S until it lands.
+var save_pending := false
+var _retry_left := 0.0
+const SAVE_RETRY_S := 2.0
+## Free-space watch and the "Storage full" message state (D-52).
+var storage := StorageStatus.new()
+var _recheck_left := 0.0
 
 
-func persist() -> void:
-	if booted:
-		var err := repository.write(progression.data)
-		last_persist_error = err
-		if err != OK:
-			push_error("Game: save failed (%d)" % err)
+## Writes progress. Returns the write result. On failure it retries once at
+## once and then keeps retrying in the background, so the save never stays
+## behind what the screen shows while the game runs (0.2.0 known limitation).
+func persist() -> int:
+	if not booted:
+		return OK
+	storage.check_space()
+	var err := repository.write(progression.data)
+	if err != OK:
+		push_error("Game: save failed (%d), retrying" % err)
+		err = repository.write(progression.data)
+	last_persist_error = err
+	save_pending = err != OK
+	_retry_left = SAVE_RETRY_S
+	if err != OK:
+		push_error("Game: save failed again (%d); kept in memory, retrying every %.0f s" % [err, SAVE_RETRY_S])
+	storage.on_save_result(err)
+	return err
+
+
+func _process(delta: float) -> void:
+	if not booted:
+		return
+	if save_pending:
+		_retry_left -= delta
+		if _retry_left <= 0.0:
+			persist()
+	elif storage.visible:
+		_recheck_left -= delta
+		if _recheck_left <= 0.0:
+			_recheck_left = StorageStatus.RECHECK_S
+			storage.check_space()
+
+
+## True when the "Storage full" message should be on screen: never during an
+## awakening, which plays without interruptions.
+func storage_message_shown() -> bool:
+	return booted and storage.visible and _current_name != "awakening"
 
 
 func settings() -> Dictionary:
@@ -143,6 +187,9 @@ func reduce_motion() -> bool:
 
 func set_host(host: Control) -> void:
 	_host = host
+	if host != null:
+		# Drawn over every screen, never takes input (StorageBanner).
+		host.add_child(StorageBanner.new())
 
 
 func current_screen() -> Control:

@@ -1,6 +1,12 @@
 # Progress
 
-_Last updated: 2026-11-19 (v0.2.0 closed testing only; save fix required in 0.2.1 before production)_
+_Last updated: 2026-11-21 (0.2.1 in progress: save hardening, storage-full message, manifest, release cache)_
+
+## 0.2.1 — in progress (versionCode 4)
+Owner scope (2026-11-21), nothing else: (1) save hardening from `save-hardening-experimental` (verified write, retry now + in the background, real full-storage CI check `scripts/enospc_check.sh`); (2) non-blocking "Storage full. Free up some space to save your progress." message (`StorageStatus`, `StorageBanner`, 10 MB threshold, D-52) with tests and screen 20 in the matrix; (3) `android.hardware.screen.portrait` not required + release check for required features (D-53); (4) release workflow Gradle cache fallback (D-54); (5) promo video files (docs only).
+- Local: 257/257 tests, coverage PASS, `enospc_check` PASS, screen matrix 20 x 7.
+- PR #9 CI: all 10 jobs green ([push 44932357054](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932357054), [PR 44932382693](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44932382693) on `8004176`); `enospc_check` PASS in CI, so RELEASE_CHECKLIST item 18 is PASS; device-feature check PASS (portrait not required).
+- Next: 3 consecutive all-green runs on the PR head; owner merges and runs `release.yml` (version_code 4).
 
 ## v0.2 — current status
 Owner prompt: `docs/prompts/03_V0_2.md` (decisions D-41…D-43). Milestones A–F in `docs/ROADMAP.md`. Branch `claude/upbeat-turing-4w8wzu`.

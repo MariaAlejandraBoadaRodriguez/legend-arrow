@@ -51,13 +51,14 @@ app_dead() {
 }
 
 # 2. Load: fresh install journey (tutorial, 2 puzzles, awakening) while sampling.
-# pm clear force-stops asynchronously: settle before launching (see android_e2e.sh).
-adb shell pm clear "$PKG" >/dev/null
+# Fresh app data without `pm clear`, which can take effect late and kill the
+# app mid-run (see clear_data in android_e2e.sh): stop, wait, delete.
 adb shell am force-stop "$PKG"
-for _ in $(seq 1 15); do
-  adb shell "run-as $PKG sh -c 'mkdir -p files && test -w files'" >/dev/null 2>&1 && break
+for _ in $(seq 1 20); do
+  adb shell pidof "$PKG" >/dev/null 2>&1 || break
   sleep 1
 done
+adb shell "run-as $PKG sh -c 'rm -rf files cache code_cache no_backup shared_prefs databases app_* && mkdir files'"
 sleep 2
 adb shell "run-as $PKG sh -c 'mkdir -p files && echo fresh_install > files/e2e_journey.txt'"
 adb logcat -c >/dev/null 2>&1 || true   # fails on some API 26 images
