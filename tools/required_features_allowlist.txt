@@ -1,0 +1,7 @@
+# Device features the APK/AAB may *require* (scripts/check_apk.sh, D-53).
+# Google Play hides the app from devices without them. Anything else that is
+# required, declared or implied, fails the release check.
+#
+# faketouch: Android's default for every app (basic tap/drag input, which
+# the game needs); Play applies it to all apps.
+android.hardware.faketouch

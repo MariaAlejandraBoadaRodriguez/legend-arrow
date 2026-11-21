@@ -6,16 +6,40 @@ extends EditorPlugin
 ## committed.
 
 var _export: LegendAdsExport
+var _manifest: LegendManifestExport
 
 
 func _enter_tree() -> void:
 	_export = LegendAdsExport.new()
 	add_export_plugin(_export)
+	_manifest = LegendManifestExport.new()
+	add_export_plugin(_manifest)
 
 
 func _exit_tree() -> void:
 	remove_export_plugin(_export)
+	remove_export_plugin(_manifest)
 	_export = null
+	_manifest = null
+
+
+## Manifest entries every Android export needs, with or without ads (0.2.1,
+## D-53). The game stays portrait-only (activity screenOrientation), but a
+## portrait activity makes Google Play infer a *required*
+## android.hardware.screen.portrait feature, which hides the app from devices
+## that only report landscape (some tablets, Chromebooks). Declaring it
+## explicitly as not required keeps those devices; scripts/check_apk.sh fails
+## if any feature becomes required that is not in
+## tools/required_features_allowlist.txt.
+class LegendManifestExport extends EditorExportPlugin:
+	func _get_name() -> String:
+		return "LegendManifest"
+
+	func _supports_platform(platform: EditorExportPlatform) -> bool:
+		return platform is EditorExportPlatformAndroid
+
+	func _get_android_manifest_element_contents(_platform: EditorExportPlatform, _debug: bool) -> String:
+		return '<uses-feature android:name="android.hardware.screen.portrait" android:required="false"/>'
 
 
 class LegendAdsExport extends EditorExportPlugin:

@@ -63,6 +63,7 @@ RETURN_TO_PUZZLE,Return to puzzle
 TRY_AGAIN,Try again
 SAVE_RESTORED_TITLE,Progress restored
 SAVE_RESTORED_BODY,We restored your last saved progress.
+STORAGE_FULL,Storage full. Free up some space to save your progress.
 SETTINGS_TITLE,Settings
 SETTINGS_AUDIO,Audio
 SETTINGS_MUSIC,Music

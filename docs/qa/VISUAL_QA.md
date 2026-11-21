@@ -2,7 +2,7 @@
 
 **What:** every screen of the real app, captured at each device profile with the system bars drawn over it, so anything hidden under the status bar, camera cutout or navigation/gesture bar shows up.
 
-**Files:** 19 screens × 7 profiles in `docs/qa/screens/<profile>/NN_screen.png`, plus the overview `docs/qa/screen_matrix.png` (rows = screens, columns = profiles). CI rebuilds them on every push; the CI artifact is named **screen-matrix**.
+**Files:** 20 screens × 7 profiles in `docs/qa/screens/<profile>/NN_screen.png`, plus the overview `docs/qa/screen_matrix.png` (rows = screens, columns = profiles). CI rebuilds them on every push; the CI artifact is named **screen-matrix**.
 
 **How:**
 
@@ -10,7 +10,7 @@
 GODOT=/path/to/godot scripts/screen_matrix.sh
 ```
 
-`scripts/screen_matrix.sh` runs `tools/capture_matrix.gd` once per profile under Xvfb. The script fails if any profile has fewer than 19 screens. `tools/screen_matrix.py` then builds the overview and stores all PNGs with 256 colours (enough to judge layout, not colour fidelity).
+`scripts/screen_matrix.sh` runs `tools/capture_matrix.gd` once per profile under Xvfb. The script fails if any profile does not have exactly 20 screens. `tools/screen_matrix.py` then builds the overview and stores all PNGs with 256 colours (enough to judge layout, not colour fidelity).
 
 **Profiles** (from the v0.2 prompt §8 and D-41). The insets are the simulated system UI in px.
 
@@ -26,7 +26,7 @@ GODOT=/path/to/godot scripts/screen_matrix.sh
 
 ## Screens
 
-01 Home · 02–04 Tutorial steps 1–3 · 05 World select · 06 Level select (World 3, with stars and times) · 07 Puzzle, largest board (Ancient Dragon, World 10) · 08 Blocked move (red flash) · 09 Hint highlight · 10 Pause · 11 Hint/ad sheet · 12 Ad unavailable · 13 Results (3 stars, new record) · 14 Awakening start · 15 Awakening end · 16 Bestiary · 17 Creature detail · 18 Settings · 19 Save-recovery message.
+01 Home · 02–04 Tutorial steps 1–3 · 05 World select · 06 Level select (World 3, with stars and times) · 07 Puzzle, largest board (Ancient Dragon, World 10) · 08 Blocked move (red flash) · 09 Hint highlight · 10 Pause · 11 Hint/ad sheet · 12 Ad unavailable · 13 Results (3 stars, new record) · 14 Awakening start · 15 Awakening end · 16 Bestiary · 17 Creature detail · 18 Settings · 19 Save-recovery message · 20 "Storage full" message over a puzzle (0.2.1).
 
 ## Review (screenshots of commit with this file)
 
@@ -41,5 +41,7 @@ GODOT=/path/to/godot scripts/screen_matrix.sh
 | Results, awakening, creature detail | PASS | The photoreal art is not cropped (the overview cuts rows at fixed heights; the single screenshots show the full image). |
 | Tablets (P5, P6) | PASS | Content is centred with a 900 px max width; there are no stretched buttons. The bestiary shows 3 columns. |
 | Very tall phones (P3, P4) | PASS | The extra height becomes empty space or a larger board area, not stretched controls. |
+
+| "Storage full" message (20, 0.2.1) | PASS | Sits under the screen header on every profile, so back, title and pause stay visible; wraps on P1 and P7 without clipping; dark panel with white text in the game font. It never takes input. |
 
 Open items: none for layout. Colour, animation and feel on a real screen remain **BLOCKED** on the owner's Lenovo tablet run (`docs/DEVICE_TEST.md`).

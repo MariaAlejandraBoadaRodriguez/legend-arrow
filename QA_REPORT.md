@@ -1,6 +1,6 @@
-# QA report — Legend Arrow 0.2.0 (versionCode 3)
+# QA report — Legend Arrow 0.2.1 (versionCode 4)
 
-> **Release status: Ready for CLOSED TESTING only (not production).** 0.2.0 ships to CLOSED TESTING with this known limitation; the fix on save-hardening-experimental must ship in 0.2.1 BEFORE any production release. Known limitation: when device storage is completely full, the save can report success while writing a 0-byte save, so the latest progress is lost on the next launch (CI run 44577702952; `docs/qa/SAVE_INVESTIGATION.md`). Real players are only affected with a completely full device. All other gates are PASS, except the optional on-device measurement (Part B), which stays BLOCKED on the owner. Production is blocked by `RELEASE_CHECKLIST.md` item 18.
+> **Release status (0.2.1): PENDING CI.** 0.2.1 ships the save fix that was the 0.2.0 known limitation (RELEASE_CHECKLIST item 18). Item 18 closes only when the real full-storage check (`scripts/enospc_check.sh`) has passed in CI on this version. 0.2.0 went to closed testing only.
 
 Statuses:
 - **PASS**: executed with assertions; the evidence is cited.
@@ -11,6 +11,21 @@ Statuses:
 A workflow file is not evidence; every PASS points at an executed run or log. The v0.1.0 report is in git history (`git show 7835016:QA_REPORT.md`).
 
 **Final evidence run:** [CI PR run 44470278817](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44470278817) on `a0b8717`: **all jobs green**, including emulators API 26 / 34 / 36. Also green: [push run 44464519633](https://github.com/MariaAlejandraBoadaRodriguez/legend-arrow/actions/runs/44464519633) on `8a4b555`. API 26 emulator history (honest note): it passed on the default ~1.5 GB AVD in two runs, then failed twice. Run 44466657570: `fresh_install` results check. Run 44467837397: low-memory-killer storm, with the app dying together with the launcher and Play services. It now runs with 3 GB RAM, the spec's low-tier device, and passes. Results-check diagnostics and adb retries were added at the same time.
+
+## 0.2.1 changes (scope: save hardening, storage-full message, manifest, release cache)
+
+| Check | Result | Evidence |
+|---|---|---|
+| Save never promotes an empty, short, stale or missing tmp; main stays the previous save | PASS (local) / PENDING CI | `tests/unit/test_save_repository.gd` (truncate, stale, missing; legacy baseline still shows the 0.2.0 defect) |
+| Save retried at once and in the background until it lands; saved stars and time = shown | PASS (local) / PENDING CI | `tests/integration/test_game_flow.gd::test_completion_saved_even_if_the_first_write_fails` |
+| Real full filesystem (tmpfs, ENOSPC): 0.2.0 path still fails, new path keeps the save, reports the error, raises the message and recovers after space is freed | PASS (local) / PENDING CI | `scripts/enospc_check.sh` (CI step "Real disk-full save check") |
+| "Storage full" message: full storage, low storage (< 10 MB), recovery after space is freed, no message with normal storage, never during an awakening, never blocks input | PASS (local) / PENDING CI | `tests/unit/test_storage_status.gd`, `tests/integration/test_game_flow.gd` (storage tests) |
+| Message on every profile | PASS (local) / PENDING CI | screen 20 in `docs/qa/screens/P1..P7`, `docs/qa/VISUAL_QA.md` |
+| `android.hardware.screen.portrait` not required; no feature required unintentionally | PENDING CI | `scripts/check_apk.sh` on the debug APK and on the universal APK of both AAB rehearsals |
+| versionCode 4 / versionName 0.2.1 in APK and both AABs | PENDING CI | `EXPECT_VERSION_CODE=4` in the AAB rehearsals |
+| Release workflow falls back to CI's Gradle cache | PENDING (first manual release run) | `.github/workflows/release.yml` restore-keys (D-54) |
+
+Local runs: `scripts/verify_all.sh` 257/257 tests, coverage gate PASS, `scripts/enospc_check.sh` PASS, `scripts/screen_matrix.sh` 20 screens x 7 profiles.
 
 ## 9.1 Content and rules
 | Check | Result | Evidence |
@@ -79,7 +94,7 @@ Harness issues CI found and fixed in this milestone:
 ## 9.4 Screens on every profile
 | Check | Result | Evidence |
 |---|---|---|
-| 19 screens × P1–P7, with simulated status bar, cutout or notch, and nav or gesture bar | PASS (captured and reviewed) | `docs/qa/screens/`, `docs/qa/screen_matrix.png`, CI artifact **screen-matrix** (job 135352925942) |
+| 20 screens × P1–P7 (0.2.1: + "Storage full" message), with simulated status bar, cutout or notch, and nav or gesture bar | PASS (captured and reviewed) | `docs/qa/screens/`, `docs/qa/screen_matrix.png`, CI artifact **screen-matrix** (job 135352925942) |
 | Review: nothing under system bars, no clipping or overlap, Larger text, tablets, tall phones | PASS after one fix | `docs/qa/VISUAL_QA.md`. Fixed: with Larger text, the level-select title ran into the "Worlds" link (`Ui.top_bar`). |
 | Touch targets on the largest boards | PASS (by design) | Cells ≥ 40 dp with a 48 dp touch band; big boards open zoomed with pan on phones (D-48) |
 

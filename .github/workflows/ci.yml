@@ -45,6 +45,13 @@ jobs:
       - name: Verify (import, compile, unit/property tests, JUnit gate)
         run: scripts/verify_all.sh
 
+      # 0.2.1 (RELEASE_CHECKLIST item 18): a real full filesystem (tmpfs). The
+      # 0.2.0 write path must still show the defect (proves the check can
+      # fail); the new one must keep the save, report the failure, raise the
+      # "Storage full" message and recover once space is freed.
+      - name: Real disk-full save check (ENOSPC on a tmpfs)
+        run: GODOT="$(scripts/install_godot.sh)" scripts/enospc_check.sh
+
       - name: Line coverage (instrumented re-run, fails below brief targets)
         run: GODOT="$(scripts/install_godot.sh)" python3 tools/coverage.py build/reports/coverage
 
@@ -178,7 +185,7 @@ jobs:
         run: ANDROID_HOME="$ANDROID_SDK_ROOT" scripts/export_android.sh
 
       - name: Release AAB rehearsal (throwaway key, ads disabled, bundletool validation)
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=4 scripts/export_release.sh --rehearsal
 
       - name: Upload release AAB rehearsal (NOT for Play upload)
         if: always()
@@ -194,7 +201,7 @@ jobs:
           if-no-files-found: error
 
       - name: Release AAB rehearsal without ads (path used by release.yml "without-ads")
-        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=3 scripts/export_release.sh --rehearsal --no-ads
+        run: ANDROID_HOME="$ANDROID_SDK_ROOT" EXPECT_VERSION_CODE=4 scripts/export_release.sh --rehearsal --no-ads
 
       - name: Upload debug APK (unsigned for release; debug-signed)
         if: always()
@@ -329,7 +336,7 @@ jobs:
           if-no-files-found: error
 
   screen-matrix:
-    name: Screen matrix (19 screens x P1-P7)
+    name: Screen matrix (20 screens x P1-P7)
     needs: [godot-tests]
     runs-on: ubuntu-24.04
     timeout-minutes: 25

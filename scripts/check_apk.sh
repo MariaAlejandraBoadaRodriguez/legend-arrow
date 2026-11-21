@@ -28,6 +28,18 @@ check "versionCode >= 1" '[[ -n "$vcode" && "$vcode" -ge 1 ]]'
 check "no location/camera/microphone/contacts permissions" '! grep -qE "LOCATION|CAMERA|RECORD_AUDIO|CONTACTS" <<<"$badging"'
 check "no advertising-ID or Privacy Sandbox ad permissions (child/unknown audience)" '! grep -qE "permission.AD_ID|ACCESS_ADSERVICES" <<<"$badging"'
 check "no notification permission" '! grep -q "POST_NOTIFICATIONS" <<<"$badging"'
+# Device features (0.2.1, D-53): Google Play hides the app from devices that
+# lack a required feature, including features it infers ("implied"). Only the
+# features in tools/required_features_allowlist.txt may be required.
+required="$(grep -oE "uses-(implied-)?feature: name='[^']+'" <<<"$badging" | sed -E "s/.*name='([^']+)'.*/\1/" | sort -u)"
+not_required="$(grep -oE "uses-feature-not-required: name='[^']+'" <<<"$badging" | sed -E "s/.*name='([^']+)'.*/\1/" | sort -u)"
+echo "required features: $(tr '\n' ' ' <<<"$required")"
+echo "not-required features: $(tr '\n' ' ' <<<"$not_required")"
+allowed_req="$(grep -vE '^(#|$)' "$(dirname "$0")/../tools/required_features_allowlist.txt" | sort -u)"
+unexpected="$(comm -23 <(echo "$required") <(echo "$allowed_req") | grep . || true)"
+[[ -z "$unexpected" ]] || echo "  required but not in tools/required_features_allowlist.txt: $unexpected"
+check "no uses-feature required unintentionally" '[[ -z "$unexpected" ]]'
+check "android.hardware.screen.portrait declared not required" 'grep -qx "android.hardware.screen.portrait" <<<"$not_required"'
 if [[ "${EXPECT_ADS_PLUGIN:-1}" == "1" ]]; then
   if [[ "$(basename "$AAPT")" == "aapt2" ]]; then
     manifest="$("$AAPT" dump xmltree --file AndroidManifest.xml "$APK" 2>/dev/null || true)"

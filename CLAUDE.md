@@ -16,7 +16,7 @@ Conflict priority: this file > brief > spec > READ_FIRST > mockup pixels. Record
 - **Roster** = `docs/ART_PROMPTS.md` (10 worlds × 10 dragons, ids/names/order verbatim; world order = difficulty). 100 puzzles, one per dragon, all solver-certified. Never rename or regenerate the roster.
 - **Art**: owner's photoreal images at `assets/creatures/raw/<dragon_id>.png` (ChatGPT, owner-generated, commercial use) → `scripts/import_art.sh`. No release AAB while any dragon is ART PENDING (`docs/ART_STATUS.md`).
 - **Speed timer + 1–3 stars**, local personal bests only (no leaderboard/account).
-- Version 0.2.0 / versionCode 3. Portrait only; must work on phones and tablets (profiles P1–P7 in the v0.2 prompt, `docs/DECISIONS.md` D-41).
+- Version 0.2.1 / versionCode 4 (0.2.0 / 3 went to closed testing). Portrait only; must work on phones and tablets (profiles P1–P7 in the v0.2 prompt, `docs/DECISIONS.md` D-41).
 - Android application ID: `com.mariaalejandraboada.legendarrow` (permanent on Google Play — never change after first release).
 - GitHub repo: this repository (`legend-arrow`, private). Do not create another one.
 - Engine: stable Godot 4.x + GDScript, Compatibility renderer. Pin the exact version in `BUILDING.md`.

@@ -13,6 +13,6 @@ for p in "${PROFILES[@]}"; do
   xvfb-run -a -s "-screen 0 1700x2700x24" "$GODOT" --path . --rendering-driver opengl3 --audio-driver Dummy \
     -s res://tools/capture_matrix.gd -- "$p" 2>&1 | grep -E "capture_matrix|SCRIPT ERROR" || true
   n=$(ls "docs/qa/screens/$p"/*.png 2>/dev/null | wc -l)
-  [[ "$n" -eq 19 ]] || { echo "screen_matrix: $p has $n of 19 screens" >&2; exit 1; }
+  [[ "$n" -eq 20 ]] || { echo "screen_matrix: $p has $n of 20 screens" >&2; exit 1; }
 done
 python3 tools/screen_matrix.py

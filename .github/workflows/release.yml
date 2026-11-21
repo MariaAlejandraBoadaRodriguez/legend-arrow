@@ -24,7 +24,7 @@ on:
       version_code:
         description: "Expected versionCode (must match export_presets.cfg)"
         type: string
-        default: "3"
+        default: "4"
 
 permissions:
   contents: read
@@ -87,6 +87,14 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: gradle-release-${{ hashFiles('export_presets.cfg', 'addons/legend_ads/legend_ads_editor.gd', 'android/plugins/legend_ads/**/*.kts') }}
+          # On a miss (GitHub drops caches unused for 7 days), start from an
+          # older release cache or from CI's export cache on main (same Gradle
+          # build, saved by every CI run on main), so a release does not have
+          # to download every dependency from Maven Central (run 44629356126
+          # failed on a cold cache when Maven Central answered "not found").
+          restore-keys: |
+            gradle-release-
+            gradle-export-
 
       - name: Build ads plugin (with-ads only)
         if: inputs.ads == 'with-ads'

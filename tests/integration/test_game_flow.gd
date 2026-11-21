@@ -525,3 +525,128 @@ func test_detail_releases_its_full_image_and_grid_uses_thumbnails() -> void:
 	Game.back()   # leave the detail screen
 	await wait_process_frames(4)
 	assert_null(ref.get_ref(), "the full image is released after leaving the detail screen")
+
+
+# --- 0.2.1 save hardening and the "Storage full" message (D-52) -------------
+
+func _banner() -> Control:
+	return app.host.find_child("StorageBanner", true, false) as Control
+
+
+func _set_free_space(bytes: int) -> void:
+	Game.storage.space_left = func() -> int: return bytes
+	Game.storage.check_space()
+
+
+func _report_save_errors() -> int:
+	var reported := 0
+	for e in get_errors():
+		if not e.handled and "save failed" in e.to_s():
+			e.handled = true
+			reported += 1
+	return reported
+
+
+## The results screen shows the in-memory run; if the save write fails at
+## that moment the save must catch up (retry now, then in the background)
+## and never fall behind what was shown.
+func test_completion_saved_even_if_the_first_write_fails() -> void:
+	Game.progression.data.tutorial_done = true
+	Game.persist()
+	Game.go("puzzle", {"level_id": "forest_drake"})
+	await _layout()
+	Game.repository.simulate_bad_tmp = "truncate"   # every write fails for now
+	await app.solve_current_puzzle()
+	assert_eq(Game.current_screen_name(), "level_complete")
+	assert_true(Game.save_pending, "failure is known, progress kept in memory")
+	assert_ne(Game.last_persist_error, OK)
+	var on_disk: Dictionary = Game.repository.peek().data
+	assert_false(on_disk.levels.has("forest_drake"), "disk still has the previous save")
+	assert_true(on_disk.tutorial_done, "and that previous save is intact")
+	assert_false(_banner().visible, "an I/O failure with free space is not 'storage full'")
+	Game.repository.simulate_bad_tmp = ""             # the condition clears
+	await wait_seconds(Game.SAVE_RETRY_S + 0.5)
+	assert_false(Game.save_pending, "background retry landed")
+	var rec: Dictionary = Game.repository.peek().data.levels.get("forest_drake", {})
+	var shown: Dictionary = app.screen().params
+	assert_eq(int(rec.get("best_stars", 0)), int(shown.stars), "saved stars = shown stars")
+	assert_eq(int(rec.get("best_time_ms", -1)), int(shown.time_ms), "saved time = shown time")
+	assert_gt(_report_save_errors(), 0, "save failures are reported")
+
+
+func test_storage_full_message_shows_hides_during_awakening_and_clears_on_recovery() -> void:
+	Game.progression.data.tutorial_done = true
+	Game.persist()
+	Game.go("puzzle", {"level_id": "forest_drake"})
+	await _layout()
+	assert_false(_banner().visible)
+	# The disk fills up: writes really fail and almost no space is left.
+	_set_free_space(0)
+	Game.repository.simulate_bad_tmp = "truncate"
+	await app.solve_current_puzzle()
+	await wait_process_frames(2)
+	assert_eq(Game.current_screen_name(), "level_complete")
+	assert_true(Game.save_pending)
+	assert_true(Game.storage.save_failed)
+	assert_true(_banner().visible, "storage full: the message is on screen")
+	var msg := _banner().find_child("StorageMessage", true, false) as Label
+	assert_eq(tr(msg.text), "Storage full. Free up some space to save your progress.")
+	assert_eq(_banner().mouse_filter, Control.MOUSE_FILTER_IGNORE, "never blocks input")
+	assert_eq(msg.mouse_filter, Control.MOUSE_FILTER_IGNORE)
+	# Play goes on: Next still works with the message up.
+	assert_true(app.press("NextButton"))
+	await wait_process_frames(2)
+	assert_eq(Game.current_screen_name(), "awakening")
+	assert_false(_banner().visible, "never over the awakening")
+	await wait_seconds(1.1)   # Skip is offered after 1 s
+	Game.current_screen().skip()
+	for i in 300:
+		if Game.current_screen().get("finished") == true:
+			break
+		assert_false(_banner().visible, "never over the awakening")
+		await wait_process_frames(1)
+	assert_true(Game.current_screen().get("finished"), "awakening finished")
+	assert_false(_banner().visible, "not even on the finished awakening")
+	assert_true(app.press("ContinueButton"))
+	await wait_process_frames(2)
+	assert_true(_banner().visible, "back after the awakening while the problem lasts")
+	# The player frees space; the background retry lands and the message goes.
+	Game.repository.simulate_bad_tmp = ""
+	_set_free_space(2000 * 1024 * 1024)
+	await wait_seconds(Game.SAVE_RETRY_S + 0.5)
+	await wait_process_frames(2)
+	assert_false(Game.save_pending, "saved")
+	assert_false(_banner().visible, "gone on its own once a save succeeds")
+	assert_true(Game.repository.peek().data.levels.has("forest_drake"), "progress on disk")
+	assert_gt(_report_save_errors(), 0)
+
+
+func test_low_storage_warning_at_launch_does_not_block_play() -> void:
+	Game.progression.data.tutorial_done = true
+	Game.persist()
+	app.relaunch()
+	_set_free_space(StorageStatus.LOW_SPACE_BYTES / 2)
+	Game.reset_to("home")
+	await _layout()
+	assert_true(_banner().visible, "warned before progress is at risk")
+	assert_false(Game.save_pending, "saves still work")
+	assert_true(app.press("PlayButton"), "play is not blocked")
+	await _layout()
+	assert_eq(Game.current_screen_name(), "level_select")
+	_set_free_space(2000 * 1024 * 1024)
+	await wait_process_frames(2)
+	assert_false(_banner().visible, "space freed: warning gone")
+
+
+func test_no_storage_message_with_normal_storage() -> void:
+	_set_free_space(2000 * 1024 * 1024)
+	Game.progression.data.tutorial_done = true
+	Game.persist()
+	Game.go("puzzle", {"level_id": "forest_drake"})
+	await _layout()
+	await app.solve_current_puzzle()
+	await wait_process_frames(2)
+	assert_eq(Game.current_screen_name(), "level_complete")
+	assert_false(Game.save_pending)
+	assert_false(_banner().visible)
+	assert_false(Game.storage.visible)
